@@ -25,62 +25,76 @@ export default function WaveWeatherScreen() {
 
       <ThemedView style={styles.section}>
         <ThemedText type="subtitle" style={styles.thinText}>
-          <Ionicons name="cloudy" size={16} color="#4169E1" /> Current Weather
+          <Ionicons name="cloudy" size={16} color="#4169E1" /> Current Weather Conditions
         </ThemedText>
-        <ThemedText style={styles.thinText}>
-          🌡️ Temperature: Loading...
-        </ThemedText>
-        <ThemedText style={styles.thinText}>
-          💨 Wind: Loading...
-        </ThemedText>
-        <ThemedText style={styles.thinText}>
-          🌧️ Rainfall: Loading...
-        </ThemedText>
-        <ThemedText style={styles.thinText}>
-          ☁️ Conditions: Live data coming soon
-        </ThemedText>
+        
+        <ThemedView style={styles.monitorInfo}>
+          <ThemedView style={styles.infoItem}>
+            <ThemedText style={styles.label}>Temperature:</ThemedText>
+            <ThemedText style={styles.value}>Loading...</ThemedText>
+          </ThemedView>
+          
+          <ThemedView style={styles.infoItem}>
+            <ThemedText style={styles.label}>Humidity:</ThemedText>
+            <ThemedText style={styles.value}>Loading...</ThemedText>
+          </ThemedView>
+          
+          <ThemedView style={styles.infoItem}>
+            <ThemedText style={styles.label}>Wind Speed:</ThemedText>
+            <ThemedText style={styles.value}>Loading...</ThemedText>
+          </ThemedView>
+          
+          <ThemedView style={styles.infoItem}>
+            <ThemedText style={styles.label}>Rainfall:</ThemedText>
+            <ThemedText style={styles.value}>Loading...</ThemedText>
+          </ThemedView>
+        </ThemedView>
       </ThemedView>
 
       <ThemedView style={styles.section}>
         <ThemedText type="subtitle" style={styles.thinText}>
-          <Ionicons name="water" size={16} color="#4169E1" /> Wave Conditions
+          <Ionicons name="calendar" size={16} color="#4169E1" /> 5-Day Weather Forecast
         </ThemedText>
-        <ThemedText style={styles.thinText}>
-          🌊 Wave Height: Loading...
+        <ThemedText style={styles.description}>
+          Waikāne/Waiahole Area - National Weather Service
         </ThemedText>
-        <ThemedText style={styles.thinText}>
-          ⏱️ Wave Period: Loading...
-        </ThemedText>
-        <ThemedText style={styles.thinText}>
-          🧭 Wave Direction: Loading...
-        </ThemedText>
+        <ThemedView style={styles.forecastContainer}>
+          <ThemedText style={styles.placeholderText}>5-Day Forecast Data</ThemedText>
+          <ThemedText style={styles.subText}>Weather forecast from National Weather Service will be displayed here</ThemedText>
+        </ThemedView>
       </ThemedView>
 
       <ThemedView style={styles.section}>
         <ThemedText type="subtitle" style={styles.thinText}>
-          <Ionicons name="warning" size={16} color="#FF9500" /> Weather Alerts
+          <Ionicons name="water" size={16} color="#4169E1" /> Wave Conditions - Kāne&apos;ohe Bay
         </ThemedText>
-        <ThemedText style={styles.thinText}>
-          No active weather warnings at this time.
+        <ThemedText style={styles.description}>
+          Data from Surfline
         </ThemedText>
-        <ThemedText style={styles.thinText}>
-          🌀 Storm Watch: None
-        </ThemedText>
-        <ThemedText style={styles.thinText}>
-          🌧️ Flood Watch: None
-        </ThemedText>
+        <ThemedView style={styles.waveContainer}>
+          <ThemedView style={styles.infoItem}>
+            <ThemedText style={styles.label}>Wave Height:</ThemedText>
+            <ThemedText style={styles.value}>Loading...</ThemedText>
+          </ThemedView>
+          
+          <ThemedView style={styles.infoItem}>
+            <ThemedText style={styles.label}>Wave Period:</ThemedText>
+            <ThemedText style={styles.value}>Loading...</ThemedText>
+          </ThemedView>
+          
+          <ThemedView style={styles.infoItem}>
+            <ThemedText style={styles.label}>Wave Direction:</ThemedText>
+            <ThemedText style={styles.value}>Loading...</ThemedText>
+          </ThemedView>
+          
+          <ThemedView style={styles.infoItem}>
+            <ThemedText style={styles.label}>Surf Conditions:</ThemedText>
+            <ThemedText style={styles.value}>Loading...</ThemedText>
+          </ThemedView>
+        </ThemedView>
       </ThemedView>
 
-      <ThemedView style={styles.section}>
-        <ThemedText type="subtitle" style={styles.thinText}>
-          <Ionicons name="calendar" size={16} color="#4169E1" /> 5-Day Forecast
-        </ThemedText>
-        <ThemedText style={styles.thinText}>
-          Detailed weather forecast for the next 5 days will be displayed here.
-        </ThemedText>
-      </ThemedView>
-
-      <ThemedView style={styles.section}>
+      {/* <ThemedView style={styles.section}>
         <ThemedText type="subtitle" style={styles.thinText}>
           <Ionicons name="rainy" size={16} color="#4169E1" /> Rainfall History
         </ThemedText>
@@ -93,7 +107,7 @@ export default function WaveWeatherScreen() {
         <ThemedText style={styles.thinText}>
           📊 This month: Data loading...
         </ThemedText>
-      </ThemedView>
+      </ThemedView> */}
 
       <ThemedView style={styles.section}>
         <ThemedText type="subtitle" style={styles.thinText}>
@@ -131,5 +145,63 @@ const styles = StyleSheet.create({
   },
   thinText: {
     fontWeight: '300',
+  },
+  monitorInfo: {
+    backgroundColor: 'rgba(65, 105, 225, 0.1)',
+    borderRadius: 8,
+    padding: 16,
+    marginTop: 8,
+  },
+  infoItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  label: {
+    fontWeight: '500',
+    fontSize: 16,
+  },
+  value: {
+    fontWeight: '300',
+    fontSize: 16,
+    color: '#4169E1',
+  },
+  description: {
+    fontSize: 14,
+    fontWeight: '400',
+    opacity: 0.7,
+    marginBottom: 8,
+  },
+  forecastContainer: {
+    backgroundColor: 'rgba(65, 105, 225, 0.05)',
+    borderRadius: 8,
+    padding: 16,
+    marginTop: 8,
+    borderWidth: 2,
+    borderColor: '#4169E1',
+    borderStyle: 'dashed',
+    alignItems: 'center',
+    minHeight: 120,
+    justifyContent: 'center',
+  },
+  waveContainer: {
+    backgroundColor: 'rgba(65, 105, 225, 0.08)',
+    borderRadius: 8,
+    padding: 16,
+    marginTop: 8,
+  },
+  placeholderText: {
+    color: '#4169E1',
+    fontWeight: '600',
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  subText: {
+    color: '#4169E1',
+    fontWeight: '400',
+    fontSize: 12,
+    textAlign: 'center',
+    opacity: 0.8,
   },
 });
