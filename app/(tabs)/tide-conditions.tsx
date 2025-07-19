@@ -12,7 +12,7 @@ export default function TideConditionsScreen() {
       headerBackgroundColor={{ light: '#87CEEB', dark: '#2F4F4F' }}
       headerImage={
         <IconSymbol
-          size={310}
+          size={200}
           color="#4682B4"
           name="moon.haze"
           style={styles.headerImage}
@@ -94,7 +94,7 @@ export default function TideConditionsScreen() {
 const styles = StyleSheet.create({
   headerImage: {
     color: '#4682B4',
-    bottom: -90,
+    bottom: -50,
     left: -35,
     position: 'absolute',
   },

@@ -1,5 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Pressable } from 'react-native';
+import * as WebBrowser from 'expo-web-browser';
+import { Image } from 'expo-image';
 
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
@@ -7,12 +9,16 @@ import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 
 export default function StreamMonitorScreen() {
+  const openMap = async () => {
+    await WebBrowser.openBrowserAsync('https://experience.arcgis.com/experience/60260cda4f744186bbd9c67163b747d3');
+  };
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
       headerImage={
         <IconSymbol
-          size={310}
+          size={200}
           color="#007AFF"
           name="water.waves"
           style={styles.headerImage}
@@ -141,10 +147,31 @@ export default function StreamMonitorScreen() {
         <ThemedText type="subtitle" style={styles.thinText}>
           <Ionicons name="map" size={16} color="#007AFF" /> Stream Locations
         </ThemedText>
-        <ThemedView style={styles.mapPlaceholder}>
-          <Ionicons name="map-outline" size={48} color="#007AFF" />
-          <ThemedText style={styles.mapPlaceholderText}>Interactive Map</ThemedText>
-          <ThemedText style={styles.mapSubtext}>Waikāne & Waiahole Stream Locations</ThemedText>
+        <ThemedText style={[styles.thinText, { marginBottom: 12 }]}>
+          Interactive map showing Waikāne & Waiahole stream locations and flood monitoring stations.
+        </ThemedText>
+        
+        <ThemedView style={styles.mapContainer}>
+          <Pressable style={styles.mapPreviewPressable} onPress={openMap}>
+            <Image
+              source={require('@/assets/images/map-preview-placeholder.png')}
+              style={styles.mapPreview}
+              contentFit="cover"
+              accessibilityLabel="Map preview"
+            />
+            <ThemedView style={styles.mapPreviewOverlay} pointerEvents="none">
+              <ThemedView style={styles.mapPreviewTextBg}>
+                <Ionicons name="map" size={28} color="#fff" style={{ marginBottom: 10, textShadowColor: '#222', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 6 }} />
+                <ThemedText style={styles.mapButtonText}>
+                  Open Interactive Flood Risk Map
+                </ThemedText>
+                <ThemedText style={styles.mapButtonSubtext}>
+                  View flood-prone areas and monitoring stations
+                </ThemedText>
+                <Ionicons name="open-outline" size={18} color="#fff" style={{ marginTop: 10, textShadowColor: '#222', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 6 }} />
+              </ThemedView>
+            </ThemedView>
+          </Pressable>
         </ThemedView>
       </ThemedView>
     </ParallaxScrollView>
@@ -154,7 +181,7 @@ export default function StreamMonitorScreen() {
 const styles = StyleSheet.create({
   headerImage: {
     color: '#007AFF',
-    bottom: -90,
+    bottom: -30,
     left: -35,
     position: 'absolute',
   },
@@ -293,5 +320,109 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     fontSize: 12,
     marginTop: 4,
+  },
+  mapContainer: {
+    backgroundColor: 'rgba(0, 122, 255, 0.05)',
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 122, 255, 0.2)',
+    overflow: 'hidden',
+  },
+  webView: {
+    height: 400,
+    borderRadius: 8,
+    backgroundColor: 'transparent',
+  },
+  mapButton: {
+    backgroundColor: 'rgba(0, 122, 255, 0.1)',
+    borderRadius: 12,
+    padding: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#007AFF',
+    borderStyle: 'dashed',
+    minHeight: 120,
+  },
+  mapButtonText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#fff',
+    textAlign: 'center',
+    marginTop: 2,
+    marginBottom: 6,
+    textShadowColor: '#222',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 6,
+    letterSpacing: 0.2,
+  },
+  mapButtonSubtext: {
+    fontSize: 15,
+    fontWeight: '400',
+    color: '#fff',
+    textAlign: 'center',
+    opacity: 0.92,
+    marginBottom: 2,
+    textShadowColor: '#222',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 6,
+    letterSpacing: 0.1,
+  },
+  loadingContainer: {
+    height: 400,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 122, 255, 0.05)',
+    borderRadius: 8,
+  },
+  loadingText: {
+    color: '#007AFF',
+    fontWeight: '500',
+    fontSize: 16,
+    marginTop: 8,
+  },
+  mapPreview: {
+    width: '100%',
+    height: 220, // expanded height for better mobile appearance
+    borderRadius: 12,
+    marginBottom: 0,
+    backgroundColor: '#e0e0e0',
+    borderWidth: 0, // no border
+  },
+  mapPreviewPressable: {
+    position: 'relative',
+    width: '100%',
+    height: 220,
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 16,
+  },
+  mapPreviewOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(0,122,255,0.18)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+  },
+  mapPreviewTextBg: {
+    backgroundColor: 'rgba(20, 30, 60, 0.55)',
+    borderRadius: 12,
+    paddingVertical: 18,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    // Removed borderWidth and borderColor for cleaner look
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.18,
+    shadowRadius: 10,
+    elevation: 6,
+    width: '100%', // expand overlay to match image width
+    minHeight: 120,
   },
 });

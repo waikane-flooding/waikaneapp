@@ -12,7 +12,7 @@ export default function WaveWeatherScreen() {
       headerBackgroundColor={{ light: '#B0E0E6', dark: '#2F4F4F' }}
       headerImage={
         <IconSymbol
-          size={310}
+          size={200}
           color="#4169E1"
           name="cloud.rain"
           style={styles.headerImage}
@@ -130,7 +130,7 @@ export default function WaveWeatherScreen() {
 const styles = StyleSheet.create({
   headerImage: {
     color: '#4169E1',
-    bottom: -90,
+    bottom: -30,
     left: -35,
     position: 'absolute',
   },
