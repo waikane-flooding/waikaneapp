@@ -146,24 +146,10 @@ export default function WaveWeatherScreen() {
       </ThemedView>
 
       <ThemedView style={styles.section}>
-        <ThemedText type="subtitle" style={styles.thinText}>
-          <Ionicons name="water" size={16} color="#4169E1" /> Surf Forecast - Oʻahu East
+        <ThemedText style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 36 }}>
+          Surf Forecast - Oʻahu East
         </ThemedText>
-        <TouchableOpacity
-          style={{
-            backgroundColor: '#0077cc',
-            borderRadius: 8,
-            padding: 14,
-            marginBottom: 18,
-            alignItems: 'center',
-          }}
-          onPress={() => Linking.openURL('https://www.surfnewsnetwork.com')}
-          accessibilityRole="link"
-        >
-          <ThemedText style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>
-            Click here to access Surf News Network
-          </ThemedText>
-        </TouchableOpacity>
+        <SurfForecastLink />
       </ThemedView>
     </ParallaxScrollView>
   );
@@ -179,6 +165,34 @@ function getForecastIcon(shortForecast: string) {
   if (text.includes('haze')) return 'partly-sunny';
   if (text.includes('wind')) return 'flag';
   return 'cloud-outline';
+}
+
+// Update the SurfForecastLink button to remove the icon and ensure the text is centered
+function SurfForecastLink() {
+  return (
+    <TouchableOpacity
+      style={{
+        backgroundColor: '#1976d2',
+        borderRadius: 12,
+        paddingVertical: 16,
+        paddingHorizontal: 20,
+        marginBottom: 18,
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: '#000',
+        shadowOpacity: 0.08,
+        shadowRadius: 4,
+        shadowOffset: { width: 0, height: 2 },
+      }}
+      onPress={() => Linking.openURL('https://www.surfnewsnetwork.com')}
+      accessibilityRole="link"
+      activeOpacity={0.85}
+    >
+      <ThemedText style={{ color: 'white', fontWeight: 'bold', fontSize: 16, letterSpacing: 0.2, textAlign: 'center' }}>
+        Click here to access Surf News Network
+      </ThemedText>
+    </TouchableOpacity>
+  );
 }
 
 const styles = StyleSheet.create({

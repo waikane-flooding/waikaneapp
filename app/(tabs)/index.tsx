@@ -13,33 +13,38 @@ const emergencyContacts = [
   {
     name: "Honolulu Emergency Services",
     number: "911",
-    description: "For immediate emergency response"
+    description: "For immediate emergency response",
+    website: "https://emergencyservices.honolulu.gov"
   },
   {
     name: "Windward Police Station",
     number: "(808) 723-8640",
-    description: "Kāne'ohe Police Department"
+    description: "Kāne'ohe Police Department",
+    website: "https://www.honolulupd.org/d4/"
   },
-  
   {
     name: "Honolulu Police Department",
     number: "(808) 723-8488",
-    description: "General number for non-emergencies"
+    description: "General number for non-emergencies",
+    website: "https://www.honolulupd.org/"
   },
   {
     name: "Board of Water Supply",
     number: "(808) 748-5000",
-    description: "Water emergency & main breaks"
+    description: "Water emergency & main breaks",
+    website: "https://www.boardofwatersupply.com/"
   },
   {
     name: "State of Hawai'i, DLNR",
     number: "(808) 587-0230",
-    description: "Engineering & flood control"
+    description: "Engineering & flood control",
+    website: "https://dlnreng.hawaii.gov"
   },
   {
     name: "Hawaiian Electric",
     number: "855-304-1212",
-    description: "Power outages & emergencies"
+    description: "Power outages & emergencies",
+    website: "https://www.hawaiianelectric.com/"
   }
 ];
 
@@ -73,10 +78,12 @@ export default function HomeScreen() {
         
         {emergencyContacts.map((contact, index) => (
           <ThemedView key={index} style={styles.contactCard}>
-            <ThemedView style={styles.contactHeader}>
-              <ThemedText style={styles.contactName}>{contact.name}</ThemedText>
+            <ThemedView style={styles.contactHeaderColumn}>
+              <ExternalLink href={contact.website as any}>
+                <ThemedText style={styles.contactName} type="link">{contact.name}</ThemedText>
+              </ExternalLink>
               <ThemedText 
-                style={styles.contactNumber}
+                style={styles.contactNumberBelow}
                 onPress={() => Linking.openURL(`tel:${contact.number}`)}
               >
                 {contact.number}
@@ -184,23 +191,34 @@ const styles = StyleSheet.create({
     marginTop: 8,
     borderWidth: 1,
     borderColor: 'rgba(0, 122, 255, 0.2)',
+    flexShrink: 1,
+    flexGrow: 0,
+    width: '100%',
+    alignSelf: 'stretch',
   },
-  contactHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  contactHeaderColumn: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
     marginBottom: 4,
+    gap: 2,
   },
   contactName: {
     fontSize: 16,
     fontWeight: '600',
-    flex: 1,
+    flexShrink: 1,
+    flexGrow: 1,
+    minWidth: 0,
+    maxWidth: '65%',
+    flexBasis: '65%',
+    marginRight: 8,
   },
-  contactNumber: {
-    fontSize: 16,
+  contactNumberBelow: {
+    fontSize: 14,
     fontWeight: '700',
     color: '#007AFF',
     textDecorationLine: 'underline',
+    marginTop: 2,
+    textAlign: 'left',
   },
   contactDescription: {
     fontSize: 14,
