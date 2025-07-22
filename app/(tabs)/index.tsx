@@ -1,11 +1,47 @@
 //home screen
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Linking } from 'react-native';
 
+import { Collapsible } from '@/components/Collapsible';
+import { ExternalLink } from '@/components/ExternalLink';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+
+const emergencyContacts = [
+  {
+    name: "Honolulu Emergency Services",
+    number: "911",
+    description: "For immediate emergency response"
+  },
+  {
+    name: "Windward Police Station",
+    number: "(808) 723-8640",
+    description: "Kāne'ohe Police Department"
+  },
+  
+  {
+    name: "Honolulu Police Department",
+    number: "(808) 723-8488",
+    description: "General number for non-emergencies"
+  },
+  {
+    name: "Board of Water Supply",
+    number: "(808) 748-5000",
+    description: "Water emergency & main breaks"
+  },
+  {
+    name: "State of Hawai'i, DLNR",
+    number: "(808) 587-0230",
+    description: "Engineering & flood control"
+  },
+  {
+    name: "Hawaiian Electric",
+    number: "855-304-1212",
+    description: "Power outages & emergencies"
+  }
+];
 
 export default function HomeScreen() {
   return (
@@ -21,32 +57,84 @@ export default function HomeScreen() {
         <ThemedText type="title" style={styles.thinText}>Waikāne Flood Tracker</ThemedText>
       </ThemedView>
 
-      <ThemedView style={styles.section}>
-        <ThemedText type="subtitle" style={styles.thinText}>🌊 Current Tide Levels</ThemedText>
-        <ThemedText style={styles.thinText}>Live data coming soon!</ThemedText>
-      </ThemedView>
-
-      <ThemedView style={styles.section}>
-        <ThemedText type="subtitle" style={styles.thinText}>📍 East O&apos;ahu Risk Zones</ThemedText>
-        <ThemedText style={styles.thinText}>Flood prone map sections will go here.</ThemedText>
-      </ThemedView>
-
-      <ThemedView style={styles.section}>
-        <ThemedText type="subtitle" style={styles.thinText}>🕒 Historical Flood Events</ThemedText>
-        <ThemedText style={styles.thinText}>Data of past flood occurrences.</ThemedText>
-      </ThemedView>
-
-      <ThemedView style={styles.section}>
-        <ThemedText type="subtitle" style={styles.thinText}>🚨 Flood Alerts</ThemedText>
-        <ThemedText style={styles.thinText}>Emergency alert info here.</ThemedText>
+      <ThemedView style={styles.welcomeSection}>
+        <ThemedText style={styles.welcomeText}>
+          Welcome to the Waikāne Flood Tracker app! This tool helps you stay informed about flood conditions in the Waikāne and Waiahole areas of windward O&apos;ahu.
+        </ThemedText>
+        <ThemedText style={styles.descriptionText}>
+          Monitor real-time stream levels, tide conditions, and weather data to make informed decisions during heavy rainfall and potential flooding situations.
+        </ThemedText>
       </ThemedView>
 
       <ThemedView style={styles.section}>
         <ThemedText type="subtitle" style={styles.thinText}>
           <Ionicons name="call-outline" size={16} /> Emergency Contacts
         </ThemedText>
-        <ThemedText style={styles.thinText}>Important contact numbers will be listed here.</ThemedText>
+        
+        {emergencyContacts.map((contact, index) => (
+          <ThemedView key={index} style={styles.contactCard}>
+            <ThemedView style={styles.contactHeader}>
+              <ThemedText style={styles.contactName}>{contact.name}</ThemedText>
+              <ThemedText 
+                style={styles.contactNumber}
+                onPress={() => Linking.openURL(`tel:${contact.number}`)}
+              >
+                {contact.number}
+              </ThemedText>
+            </ThemedView>
+            <ThemedText style={styles.contactDescription}>{contact.description}</ThemedText>
+          </ThemedView>
+        ))}
       </ThemedView>
+
+      <ThemedView style={styles.section}>
+        <ThemedText type="subtitle" style={styles.thinText}>
+          <Ionicons name="information-circle" size={16} color="#007AFF" /> Frequently Asked Questions
+        </ThemedText>
+      </ThemedView>
+
+      <Collapsible title="What is this app about?">
+        <ThemedText style={styles.thinText}>
+          <Ionicons name="warning-outline" size={16} color="#FF9500" />{' '}
+          This app warns you about floods, potential risks, and helps you make smart decisions to protect yourself and your community.
+          {'\n\n'}
+          <Ionicons name="rainy-outline" size={16} color="#007AFF" />{' '}
+          Check the app regularly during heavy rain or stormy weather to see the latest updates!
+        </ThemedText>
+      </Collapsible>
+
+      <Collapsible title="How do I use the app?">
+        <ThemedText style={styles.thinText}>
+          You can navigate through different tabs to access features and data:
+          {'\n\n'}
+          <Ionicons name="home" size={16} color="#007AFF" />
+          <ThemedText type="defaultSemiBold" style={styles.thinText}> Home </ThemedText>
+          provides app information, frequently asked questions, and emergency contact numbers for immediate assistance.
+          {'\n\n'}
+          <Ionicons name="water" size={16} color="#007AFF" />
+          <ThemedText type="defaultSemiBold" style={styles.thinText}> Stream Monitor </ThemedText>
+          shows real-time monitoring for Waikāne and Waiahole streams with current height, status, gauge charts, and stream location maps.
+          {'\n\n'}
+          <Ionicons name="time" size={16} color="#007AFF" />
+          <ThemedText type="defaultSemiBold" style={styles.thinText}> Tide Conditions </ThemedText>
+          displays Kāne&apos;ohe Bay tide monitoring with current height, tide direction, high/low tide times, and tide level charts.
+          {'\n\n'}
+          <Ionicons name="cloudy" size={16} color="#007AFF" />
+          <ThemedText type="defaultSemiBold" style={styles.thinText}> Wave & Weather </ThemedText>
+          provides current weather conditions (temperature, humidity, wind, rainfall), 5-day forecasts, and Kāne&apos;ohe Bay wave conditions from Surfline.
+        </ThemedText>
+      </Collapsible>
+
+      <Collapsible title="Where can I find more help?">
+        <ThemedText style={styles.thinText}>
+          Have more questions or need help with the app? You can reach out to the developer for support.
+          {'\n\n'}
+          <Ionicons name="send-outline" size={16} color="#007AFF" />{' '}
+          <ExternalLink href="mailto:chiaraduyn@gmail.com">
+            <ThemedText type="link" style={styles.thinText}>chiaraduyn@gmail.com</ThemedText>
+          </ExternalLink>
+        </ThemedText>
+      </Collapsible>
     </ParallaxScrollView>
   );
 }
@@ -68,5 +156,55 @@ const styles = StyleSheet.create({
   },
   thinText: {
     fontWeight: '300',
+  },
+  welcomeSection: {
+    backgroundColor: 'rgba(0, 122, 255, 0.08)',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+    borderLeftWidth: 4,
+    borderLeftColor: '#007AFF',
+  },
+  welcomeText: {
+    fontSize: 16,
+    fontWeight: '500',
+    marginBottom: 8,
+    color: '#007AFF',
+  },
+  descriptionText: {
+    fontSize: 14,
+    fontWeight: '300',
+    lineHeight: 20,
+    opacity: 0.8,
+  },
+  contactCard: {
+    backgroundColor: 'rgba(0, 122, 255, 0.08)',
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 122, 255, 0.2)',
+  },
+  contactHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  contactName: {
+    fontSize: 16,
+    fontWeight: '600',
+    flex: 1,
+  },
+  contactNumber: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#007AFF',
+    textDecorationLine: 'underline',
+  },
+  contactDescription: {
+    fontSize: 14,
+    fontWeight: '300',
+    opacity: 0.8,
   },
 });

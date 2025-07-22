@@ -32,21 +32,38 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Home',
-          //tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-        tabBarIcon: ({ color, size }) => (
-          <Ionicons name="water" color={color} size={size} />
-        ),
-      }}
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="home" color={color} size={size} />
+          ),
+        }}
       />
       <Tabs.Screen
-  name="faq"
-  options={{
-    title: 'FAQ',
-    tabBarIcon: ({ color, size }) => (
-      <Ionicons name="help-circle-outline" color={color} size={size ?? 28} />
-    ),
-  }}
-/>
+        name="stream-monitor"
+        options={{
+          title: 'Stream Monitor',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="water" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="tide-conditions"
+        options={{
+          title: 'Tide Conditions',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="time" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="wave-weather"
+        options={{
+          title: 'Wave & Weather',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="cloudy" color={color} size={size} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }
