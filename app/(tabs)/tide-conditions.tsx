@@ -76,17 +76,6 @@ export default function TideConditionsScreen() {
         </ThemedText>
       </ThemedView> */}
 
-      <ThemedView style={styles.section}>
-        <ThemedText type="subtitle" style={styles.thinText}>
-          <Ionicons name="information-circle" size={16} color="#4682B4" /> Tide Station
-        </ThemedText>
-        <ThemedText style={styles.thinText}>
-          📍 Kāne&apos;ohe Bay, O&apos;ahu
-        </ThemedText>
-        <ThemedText style={styles.thinText}>
-          Data source: NOAA Tide Predictions
-        </ThemedText>
-      </ThemedView>
     </ParallaxScrollView>
   );
 }

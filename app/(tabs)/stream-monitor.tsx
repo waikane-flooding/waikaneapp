@@ -111,7 +111,7 @@ export default function StreamMonitorScreen() {
         </ThemedView>
       </ThemedView>
 
-      <ThemedView style={styles.section}>
+      {/* <ThemedView style={styles.section}>
         <ThemedText type="subtitle" style={styles.thinText}>
           <Ionicons name="information-circle" size={16} color="#007AFF" /> Stream Information
         </ThemedText>
@@ -141,14 +141,14 @@ export default function StreamMonitorScreen() {
             <ThemedText style={styles.detailItem}>🌊 Flow: Mountain to ocean</ThemedText>
           </ThemedView>
         </ThemedView>
-      </ThemedView>
+      </ThemedView> */}
 
       <ThemedView style={styles.section}>
         <ThemedText type="subtitle" style={styles.thinText}>
-          <Ionicons name="map" size={16} color="#007AFF" /> Stream Locations
+          <Ionicons name="map" size={16} color="#007AFF" /> Interactive Flood Risk Map
         </ThemedText>
         <ThemedText style={[styles.thinText, { marginBottom: 12 }]}>
-          Interactive map showing Waikāne & Waiahole stream locations and flood monitoring stations.
+          Powered by ArcGIS mapping technology
         </ThemedText>
         
         <ThemedView style={styles.mapContainer}>

@@ -2,6 +2,7 @@
   -weather forecast will update automatically
   -fetches live forecast data from the National Weather Service API every time the user opens or refreshes the screen.
   -NWS for the Kāneʻohe/Waiahole area.
+  - wanted to use NOAA Weather Prediction Center (WPC) does not offer a public, CORS-enabled API
 */
 
 /*
@@ -60,7 +61,21 @@ export default function WaveWeatherScreen() {
       try {
         const resp = await fetch('https://api.weather.gov/alerts/active?area=HI');
         const data = await resp.json();
-        setAlerts(data.features || []);
+        // Filter out Coastal/Marine and Winter hazards, and only include Oʻahu East alerts, only includes alerts for Kāneʻohe, Waikāne, Waiahole, Kualoa, Waimanalo, Heʻeia, Windward, or Koʻolaupoko.https://www.weather.gov/wrh/hazards
+        const eastOahuKeywords = [
+          'Kāneʻohe', 'Kaneohe', 'Waikāne', 'Waikane', 'Waiahole', 'Kualoa', 'Waimanalo', 'Heʻeia', 'Heeia', 'Oahu East', 'Windward', 'Koʻolaupoko', 'Koolaupoko'
+        ];
+        const excludeKeywords = ['Coastal', 'Marine', 'Winter'];
+        const filtered = (data.features || []).filter((alert: any) => {
+          const event = alert.properties.event || '';
+          const headline = alert.properties.headline || '';
+          const desc = alert.properties.areaDesc || '';
+          // Exclude if event or headline contains any exclude keywords
+          if (excludeKeywords.some(word => event.includes(word) || headline.includes(word))) return false;
+          // Only include if areaDesc contains any east Oahu keywords
+          return eastOahuKeywords.some(word => desc.includes(word));
+        });
+        setAlerts(filtered);
       } catch {
         setAlertsError('Unable to load alerts.');
       } finally {
@@ -84,6 +99,63 @@ export default function WaveWeatherScreen() {
     >
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title" style={styles.thinText}>Wave &amp; Weather Conditions</ThemedText>
+      </ThemedView>
+
+      <ThemedView style={styles.section}>
+        <ThemedText type="subtitle" style={[styles.thinText, { marginBottom: 18 }]}>
+          <Ionicons name="warning" size={18} color="#d9534f" /> National Weather Service Alerts & Warnings
+        </ThemedText>
+        {alertsLoading ? (
+          <ThemedView style={styles.alertsCard}>
+            <ActivityIndicator size="small" color="#d9534f" />
+          </ThemedView>
+        ) : alertsError ? (
+          <ThemedView style={styles.alertsCard}>
+            <ThemedText style={[styles.placeholderText, { color: '#d9534f' }]}>{alertsError}</ThemedText>
+          </ThemedView>
+        ) : alerts.length > 0 ? (
+          <ThemedView style={styles.alertsCard}>
+            {alerts.map((alert: any) => {
+              const alertSeverity = getAlertSeverity(alert);
+              return (
+                <ThemedView 
+                  key={alert.id} 
+                  style={[
+                    styles.alertItem,
+                    { 
+                      backgroundColor: alertSeverity.bgColor,
+                      borderLeftWidth: 4,
+                      borderLeftColor: alertSeverity.color
+                    }
+                  ]}
+                >
+                  <ThemedView style={styles.alertHeader}>
+                    <ThemedText style={[styles.alertTitle, { color: alertSeverity.color }]}>
+                      {alert.properties.event}
+                    </ThemedText>
+                    <ThemedView style={[styles.severityBadge, { backgroundColor: alertSeverity.color }]}>
+                      <ThemedText style={styles.severityText}>
+                        {alertSeverity.level.toUpperCase()}
+                      </ThemedText>
+                    </ThemedView>
+                  </ThemedView>
+                  <ThemedText style={styles.alertTime}>
+                    {alert.properties.effective ? `From: ${new Date(alert.properties.effective).toLocaleString()}` : ''}
+                    {alert.properties.ends ? `  To: ${new Date(alert.properties.ends).toLocaleString()}` : ''}
+                  </ThemedText>
+                  <ThemedText style={styles.alertArea}>{alert.properties.areaDesc}</ThemedText>
+                  {alert.properties.headline && (
+                    <ThemedText style={[styles.alertHeadline, { color: alertSeverity.color }]}>
+                      {alert.properties.headline}
+                    </ThemedText>
+                  )}
+                </ThemedView>
+              );
+            })}
+          </ThemedView>
+        ) : (
+          <ThemedText style={styles.noAlertsText}>No active alerts for East Oahu.</ThemedText>
+        )}
       </ThemedView>
 
       <ThemedView style={styles.section}>
@@ -116,54 +188,10 @@ export default function WaveWeatherScreen() {
       </ThemedView>
 
       <ThemedView style={styles.section}>
-        <ThemedText type="subtitle" style={styles.thinText}>
-          <Ionicons name="warning" size={18} color="#d9534f" /> Weather Service Alerts & Warnings
+        <ThemedText style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 36 }}>
+          Surf Forecast - Oʻahu East
         </ThemedText>
-        <ThemedText style={styles.alertsDescription}>For all Hawaiian Islands</ThemedText>
-        <ThemedView style={styles.alertsCard}>
-          {alertsLoading ? (
-            <ActivityIndicator size="small" color="#d9534f" />
-          ) : alertsError ? (
-            <ThemedText style={[styles.placeholderText, { color: '#d9534f' }]}>{alertsError}</ThemedText>
-          ) : alerts.length > 0 ? (
-            alerts.map((alert: any) => (
-              <ThemedView key={alert.id} style={styles.alertItem}>
-                <ThemedText style={styles.alertTitle}>{alert.properties.event}</ThemedText>
-                <ThemedText style={styles.alertTime}>
-                  {alert.properties.effective ? `From: ${new Date(alert.properties.effective).toLocaleString()}` : ''}
-                  {alert.properties.ends ? `  To: ${new Date(alert.properties.ends).toLocaleString()}` : ''}
-                </ThemedText>
-                <ThemedText style={styles.alertArea}>{alert.properties.areaDesc}</ThemedText>
-                {alert.properties.headline && (
-                  <ThemedText style={styles.alertHeadline}>{alert.properties.headline}</ThemedText>
-                )}
-              </ThemedView>
-            ))
-          ) : (
-            <ThemedText style={styles.placeholderText}>No active alerts for Hawaii.</ThemedText>
-          )}
-        </ThemedView>
-      </ThemedView>
-
-      <ThemedView style={styles.section}>
-        <ThemedText type="subtitle" style={styles.thinText}>
-          <Ionicons name="water" size={16} color="#4169E1" /> Surf Forecast - Oʻahu East
-        </ThemedText>
-        <TouchableOpacity
-          style={{
-            backgroundColor: '#0077cc',
-            borderRadius: 8,
-            padding: 14,
-            marginBottom: 18,
-            alignItems: 'center',
-          }}
-          onPress={() => Linking.openURL('https://www.surfnewsnetwork.com')}
-          accessibilityRole="link"
-        >
-          <ThemedText style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>
-            Click here to access Surf News Network
-          </ThemedText>
-        </TouchableOpacity>
+        <SurfForecastLink />
       </ThemedView>
     </ParallaxScrollView>
   );
@@ -179,6 +207,59 @@ function getForecastIcon(shortForecast: string) {
   if (text.includes('haze')) return 'partly-sunny';
   if (text.includes('wind')) return 'flag';
   return 'cloud-outline';
+}
+
+// Helper function to determine alert severity and color
+function getAlertSeverity(alert: any) {
+  const event = alert.properties.event?.toLowerCase() || '';
+  const severity = alert.properties.severity?.toLowerCase() || '';
+  
+  // High severity (red) - immediate danger
+  if (severity === 'extreme' || severity === 'severe' || 
+      event.includes('warning') || event.includes('watch') || 
+      event.includes('tornado') || event.includes('hurricane') || 
+      event.includes('flash flood') || event.includes('severe thunderstorm')) {
+    return { color: '#FF3B30', bgColor: 'rgba(255, 59, 48, 0.1)', level: 'high' };
+  }
+  
+  // Medium severity (yellow/orange) - caution needed
+  if (severity === 'moderate' || 
+      event.includes('advisory') || event.includes('statement') || 
+      event.includes('flood') || event.includes('wind') || 
+      event.includes('rain')) {
+    return { color: '#FF9500', bgColor: 'rgba(255, 149, 0, 0.1)', level: 'medium' };
+  }
+  
+  // Low severity (green) - informational
+  return { color: '#34C759', bgColor: 'rgba(52, 199, 89, 0.1)', level: 'low' };
+}
+
+// Update the SurfForecastLink button to remove the icon and ensure the text is centered
+function SurfForecastLink() {
+  return (
+    <TouchableOpacity
+      style={{
+        backgroundColor: '#1976d2',
+        borderRadius: 12,
+        paddingVertical: 16,
+        paddingHorizontal: 20,
+        marginBottom: 18,
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: '#000',
+        shadowOpacity: 0.08,
+        shadowRadius: 4,
+        shadowOffset: { width: 0, height: 2 },
+      }}
+      onPress={() => Linking.openURL('https://www.surfnewsnetwork.com')}
+      accessibilityRole="link"
+      activeOpacity={0.85}
+    >
+      <ThemedText style={{ color: 'white', fontWeight: 'bold', fontSize: 16, letterSpacing: 0.2, textAlign: 'center' }}>
+        Click here to access Surf News Network
+      </ThemedText>
+    </TouchableOpacity>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -308,11 +389,18 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(217, 83, 79, 0.13)',
+    borderRadius: 8,
+    padding: 12,
+  },
+  alertHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
   },
   alertTitle: {
     fontWeight: '700',
     fontSize: 16,
-    color: '#d9534f',
     marginBottom: 2,
   },
   alertTime: {
@@ -327,14 +415,31 @@ const styles = StyleSheet.create({
   },
   alertHeadline: {
     fontSize: 14,
-    color: '#d9534f',
     fontWeight: '500',
     marginBottom: 2,
   },
-  alertsDescription: {
-    fontSize: 13,
-    color: '#888',
-    marginBottom: 6,
-    marginLeft: 2,
+  severityBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  severityText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: 'white',
+    letterSpacing: 0.5,
+  },
+  noAlertsText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#34C759',
+    textAlign: 'center',
+    padding: 16,
+    backgroundColor: 'rgba(52, 199, 89, 0.08)',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(52, 199, 89, 0.2)',
   },
 });
