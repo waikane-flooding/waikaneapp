@@ -5,6 +5,7 @@ import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
+import WaikaneTideLevel from '@/components/visualizations/WaikaneTideLevel';
 
 export default function TideConditionsScreen() {
   return (
@@ -54,9 +55,7 @@ export default function TideConditionsScreen() {
       <ThemedView style={styles.chartsContainer}>
         <ThemedView style={styles.chartSection}>
           <ThemedText style={styles.chartTitle}>Waikāne Tide Level Gauge</ThemedText>
-          <ThemedView style={styles.chartPlaceholder}>
-            <ThemedText style={styles.placeholderText}>Gauge Chart Space</ThemedText>
-          </ThemedView>
+          <WaikaneTideLevel />
         </ThemedView>
         
         <ThemedView style={styles.chartSection}>
