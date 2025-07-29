@@ -12,8 +12,8 @@ CORS(app)
 # File paths
 BASE_DIR = os.path.dirname(__file__)
 WAIKANE_TIDE_FILE = os.path.join(BASE_DIR, 'Waikane_Tide_Data.json')
-WAIKANE_STREAM_FILE = os.path.join(BASE_DIR, 'Waikane_Stream_data.json')
-WAIAHOLE_STREAM_FILE = os.path.join(BASE_DIR, 'Waiahole_Stream_data.json')
+WAIKANE_STREAM_FILE = os.path.join(BASE_DIR, 'Waikane_Stream_Data.json')
+WAIAHOLE_STREAM_FILE = os.path.join(BASE_DIR, 'Waiahole_Stream_Data.json')
 WAIKANE_TIDE_CURVE_FILE = os.path.join(BASE_DIR, 'Waikane_Tide_Curve.json')
 
 def update_data():
