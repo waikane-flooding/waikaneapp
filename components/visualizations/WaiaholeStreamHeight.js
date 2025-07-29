@@ -1,15 +1,33 @@
 import React, { useEffect, useState } from 'react';
-import GaugeChart from 'react-gauge-chart';
+import { View, Text, StyleSheet, Animated } from 'react-native';
+import Svg, { Path, Line, Text as SvgText } from 'react-native-svg';
+
+function polarToCartesian(cx, cy, r, angle) {
+  const rad = (angle - 90) * Math.PI / 180.0;
+  return {
+    x: cx + r * Math.cos(rad),
+    y: cy + r * Math.sin(rad)
+  };
+}
 
 const WaiaholeStreamHeight = () => {
   const [streamLevel, setStreamLevel] = useState(null);
   const [streamTime, setStreamTime] = useState(null);
+  const [animatedValue] = useState(new Animated.Value(0));
 
+  const minLevel = 0;
   const maxLevel = 22;
-  const greenEnd = 12 / maxLevel;
-  const yellowEnd = 16.4 / maxLevel;
-  const redEnd = 1;
-  const customTicks = Array.from({ length: 12 }, (_, i) => i * 2);
+  const greenEnd = 12;
+  const yellowEnd = 16.4;
+
+  // Get color based on stream level
+  const getColorForLevel = (level) => {
+    if (level < greenEnd) return '#4CAF50';
+    if (level < yellowEnd) return '#FFC107';
+    return '#F44336';
+  };
+
+  const customTicks = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22];
 
   useEffect(() => {
     fetch('http://localhost:5000/api/waiahole_stream')
@@ -28,12 +46,18 @@ const WaiaholeStreamHeight = () => {
         if (latest) {
           setStreamLevel(latest.value);
           setStreamTime(latest.time);
+          
+          // Animate to new stream level
+          const targetPercent = (latest.value - minLevel) / (maxLevel - minLevel);
+          Animated.timing(animatedValue, {
+            toValue: targetPercent,
+            duration: 2000,
+            useNativeDriver: false,
+          }).start();
         }
       })
       .catch(err => console.error("Failed to load stream data", err));
   }, []);
-
-  const percent = streamLevel !== null ? streamLevel / maxLevel : 0;
 
   const formattedDateTime = streamTime
     ? 'Latest Reading: ' + new Date(streamTime).toLocaleString('en-US', {
@@ -48,108 +72,139 @@ const WaiaholeStreamHeight = () => {
     : 'Loading...';
 
   return (
-    <div style={{ width: '600px', margin: '0 auto', position: 'relative', marginTop: '50px' }}>
-      <h3 style={{ color: 'black', marginBottom: '24px', fontSize: '20px' }}>Waiāhole Stream Height</h3>
-      <GaugeChart
-        id="stream-gauge"
-        nrOfLevels={3}
-        colors={["#4CAF50", "#FFC107", "#F44336"]}
-        percent={percent}
-        textColor="#000000"
-        needleColor="#000000"
-        needleBaseColor="#000000"
-        arcWidth={0.3}
-        formatTextValue={() => ''}
-        style={{ width: '100%' }}
-        arcsLength={[greenEnd, yellowEnd - greenEnd, redEnd - yellowEnd]}
-        animate={true}
-      />
-      <div style={{ 
-        color: 'black', 
-        fontSize: '32px', 
-        marginTop: '15px',
-        textAlign: 'center',
-        fontWeight: 'bold'
-      }}>
-        {streamLevel !== null ? `${streamLevel.toFixed(2)} ft` : 'Loading...'}
-      </div>
-      <div style={{ 
-        color: 'black', 
-        fontSize: '16px', 
-        marginTop: '8px',
-        textAlign: 'center'
-      }}>
-        {formattedDateTime}
-      </div>
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        gap: '20px',
-        marginTop: '20px',
-        color: 'black',
-        fontSize: '14px'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-          <div style={{ width: '15px', height: '15px', backgroundColor: '#4CAF50' }}></div>
-          <span>0-12 ft: No Flooding</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-          <div style={{ width: '15px', height: '15px', backgroundColor: '#FFC107' }}></div>
-          <span>12-16.4 ft: Minor Flooding</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-          <div style={{ width: '15px', height: '15px', backgroundColor: '#F44336' }}></div>
-          <span>16.4-22 ft: Major Flooding</span>
-        </div>
-      </div>
-      <svg
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          pointerEvents: 'none'
-        }}
-      >
-        {customTicks.map((tick) => {
-          const angle = 180 - (tick / maxLevel) * 180;
-          const radian = (angle * Math.PI) / 180;
-
-          const radius = 225;
-          const x = 300 + radius * Math.cos(radian);
-          const y = 300 - radius * Math.sin(radian);
-
-          const labelRadius = radius + 30;
-          const labelX = 300 + labelRadius * Math.cos(radian);
-          const labelY = 300 - labelRadius * Math.sin(radian);
-
-          return (
-            <g key={tick}>
-              <line
-                x1={x}
-                y1={y}
-                x2={x + 15 * Math.cos(radian)}
-                y2={y - 15 * Math.sin(radian)}
-                stroke="#000000"
-                strokeWidth="3"
+    <View style={styles.container}>
+      <View style={styles.gaugeContainer}>
+        <Svg width={700} height={300}>
+          {/* Background arc */}
+          <Path
+            d="M100,280 A250,250 0 0,1 600,280"
+            stroke="#333"
+            strokeWidth={20}
+            fill="none"
+            strokeLinecap="round"
+          />
+          
+          {/* Animated colored arc based on stream level */}
+          {streamLevel !== null && (() => {
+            const percent = Math.min((streamLevel - minLevel) / (maxLevel - minLevel), 0.98); // Cap at 98%
+            const angle = percent * Math.PI;
+            const endX = 350 + 250 * Math.cos(Math.PI - angle);
+            const endY = 280 - 250 * Math.sin(Math.PI - angle);
+            
+            // Always use small arc flag to prevent wrapping
+            return (
+              <Path
+                d={`M100,280 A250,250 0 0,1 ${endX},${endY}`}
+                stroke={getColorForLevel(streamLevel)}
+                strokeWidth={20}
+                fill="none"
+                strokeLinecap="round"
               />
-              <text
-                x={labelX}
-                y={labelY}
-                fill="#000000"
-                fontSize="16"
+            );
+          })()}
+          
+          {/* Tick labels */}
+          {customTicks.map((tick) => {
+            const tickPercent = (tick - minLevel) / (maxLevel - minLevel);
+            const angle = Math.PI - tickPercent * Math.PI;
+            const labelRadius = 270;
+            const lx = 350 + labelRadius * Math.cos(angle);
+            const ly = 280 - labelRadius * Math.sin(angle);
+            return (
+              <SvgText
+                key={tick}
+                x={lx}
+                y={ly}
+                fontSize="18"
+                fill="#fff"
                 textAnchor="middle"
-                dominantBaseline="middle"
+                alignmentBaseline="middle"
               >
                 {`${tick} ft`}
-              </text>
-            </g>
-          );
-        })}
-      </svg>
-    </div>
+              </SvgText>
+            );
+          })}
+        </Svg>
+      </View>
+      <View style={styles.valueContainer}>
+        <Text style={styles.value}>{streamLevel !== null ? `${streamLevel.toFixed(2)} ft` : 'Loading...'}</Text>
+        <Text style={styles.datetime}>{formattedDateTime}</Text>
+      </View>
+      <View style={styles.legendContainer}>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendColor, { backgroundColor: '#4CAF50' }]} />
+          <Text style={styles.legendText}>No Flooding</Text>
+        </View>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendColor, { backgroundColor: '#FFC107' }]} />
+          <Text style={styles.legendText}>Minor Flooding</Text>
+        </View>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendColor, { backgroundColor: '#F44336' }]} />
+          <Text style={styles.legendText}>Major Flooding</Text>
+        </View>
+      </View>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10,
+    marginBottom: 10,
+    position: 'relative',
+  },
+  gaugeContainer: {
+    marginBottom: 0,
+    position: 'relative',
+  },
+  valueContainer: {
+    position: 'absolute',
+    bottom: 80,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  value: {
+    color: 'white',
+    fontSize: 32,
+    textAlign: 'center',
+    fontWeight: 'bold',
+  },
+  datetime: {
+    color: 'white',
+    fontSize: 16,
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  legendContainer: {
+    position: 'absolute',
+    bottom: 10,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 16,
+    zIndex: 10,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 4,
+  },
+  legendColor: {
+    width: 15,
+    height: 15,
+    borderRadius: 3,
+    marginRight: 5,
+  },
+  legendText: {
+    color: 'white',
+    fontSize: 14,
+  },
+});
 
 export default WaiaholeStreamHeight;

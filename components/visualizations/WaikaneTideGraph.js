@@ -1,13 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
-import Chart from 'chart.js/auto';
-import annotationPlugin from 'chartjs-plugin-annotation';
-import 'chartjs-adapter-date-fns';
-
-Chart.register(annotationPlugin);
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { Svg, Path, Line, Circle, Polygon, Defs, LinearGradient, Stop, Text as SvgText } from 'react-native-svg';
 
 const WaikaneTideGraph = () => {
-  const chartRef = useRef(null);
-  const chartInstance = useRef(null);
   const [curveData, setCurveData] = useState([]);
   const [tideData, setTideData] = useState([]);
 
@@ -33,239 +28,490 @@ const WaikaneTideGraph = () => {
       });
   }, []);
 
-  useEffect(() => {
-    if (curveData.length === 0 || tideData.length === 0) {
-      return;
+  // Chart dimensions - fill the container
+  const screenWidth = Dimensions.get('window').width;
+  const chartWidth = 700; // Add small padding to prevent extending to edge
+  const chartHeight = 300;
+  const padding = 40;
+  const graphWidth = chartWidth - 2 * padding;
+  const graphHeight = chartHeight - 2 * padding;
+
+  // Y-axis range
+  const yMin = -1;
+  const yMax = 4;
+  const yRange = yMax - yMin;
+
+  // Process data
+  const sortedCurveData = [...curveData].sort((a, b) => new Date(a["Datetime"]) - new Date(b["Datetime"]));
+  
+  if (sortedCurveData.length === 0) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Loading...</Text>
+        </View>
+      </View>
+    );
+  }
+
+  // Get time range (24 hours before last data point + future data)
+  const lastDataTime = new Date(sortedCurveData[sortedCurveData.length - 1]["Datetime"]);
+  const startTime = new Date(lastDataTime.getTime() - 24 * 60 * 60 * 1000); // 24 hours before last data point
+  const filteredData = sortedCurveData.filter(d => {
+    const date = new Date(d["Datetime"]);
+    return date >= startTime; // Include all data from 24 hours before last point onwards
+  });
+
+  if (filteredData.length === 0) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>No recent data available</Text>
+        </View>
+      </View>
+    );
+  }
+
+  const timeMin = new Date(filteredData[0]["Datetime"]).getTime();
+  const timeMax = new Date(filteredData[filteredData.length - 1]["Datetime"]).getTime();
+  const timeRange = timeMax - timeMin;
+
+  // Convert data to SVG coordinates
+  const points = filteredData.map(d => {
+    const time = new Date(d["Datetime"]).getTime();
+    const value = d["Predicted_ft_MSL"];
+    
+    const x = padding + ((time - timeMin) / timeRange) * graphWidth;
+    const y = padding + ((yMax - value) / yRange) * graphHeight;
+    
+    return { x, y, time, value };
+  });
+
+  // Create path string for tide curve
+  const pathData = points.reduce((path, point, index) => {
+    if (index === 0) {
+      return `M${point.x},${point.y}`;
     }
+    return `${path} L${point.x},${point.y}`;
+  }, '');
 
-    const sortedCurveData = [...curveData].sort((a, b) => new Date(a["Datetime"]) - new Date(b["Datetime"]));
+  // Find high and low tides from tideData
+  const tidePoints = tideData
+    .filter(d => {
+      const date = new Date(d["Date Time"]);
+      return date >= startTime; // Use same time range as curve data
+    })
+    .map(d => {
+      const time = new Date(d["Date Time"]).getTime();
+      const value = d["Prediction_ft_MSL"];
+      const x = padding + ((time - timeMin) / timeRange) * graphWidth;
+      const y = padding + ((yMax - value) / yRange) * graphHeight;
+      return { x, y, time, value, type: d["Type"] };
+    });
 
-    const curvePoints = sortedCurveData.map(d => ({
-      x: new Date(d["Datetime"]),
-      y: d["Predicted_ft_MSL"]
-    }));
+  const highTides = tidePoints.filter(point => point.type === 'H');
+  const lowTides = tidePoints.filter(point => point.type === 'L');
 
-    const xMin = curvePoints.length > 0 ? curvePoints[0].x : null;
-    const xMax = curvePoints.length > 0 ? curvePoints[curvePoints.length - 1].x : null;
-
-    const now = new Date();
-    let latestPointIndex = -1;
-    for (let i = curvePoints.length - 1; i >= 0; i--) {
-      if (curvePoints[i].x <= now) {
-        latestPointIndex = i;
-        break;
+  // Find current time marker on the curve
+  const currentTime = new Date().getTime();
+  let currentTimePoint = null;
+  
+  if (currentTime >= timeMin && currentTime <= timeMax) {
+    // Find the closest data point to current time or interpolate
+    const currentTimeData = filteredData.find(d => {
+      const dataTime = new Date(d["Datetime"]).getTime();
+      return Math.abs(dataTime - currentTime) < 30 * 60 * 1000; // Within 30 minutes
+    });
+    
+    if (currentTimeData) {
+      const time = new Date(currentTimeData["Datetime"]).getTime();
+      const value = currentTimeData["Predicted_ft_MSL"];
+      const x = padding + ((time - timeMin) / timeRange) * graphWidth;
+      const y = padding + ((yMax - value) / yRange) * graphHeight;
+      currentTimePoint = { x, y, time, value };
+    } else {
+      // Interpolate between nearest points
+      const beforePoint = filteredData.filter(d => new Date(d["Datetime"]).getTime() <= currentTime).pop();
+      const afterPoint = filteredData.find(d => new Date(d["Datetime"]).getTime() > currentTime);
+      
+      if (beforePoint && afterPoint) {
+        const beforeTime = new Date(beforePoint["Datetime"]).getTime();
+        const afterTime = new Date(afterPoint["Datetime"]).getTime();
+        const ratio = (currentTime - beforeTime) / (afterTime - beforeTime);
+        const interpolatedValue = beforePoint["Predicted_ft_MSL"] + 
+          (afterPoint["Predicted_ft_MSL"] - beforePoint["Predicted_ft_MSL"]) * ratio;
+        
+        const x = padding + ((currentTime - timeMin) / timeRange) * graphWidth;
+        const y = padding + ((yMax - interpolatedValue) / yRange) * graphHeight;
+        currentTimePoint = { x, y, time: currentTime, value: interpolatedValue };
       }
     }
+  }
 
-    const latestPoint = latestPointIndex !== -1 ? curvePoints[latestPointIndex] : null;
-
-    const tidePoints = tideData.map(d => ({
-      x: new Date(d["Date Time"]),
-      y: d["Prediction_ft_MSL"],
-      type: d["Type"]
-    }));
-
-    const highTides = tidePoints.filter(point => point.type === 'H');
-    const lowTides = tidePoints.filter(point => point.type === 'L');
-
-    const data = {
-      datasets: [
-        {
-          label: 'Tide Curve',
-          data: curvePoints,
-          borderColor: 'rgba(54, 162, 235, 0.8)',
-          backgroundColor: 'rgba(54, 162, 235, 0.5)',
-          tension: 0.3,
-          fill: 'start',
-          spanGaps: true,
-          order: 2,
-          pointRadius: 0,
-          pointStyle: 'rect',
-          pointHitRadius: 10
-        },
-        {
-          label: 'High Tides',
-          data: highTides.map(point => ({ x: point.x, y: point.y })),
-          type: 'scatter',
-          backgroundColor: 'rgba(255, 99, 132, 0.8)',
-          borderColor: 'rgba(255, 99, 132, 1)',
-          pointRadius: 8,
-          pointHoverRadius: 10,
-          showLine: false,
-          order: 1
-        },
-        {
-          label: 'Low Tides',
-          data: lowTides.map(point => ({ x: point.x, y: point.y })),
-          type: 'scatter',
-          backgroundColor: 'rgba(132, 185, 115, 0.8)',
-          borderColor: 'rgba(132, 185, 115, 0.8)',
-          pointRadius: 8,
-          pointHoverRadius: 10,
-          showLine: false,
-          order: 1
-        },
-        {
-          label: 'Latest Reading',
-          data: latestPoint ? [latestPoint] : [],
-          type: 'scatter',
-          backgroundColor: 'rgba(54, 162, 235, 0.8)',
-          pointStyle: 'triangle',
-          radius: 8,
-          order: 1
-        }
-      ]
-    };
-
-    const config = {
-      type: 'line',
-      data: data,
-      options: {
-        responsive: true,
-        plugins: {
-          annotation: {
-            annotations: {
-              yellowLine: {
-                type: 'line',
-                yMin: 2.12,
-                yMax: 2.12,
-                borderColor: '#FFC107',
-                borderWidth: 2,
-                borderDash: [5, 5],
-                label: {
-                  content: '2.12 ft',
-                  enabled: true,
-                  position: 'start'
-                }
-              },
-              redLine: {
-                type: 'line',
-                yMin: 2.92,
-                yMax: 2.92,
-                borderColor: 'red',
-                borderWidth: 2,
-                borderDash: [5, 5],
-                label: {
-                  content: '2.92 ft',
-                  enabled: true,
-                  position: 'start'
-                }
-              }
-            }
-          },
-          title: {
-            display: true,
-            text: 'Waikāne Predicted Tides (Above Mean Sea Level)',
-            font: { size: 16 },
-            color: 'black'
-          },
-          tooltip: {
-            callbacks: {
-              label: function(context) {
-                const date = context.parsed.x ? new Date(context.parsed.x) : null;
-                const dateStr = date
-                  ? date.toLocaleString([], {
-                      month: 'short',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      hour12: true
-                    })
-                  : '';
-                if (context.dataset.label === 'High Tides') {
-                  return `High Tide: ${context.parsed.y} ft\n${dateStr}`;
-                } else if (context.dataset.label === 'Low Tides') {
-                  return `Low Tide: ${context.parsed.y} ft\n${dateStr}`;
-                } else if (context.dataset.label === 'Latest Reading') {
-                  return `Latest Reading: ${context.parsed.y} ft\n${dateStr}`;
-                }
-                return `Tide: ${context.parsed.y} ft`;
-              }
-            }
-          },
-          legend: {
-            labels: {
-              color: 'black',
-              usePointStyle: true,
-            }
-          }
-        },
-        scales: {
-          x: {
-            type: 'time',
-            min: xMin,
-            max: xMax,
-            time: {
-              unit: 'hour',
-              displayFormats: {
-                hour: 'MMM d, h:mm a'
-              }
-            },
-            title: {
-              display: true,
-              text: 'Time',
-              color: 'black'
-            },
-            ticks: {
-              color: 'black',
-              maxRotation: 45,
-              minRotation: 45,
-              autoSkip: false,
-              stepSize: 1,
-              callback: function(value) {
-                const date = new Date(value);
-                const hour = date.getHours();
-                return hour % 6 === 0 ? date.toLocaleString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  hour: 'numeric',
-                  minute: 'numeric',
-                  hour12: true
-                }) : '';
-              }
-            },
-            grid: {
-              color: 'rgba(0,0,0,0.1)'
-            }
-          },
-          y: {
-            min: -1,
-            max: 3.92,
-            title: {
-              display: true,
-              text: 'Tide Height (ft)',
-              color: 'black'
-            },
-            ticks: {
-              color: 'black'
-            },
-            grid: {
-              color: 'rgba(0,0,0,0.1)'
-            }
-          }
-        }
-      }
-    };
-
-    if (chartInstance.current) {
-      chartInstance.current.destroy();
+  // Y-axis labels
+  const yTicks = [-1, 0, 1, 2, 3, 4];
+  
+  // X-axis labels (every 6 hours, aligned to 12 AM, 6 AM, 12 PM, 6 PM)
+  const xTicks = [];
+  
+  // Find the first 6-hour boundary within our time range
+  const startDate = new Date(timeMin);
+  const firstTickHour = Math.ceil(startDate.getHours() / 6) * 6;
+  const firstTick = new Date(startDate);
+  firstTick.setHours(firstTickHour, 0, 0, 0);
+  
+  // If the first tick is before our start time, use the next 6-hour boundary
+  if (firstTick.getTime() < timeMin) {
+    firstTick.setHours(firstTick.getHours() + 6);
+  }
+  
+  // Generate ticks every 6 hours from the first aligned tick
+  let currentTick = new Date(firstTick);
+  while (currentTick.getTime() <= timeMax) {
+    const x = padding + ((currentTick.getTime() - timeMin) / timeRange) * graphWidth;
+    
+    // Format time labels
+    const hour = currentTick.getHours();
+    let timeLabel = '';
+    if (hour === 0) {
+      timeLabel = '12:00 AM';
+    } else if (hour === 6) {
+      timeLabel = '6:00 AM';
+    } else if (hour === 12) {
+      timeLabel = '12:00 PM';
+    } else if (hour === 18) {
+      timeLabel = '6:00 PM';
+    } else {
+      // Fallback for other hours (shouldn't happen with 6-hour intervals)
+      timeLabel = currentTick.toLocaleTimeString('en-US', { 
+        hour: 'numeric', 
+        minute: '2-digit', 
+        hour12: true 
+      });
     }
-
-    const ctx = chartRef.current.getContext('2d');
-    chartInstance.current = new Chart(ctx, config);
-
-    return () => {
-      if (chartInstance.current) {
-        chartInstance.current.destroy();
-      }
-    };
-  }, [curveData, tideData]);
+    
+    xTicks.push({
+      x: x,
+      time: new Date(currentTick),
+      timeLabel: timeLabel,
+      dateLabel: currentTick.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric' 
+      })
+    });
+    
+    // Move to next 6-hour interval
+    currentTick.setHours(currentTick.getHours() + 6);
+  }
+  
+  // Threshold lines
+  const threshold1Y = padding + ((yMax - 2.12) / yRange) * graphHeight;
+  const threshold2Y = padding + ((yMax - 2.92) / yRange) * graphHeight;
 
   return (
-    <div style={{ width: '800px', height: '400px', backgroundColor: 'white', padding: '20px', borderRadius: '8px', margin: '0 auto' }}>
-      <canvas ref={chartRef}></canvas>
-    </div>
+    <View style={styles.container}>
+      <View style={styles.chartContainer}>
+        <Svg width={chartWidth} height={chartHeight}>
+          <Defs>
+            <LinearGradient id="tideGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <Stop offset="0%" stopColor="rgba(54, 162, 235, 0.3)" />
+              <Stop offset="100%" stopColor="rgba(54, 162, 235, 0.1)" />
+            </LinearGradient>
+          </Defs>
+          
+          {/* Grid lines */}
+          {yTicks.map(tick => {
+            const y = padding + ((yMax - tick) / yRange) * graphHeight;
+            return (
+              <Line
+                key={tick}
+                x1={padding}
+                y1={y}
+                x2={padding + graphWidth}
+                y2={y}
+                stroke="rgba(0,0,0,0.1)"
+                strokeWidth={1}
+              />
+            );
+          })}
+          
+          {/* X-axis grid lines */}
+          {xTicks.map((tick, index) => (
+            <Line
+              key={`x-grid-${index}`}
+              x1={tick.x}
+              y1={padding}
+              x2={tick.x}
+              y2={padding + graphHeight}
+              stroke="rgba(0,0,0,0.1)"
+              strokeWidth={1}
+            />
+          ))}
+          
+          {/* X-axis line */}
+          <Line
+            x1={padding}
+            y1={padding + graphHeight}
+            x2={padding + graphWidth}
+            y2={padding + graphHeight}
+            stroke="rgba(0,0,0,0.3)"
+            strokeWidth={1}
+          />
+          
+          {/* Y-axis line */}
+          <Line
+            x1={padding}
+            y1={padding}
+            x2={padding}
+            y2={padding + graphHeight}
+            stroke="rgba(0,0,0,0.3)"
+            strokeWidth={1}
+          />
+          
+          {/* Threshold lines */}
+          <Line
+            x1={padding}
+            y1={threshold1Y}
+            x2={padding + graphWidth}
+            y2={threshold1Y}
+            stroke="#FFC107"
+            strokeWidth={2}
+            strokeDasharray="5,5"
+          />
+          <Line
+            x1={padding}
+            y1={threshold2Y}
+            x2={padding + graphWidth}
+            y2={threshold2Y}
+            stroke="#F44336"
+            strokeWidth={2}
+            strokeDasharray="5,5"
+          />
+          
+          {/* Tide curve area fill */}
+          <Path
+            d={`${pathData} L${points[points.length - 1].x},${padding + graphHeight} L${points[0].x},${padding + graphHeight} Z`}
+            fill="url(#tideGradient)"
+          />
+          
+          {/* Tide curve line */}
+          <Path
+            d={pathData}
+            stroke="rgba(54, 162, 235, 0.8)"
+            strokeWidth={2}
+            fill="none"
+          />
+          
+          {/* High tide points */}
+          {highTides.map((point, index) => (
+            <Polygon
+              key={`high-${index}`}
+              points={`${point.x},${point.y - 6} ${point.x - 5},${point.y + 4} ${point.x + 5},${point.y + 4}`}
+              fill="#000000"
+              stroke="#fff"
+              strokeWidth={1}
+            />
+          ))}
+          
+          {/* Low tide points */}
+          {lowTides.map((point, index) => (
+            <Polygon
+              key={`low-${index}`}
+              points={`${point.x},${point.y + 6} ${point.x - 5},${point.y - 4} ${point.x + 5},${point.y - 4}`}
+              fill="#000000"
+              stroke="#fff"
+              strokeWidth={1}
+            />
+          ))}
+          
+          {/* Current time marker */}
+          {currentTimePoint && (
+            <Circle
+              cx={currentTimePoint.x}
+              cy={currentTimePoint.y}
+              r={5}
+              fill="#000000"
+              stroke="#fff"
+              strokeWidth={2}
+            />
+          )}
+          
+          {/* Y-axis labels */}
+          {yTicks.map(tick => {
+            const y = padding + ((yMax - tick) / yRange) * graphHeight;
+            return (
+              <SvgText
+                key={tick}
+                x={padding - 10}
+                y={y + 3}
+                fontSize="12"
+                fill="#666"
+                textAnchor="end"
+              >
+                {tick} ft
+              </SvgText>
+            );
+          })}
+          
+          {/* X-axis labels */}
+          {xTicks.map((tick, index) => (
+            <SvgText
+              key={`x-label-${index}`}
+              x={tick.x}
+              y={padding + graphHeight + 15}
+              fontSize="10"
+              fill="#666"
+              textAnchor="middle"
+            >
+              {tick.timeLabel}
+            </SvgText>
+          ))}
+          
+          {/* X-axis date labels */}
+          {xTicks.map((tick, index) => (
+            <SvgText
+              key={`x-date-${index}`}
+              x={tick.x}
+              y={padding + graphHeight + 28}
+              fontSize="9"
+              fill="#999"
+              textAnchor="middle"
+            >
+              {tick.dateLabel}
+            </SvgText>
+          ))}
+          
+          {/* X-axis ticks */}
+          {xTicks.map((tick, index) => (
+            <Line
+              key={`x-tick-${index}`}
+              x1={tick.x}
+              y1={padding + graphHeight}
+              x2={tick.x}
+              y2={padding + graphHeight + 5}
+              stroke="rgba(0,0,0,0.5)"
+              strokeWidth={1}
+            />
+          ))}
+          
+          {/* Threshold labels */}
+          <SvgText
+            x={padding + 5}
+            y={threshold1Y - 5}
+            fontSize="10"
+            fill="#FFC107"
+          >
+            2.12 ft
+          </SvgText>
+          <SvgText
+            x={padding + 5}
+            y={threshold2Y - 5}
+            fontSize="10"
+            fill="#F44336"
+          >
+            2.92 ft
+          </SvgText>
+        </Svg>
+        
+        {/* Legend */}
+        <View style={styles.legend}>
+          <View style={styles.legendItem}>
+            <View style={[styles.legendLine]} />
+            <Text style={styles.legendText}>Tide Curve</Text>
+          </View>
+          <View style={styles.legendItem}>
+            <View style={[styles.legendTriangleUp]} />
+            <Text style={styles.legendText}>High Tides</Text>
+          </View>
+          <View style={styles.legendItem}>
+            <View style={[styles.legendTriangleDown]} />
+            <Text style={styles.legendText}>Low Tides</Text>
+          </View>
+          <View style={styles.legendItem}>
+            <View style={[styles.legendColor, { backgroundColor: '#000000' }]} />
+            <Text style={styles.legendText}>Current Time</Text>
+          </View>
+        </View>
+      </View>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: 'white',
+    paddingHorizontal: 10,
+  },
+  chartContainer: {
+    flex: 1,
+    width: '100%',
+  },
+  loadingContainer: {
+    height: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#666',
+  },
+  legend: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    marginTop: 10,
+    paddingHorizontal: 10,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 10,
+    marginVertical: 5,
+  },
+  legendColor: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 6,
+  },
+  legendLine: {
+    width: 20,
+    height: 2,
+    backgroundColor: '#36A2EB',
+    marginRight: 6,
+    alignSelf: 'center',
+  },
+  legendText: {
+    fontSize: 12,
+    color: '#333',
+  },
+  legendTriangleUp: {
+    width: 0,
+    height: 0,
+    backgroundColor: 'transparent',
+    borderStyle: 'solid',
+    borderLeftWidth: 5,
+    borderRightWidth: 5,
+    borderBottomWidth: 8,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderBottomColor: '#000000',
+    marginRight: 6,
+  },
+  legendTriangleDown: {
+    width: 0,
+    height: 0,
+    backgroundColor: 'transparent',
+    borderStyle: 'solid',
+    borderLeftWidth: 5,
+    borderRightWidth: 5,
+    borderTopWidth: 8,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderTopColor: '#000000',
+    marginRight: 6,
+  },
+});
 
 export default WaikaneTideGraph;

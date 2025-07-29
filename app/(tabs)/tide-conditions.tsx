@@ -6,6 +6,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import WaikaneTideLevel from '@/components/visualizations/WaikaneTideLevel';
+import WaikaneTideGraph from '@/components/visualizations/WaikaneTideGraph';
 
 export default function TideConditionsScreen() {
   return (
@@ -60,9 +61,7 @@ export default function TideConditionsScreen() {
         
         <ThemedView style={styles.chartSection}>
           <ThemedText style={styles.chartTitle}>Tide Level Trend</ThemedText>
-          <ThemedView style={styles.chartPlaceholder}>
-            <ThemedText style={styles.placeholderText}>Line Graph Space</ThemedText>
-          </ThemedView>
+          <WaikaneTideGraph />
         </ThemedView>
       </ThemedView>
 

@@ -7,6 +7,10 @@ import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
+import WaikaneStreamHeight from '@/components/visualizations/WaikaneStreamHeight';
+import WaiaholeStreamHeight from '@/components/visualizations/WaiaholeStreamHeight';
+import WaikaneStreamGraph from '@/components/visualizations/WaikaneStreamGraph';
+import WaiaholeStreamGraph from '@/components/visualizations/WaiaholeStreamGraph';
 
 export default function StreamMonitorScreen() {
   const openMap = async () => {
@@ -57,16 +61,12 @@ export default function StreamMonitorScreen() {
       <ThemedView style={styles.chartsContainer}>
         <ThemedView style={styles.chartSection}>
           <ThemedText style={styles.chartTitle}>Waikāne Stream Height Gauge</ThemedText>
-          <ThemedView style={styles.chartPlaceholder}>
-            <ThemedText style={styles.placeholderText}>Gauge Chart Space</ThemedText>
-          </ThemedView>
+          <WaikaneStreamHeight />
         </ThemedView>
         
         <ThemedView style={styles.chartSection}>
           <ThemedText style={styles.chartTitle}>Stream Height Trend</ThemedText>
-          <ThemedView style={styles.chartPlaceholder}>
-            <ThemedText style={styles.placeholderText}>Line Graph Space</ThemedText>
-          </ThemedView>
+          <WaikaneStreamGraph />
         </ThemedView>
       </ThemedView>
 
@@ -98,16 +98,12 @@ export default function StreamMonitorScreen() {
       <ThemedView style={styles.chartsContainer}>
         <ThemedView style={styles.chartSection}>
           <ThemedText style={styles.chartTitle}>Waiahole Stream Height Gauge</ThemedText>
-          <ThemedView style={styles.chartPlaceholder}>
-            <ThemedText style={styles.placeholderText}>Gauge Chart Space</ThemedText>
-          </ThemedView>
+          <WaiaholeStreamHeight />
         </ThemedView>
         
         <ThemedView style={styles.chartSection}>
           <ThemedText style={styles.chartTitle}>Stream Height Trend</ThemedText>
-          <ThemedView style={styles.chartPlaceholder}>
-            <ThemedText style={styles.placeholderText}>Line Graph Space</ThemedText>
-          </ThemedView>
+          <WaiaholeStreamGraph />
         </ThemedView>
       </ThemedView>
 
