@@ -30,7 +30,7 @@ const WaiaholeStreamHeight = () => {
   const customTicks = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22];
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/waiahole_stream')
+    fetch('http://149.165.153.234:5000/api/waiahole_stream')
       .then(res => res.json())
       .then(data => {
         const now = new Date();

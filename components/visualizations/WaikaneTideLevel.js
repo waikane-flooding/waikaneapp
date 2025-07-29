@@ -19,7 +19,7 @@ const WaikaneTideLevel = () => {
   const maxLevel = 4;
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/waikane_tide_curve')
+    fetch('http://149.165.153.234:5000/api/waikane_tide_curve')
       .then(res => res.json())
       .then(data => {
         const now = new Date();

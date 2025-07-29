@@ -7,7 +7,7 @@ const WaikaneTideGraph = () => {
   const [tideData, setTideData] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/waikane_tide_curve')
+    fetch('http://149.165.153.234:5000/api/waikane_tide_curve')
       .then(res => res.json())
       .then(curve => {
         setCurveData(curve);
@@ -18,7 +18,7 @@ const WaikaneTideGraph = () => {
   }, []);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/waikane_tides')
+    fetch('http://149.165.153.234:5000/api/waikane_tides')
       .then(res => res.json())
       .then(data => {
         setTideData(data);
