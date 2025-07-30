@@ -29,7 +29,7 @@ const WaikaneTideGraph = () => {
   }, []);
 
   // Chart dimensions - fill the container
-  const chartWidth = 700; // Add small padding to prevent extending to edge
+  const chartWidth = 650; // Add small padding to prevent extending to edge
   const chartHeight = 300;
   const padding = 50; // Increased padding to give more space for Y-axis labels
   const graphWidth = chartWidth - 2 * padding;
@@ -86,12 +86,22 @@ const WaikaneTideGraph = () => {
     return { x, y, time, value };
   });
 
-  // Create path string for tide curve
+  // Create path string for tide curve with smooth curves
   const pathData = points.reduce((path, point, index) => {
     if (index === 0) {
       return `M${point.x},${point.y}`;
     }
-    return `${path} L${point.x},${point.y}`;
+    
+    // Create smooth curves using quadratic bezier curves
+    if (index === 1) {
+      return `${path} Q${point.x},${point.y} ${point.x},${point.y}`;
+    }
+    
+    const prevPoint = points[index - 1];
+    const controlX = (prevPoint.x + point.x) / 2;
+    const controlY = (prevPoint.y + point.y) / 2;
+    
+    return `${path} Q${controlX},${controlY} ${point.x},${point.y}`;
   }, '');
 
   // Find high and low tides from tideData
@@ -299,6 +309,8 @@ const WaikaneTideGraph = () => {
             stroke="rgba(54, 162, 235, 0.8)"
             strokeWidth={2}
             fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           />
           
           {/* High tide points */}
@@ -347,7 +359,7 @@ const WaikaneTideGraph = () => {
                 fill="#666"
                 textAnchor="end"
               >
-                {tick} ft
+                {tick + " ft"}
               </SvgText>
             );
           })}
@@ -441,13 +453,18 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
     paddingHorizontal: 10,
+    borderRadius: 8,
+    overflow: 'hidden',
   },
   chartContainer: {
     flex: 1,
     width: '100%',
+    backgroundColor: 'white',
+    borderRadius: 8,
   },
   loadingContainer: {
-    height: 200,
+    width: 650,
+    height: 300,
     justifyContent: 'center',
     alignItems: 'center',
   },

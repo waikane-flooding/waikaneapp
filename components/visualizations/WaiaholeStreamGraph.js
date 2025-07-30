@@ -300,13 +300,13 @@ const WaiaholeStreamGraph = () => {
             return (
               <SvgText
                 key={tick}
-                x={padding - 15}
-                y={y + 4}
-                fontSize="14"
+                x={padding - 10}
+                y={y + 3}
+                fontSize="12"
                 fill="#666"
                 textAnchor="end"
               >
-                {tick} ft
+                {tick + " ft"}
               </SvgText>
             );
           })}
@@ -409,8 +409,8 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   loadingContainer: {
-    width: 720,
-    height: 320,
+    width: 650,
+    height: 300,
     justifyContent: 'center',
     alignItems: 'center',
   },

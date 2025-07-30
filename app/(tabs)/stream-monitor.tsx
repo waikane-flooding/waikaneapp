@@ -266,17 +266,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 0,
     alignItems: 'center',
   },
-  chartSection: {
-    backgroundColor: 'rgba(0, 122, 255, 0.05)',
-    borderRadius: 8,
-    padding: Platform.OS === 'web' ? 16 : 1,
-    marginHorizontal: 0,
-    width: Platform.OS === 'web' ? '100%' : '98%',
-    minWidth: Platform.OS === 'web' ? 'auto' : 380,
-    overflow: 'hidden',
-    minHeight: Platform.OS === 'web' ? 320 : 180,
-    alignSelf: 'center',
-  },
   chartWrapper: {
     width: '100%',
     alignItems: 'center',

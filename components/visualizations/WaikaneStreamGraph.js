@@ -298,7 +298,7 @@ const WaikaneStreamGraph = () => {
                 fill="#666"
                 textAnchor="end"
               >
-                {tick} ft
+                {tick + " ft"}
               </SvgText>
             );
           })}
@@ -401,7 +401,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   loadingContainer: {
-    width: 700,
+    width: 650,
     height: 300,
     justifyContent: 'center',
     alignItems: 'center',
