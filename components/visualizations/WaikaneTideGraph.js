@@ -337,12 +337,12 @@ const WaikaneTideGraph = () => {
           
           {/* Current time marker */}
           {currentTimePoint && (
-            <Circle
-              cx={currentTimePoint.x}
-              cy={currentTimePoint.y}
-              r={5}
-              fill="#000000"
-              stroke="#fff"
+            <Line
+              x1={currentTimePoint.x}
+              y1={padding}
+              x2={currentTimePoint.x}
+              y2={padding + graphHeight}
+              stroke="#000000"
               strokeWidth={2}
             />
           )}
@@ -439,7 +439,7 @@ const WaikaneTideGraph = () => {
             <Text style={styles.legendText}>Low Tides</Text>
           </View>
           <View style={styles.legendItem}>
-            <View style={[styles.legendColor, { backgroundColor: '#000000' }]} />
+            <View style={[styles.legendVerticalLine]} />
             <Text style={styles.legendText}>Current Time</Text>
           </View>
         </View>
@@ -501,6 +501,13 @@ const styles = StyleSheet.create({
   legendText: {
     fontSize: 12,
     color: '#333',
+  },
+  legendVerticalLine: {
+    width: 2,
+    height: 12,
+    backgroundColor: '#000000',
+    marginRight: 6,
+    alignSelf: 'center',
   },
   legendTriangleUp: {
     width: 0,

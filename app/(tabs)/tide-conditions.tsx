@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Platform, RefreshControl } from 'react-native';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
@@ -11,14 +11,140 @@ import WaikaneTideGraph from '@/components/visualizations/WaikaneTideGraph';
 
 export default function TideConditionsScreen() {
   const [refreshing, setRefreshing] = useState(false);
+  const [tideData, setTideData] = useState<{
+    currentHeight: string | null;
+    direction: string | null;
+    nextTide: string | null;
+    status: string;
+    statusColor?: string;
+  }>({ currentHeight: null, direction: null, nextTide: null, status: 'Loading...' });
+
+  // Threshold values from WaikaneTideLevel component
+  const tideThresholds = {
+    greenEnd: 2.12,
+    yellowEnd: 2.92
+  };
+
+  // Get status based on tide level
+  const getTideStatus = (level: number) => {
+    if (level < tideThresholds.greenEnd) return { status: 'Normal', color: '#34C759' };
+    if (level < tideThresholds.yellowEnd) return { status: 'Warning', color: '#FFC107' };
+    return { status: 'Danger', color: '#F44336' };
+  };
+
+  // Calculate tide direction based on future trend
+  const getTideDirection = (currentTime: Date, curveData: any[]) => {
+    const now = currentTime.getTime();
+    
+    // Get the current tide level
+    const currentData = curveData
+      .filter((item: any) => {
+        const time = new Date(item["Datetime"]).getTime();
+        return time <= now;
+      })
+      .sort((a: any, b: any) => new Date(b["Datetime"]).getTime() - new Date(a["Datetime"]).getTime())[0];
+    
+    // Get the next future data point
+    const nextData = curveData
+      .filter((item: any) => {
+        const time = new Date(item["Datetime"]).getTime();
+        return time > now;
+      })
+      .sort((a: any, b: any) => new Date(a["Datetime"]).getTime() - new Date(b["Datetime"]).getTime())[0];
+    
+    if (!currentData || !nextData) return 'Rising';
+    
+    // Compare current height with next height
+    const currentHeight = currentData["Predicted_ft_MSL"];
+    const nextHeight = nextData["Predicted_ft_MSL"];
+    
+    return nextHeight > currentHeight ? 'Rising' : 'Falling';
+  };
+
+  // Fetch tide data
+  const fetchTideData = async () => {
+    try {
+      // Fetch both tide curve and tide predictions
+      const [curveResponse, tidesResponse] = await Promise.all([
+        fetch('http://149.165.153.234:5000/api/waikane_tide_curve'),
+        fetch('http://149.165.153.234:5000/api/waikane_tides')
+      ]);
+
+      const curveData = await curveResponse.json();
+      const tidesData = await tidesResponse.json();
+
+      const now = new Date();
+      
+      // Get current tide level
+      const pastTides = curveData
+        .map((item: any) => ({
+          time: new Date(item["Datetime"]),
+          height: item["Predicted_ft_MSL"]
+        }))
+        .filter((d: any) => d.time <= now)
+        .sort((a: any, b: any) => b.time - a.time);
+
+      if (pastTides.length > 0) {
+        const currentTide = pastTides[0];
+        const statusInfo = getTideStatus(currentTide.height);
+        
+        // Get tide direction using future data
+        const direction = getTideDirection(now, curveData);
+
+        // Get next predicted tide (from the latest reading time, not current time)
+        const latestReadingTime = currentTide.time;
+        const futureTides = tidesData
+          .filter((d: any) => {
+            const tideTime = new Date(d["Date Time"]);
+            return tideTime > latestReadingTime;
+          })
+          .sort((a: any, b: any) => new Date(a["Date Time"]).getTime() - new Date(b["Date Time"]).getTime());
+
+        let nextTideText = 'N/A';
+        if (futureTides.length > 0) {
+          const nextTide = futureTides[0];
+          const tideTime = new Date(nextTide["Date Time"]);
+          const timeStr = tideTime.toLocaleString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+            timeZone: 'Pacific/Honolulu'
+          }) + ' HST';
+          const tideType = nextTide["Type"] === 'H' ? 'High' : 'Low';
+          nextTideText = `${tideType} Tide at ${timeStr}`;
+        }
+
+        setTideData({
+          currentHeight: `${currentTide.height.toFixed(2)} ft`,
+          direction: direction,
+          nextTide: nextTideText,
+          status: statusInfo.status,
+          statusColor: statusInfo.color
+        });
+      }
+    } catch (error) {
+      console.error('Failed to load tide data', error);
+      setTideData({ 
+        currentHeight: 'Error', 
+        direction: 'Error', 
+        nextTide: 'Error', 
+        status: 'Error' 
+      });
+    }
+  };
+
+  // Load data on component mount
+  useEffect(() => {
+    fetchTideData();
+  }, []);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
+    await fetchTideData();
     // Add a small delay to show the refresh indicator
     setTimeout(() => {
       setRefreshing(false);
-      // The individual components will refetch their data when they re-render
-    }, 1000);
+    }, 500);
   }, []);
 
   return (
@@ -53,17 +179,24 @@ export default function TideConditionsScreen() {
         <ThemedView style={styles.monitorInfo}>
           <ThemedView style={styles.infoItem}>
             <ThemedText style={styles.label}>Current Height:</ThemedText>
-            <ThemedText style={styles.value}>Loading...</ThemedText>
+            <ThemedText style={styles.value}>{tideData.currentHeight || 'Loading...'}</ThemedText>
           </ThemedView>
           
           <ThemedView style={styles.infoItem}>
             <ThemedText style={styles.label}>Tide Direction:</ThemedText>
-            <ThemedText style={styles.value}>Loading...</ThemedText>
+            <ThemedText style={styles.value}>{tideData.direction || 'Loading...'}</ThemedText>
           </ThemedView>
           
           <ThemedView style={styles.infoItem}>
-            <ThemedText style={styles.label}>Next Predicted Tide:</ThemedText>
-            <ThemedText style={styles.value}>Loading...</ThemedText>
+            <ThemedText style={styles.label}>Next Tide:</ThemedText>
+            <ThemedText style={styles.value}>{tideData.nextTide || 'Loading...'}</ThemedText>
+          </ThemedView>
+
+          <ThemedView style={styles.statusContainer}>
+            <ThemedText style={styles.label}>Status:</ThemedText>
+            <ThemedView style={[styles.statusBar, { backgroundColor: tideData.statusColor || (tideData.status === 'Loading...' ? '#999999' : '#34C759') }]}>
+              <ThemedText style={styles.statusText}>{tideData.status}</ThemedText>
+            </ThemedView>
           </ThemedView>
         </ThemedView>
       </ThemedView>
@@ -137,10 +270,32 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#4682B4',
   },
+  statusContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  statusBar: {
+    backgroundColor: '#34C759',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  statusText: {
+    color: 'white',
+    fontWeight: '600',
+    fontSize: 14,
+  },
   chartsContainer: {
     flexDirection: 'column',
     gap: Platform.OS === 'web' ? 16 : 4,
     marginBottom: 16,
+  },
+  chartSection: {
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 12,
   },
   chartWrapper: {
     width: '100%',

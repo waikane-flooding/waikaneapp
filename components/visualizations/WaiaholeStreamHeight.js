@@ -119,7 +119,9 @@ const WaiaholeStreamHeight = () => {
         </Svg>
       </View>
       <View style={styles.valueContainer}>
-        <Text style={styles.value}>{streamLevel !== null ? `${streamLevel.toFixed(2)} ft` : 'Loading...'}</Text>
+        <Text style={[styles.value, { color: streamLevel !== null ? getColorForLevel(streamLevel) : 'white' }]}>
+          {streamLevel !== null ? `${streamLevel.toFixed(2)} ft` : 'Loading...'}
+        </Text>
         <Text style={styles.datetime}>{formattedDateTime}</Text>
       </View>
       <View style={styles.legendContainer}>
@@ -161,7 +163,6 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   value: {
-    color: 'white',
     fontSize: 32,
     textAlign: 'center',
     fontWeight: 'bold',
