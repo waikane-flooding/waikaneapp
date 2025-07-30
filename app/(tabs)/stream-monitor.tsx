@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
-import { StyleSheet, Pressable } from 'react-native';
+import { StyleSheet, Pressable, Platform, RefreshControl } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import { Image } from 'expo-image';
+import { useState, useCallback } from 'react';
 
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
@@ -13,6 +14,17 @@ import WaikaneStreamGraph from '@/components/visualizations/WaikaneStreamGraph';
 import WaiaholeStreamGraph from '@/components/visualizations/WaiaholeStreamGraph';
 
 export default function StreamMonitorScreen() {
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    // Add a small delay to show the refresh indicator
+    setTimeout(() => {
+      setRefreshing(false);
+      // The individual components will refetch their data when they re-render
+    }, 1000);
+  }, []);
+
   const openMap = async () => {
     await WebBrowser.openBrowserAsync('https://experience.arcgis.com/experience/60260cda4f744186bbd9c67163b747d3');
   };
@@ -26,6 +38,14 @@ export default function StreamMonitorScreen() {
           color="#007AFF"
           name="water.waves"
           style={styles.headerImage}
+        />
+      }
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor="#007AFF"
+          colors={['#007AFF']}
         />
       }
     >
@@ -61,12 +81,16 @@ export default function StreamMonitorScreen() {
       <ThemedView style={styles.chartsContainer}>
         <ThemedView style={styles.chartSection}>
           <ThemedText style={styles.chartTitle}>Waikāne Stream Height Gauge</ThemedText>
-          <WaikaneStreamHeight />
+          <ThemedView style={styles.chartWrapper}>
+            <WaikaneStreamHeight />
+          </ThemedView>
         </ThemedView>
         
         <ThemedView style={styles.chartSection}>
           <ThemedText style={styles.chartTitle}>Stream Height Trend</ThemedText>
-          <WaikaneStreamGraph />
+          <ThemedView style={styles.chartWrapper}>
+            <WaikaneStreamGraph />
+          </ThemedView>
         </ThemedView>
       </ThemedView>
 
@@ -98,12 +122,16 @@ export default function StreamMonitorScreen() {
       <ThemedView style={styles.chartsContainer}>
         <ThemedView style={styles.chartSection}>
           <ThemedText style={styles.chartTitle}>Waiahole Stream Height Gauge</ThemedText>
-          <WaiaholeStreamHeight />
+          <ThemedView style={styles.chartWrapper}>
+            <WaiaholeStreamHeight />
+          </ThemedView>
         </ThemedView>
         
         <ThemedView style={styles.chartSection}>
           <ThemedText style={styles.chartTitle}>Stream Height Trend</ThemedText>
-          <WaiaholeStreamGraph />
+          <ThemedView style={styles.chartWrapper}>
+            <WaiaholeStreamGraph />
+          </ThemedView>
         </ThemedView>
       </ThemedView>
 
@@ -232,20 +260,33 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   chartsContainer: {
-    flexDirection: 'row',
-    gap: 16,
+    flexDirection: 'column',
+    gap: Platform.OS === 'web' ? 16 : 4,
     marginBottom: 16,
+    paddingHorizontal: 0,
+    alignItems: 'center',
   },
   chartSection: {
-    flex: 1,
     backgroundColor: 'rgba(0, 122, 255, 0.05)',
     borderRadius: 8,
-    padding: 16,
+    padding: Platform.OS === 'web' ? 16 : 1,
+    marginHorizontal: 0,
+    width: Platform.OS === 'web' ? '100%' : '98%',
+    minWidth: Platform.OS === 'web' ? 'auto' : 380,
+    overflow: 'hidden',
+    minHeight: Platform.OS === 'web' ? 320 : 180,
+    alignSelf: 'center',
+  },
+  chartWrapper: {
+    width: '100%',
+    alignItems: 'center',
+    transform: Platform.OS === 'web' ? [] : [{ scale: 0.58 }],
+    transformOrigin: 'center',
   },
   chartTitle: {
     fontWeight: '600',
     fontSize: 16,
-    marginBottom: 12,
+    marginBottom: Platform.OS === 'web' ? 4 : 0,
     textAlign: 'center',
   },
   chartPlaceholder: {

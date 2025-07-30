@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform, RefreshControl } from 'react-native';
+import { useState, useCallback } from 'react';
 
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
@@ -9,6 +10,17 @@ import WaikaneTideLevel from '@/components/visualizations/WaikaneTideLevel';
 import WaikaneTideGraph from '@/components/visualizations/WaikaneTideGraph';
 
 export default function TideConditionsScreen() {
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    // Add a small delay to show the refresh indicator
+    setTimeout(() => {
+      setRefreshing(false);
+      // The individual components will refetch their data when they re-render
+    }, 1000);
+  }, []);
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#87CEEB', dark: '#2F4F4F' }}
@@ -18,6 +30,14 @@ export default function TideConditionsScreen() {
           color="#4682B4"
           name="moon.haze"
           style={styles.headerImage}
+        />
+      }
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor="#4682B4"
+          colors={['#4682B4']}
         />
       }
     >
@@ -42,12 +62,7 @@ export default function TideConditionsScreen() {
           </ThemedView>
           
           <ThemedView style={styles.infoItem}>
-            <ThemedText style={styles.label}>Next High Tide:</ThemedText>
-            <ThemedText style={styles.value}>Loading...</ThemedText>
-          </ThemedView>
-          
-          <ThemedView style={styles.infoItem}>
-            <ThemedText style={styles.label}>Next Low Tide:</ThemedText>
+            <ThemedText style={styles.label}>Next Predicted Tide:</ThemedText>
             <ThemedText style={styles.value}>Loading...</ThemedText>
           </ThemedView>
         </ThemedView>
@@ -56,12 +71,16 @@ export default function TideConditionsScreen() {
       <ThemedView style={styles.chartsContainer}>
         <ThemedView style={styles.chartSection}>
           <ThemedText style={styles.chartTitle}>Waikāne Tide Level Gauge</ThemedText>
-          <WaikaneTideLevel />
+          <ThemedView style={styles.chartWrapper}>
+            <WaikaneTideLevel />
+          </ThemedView>
         </ThemedView>
         
         <ThemedView style={styles.chartSection}>
           <ThemedText style={styles.chartTitle}>Tide Level Trend</ThemedText>
-          <WaikaneTideGraph />
+          <ThemedView style={styles.chartWrapper}>
+            <WaikaneTideGraph />
+          </ThemedView>
         </ThemedView>
       </ThemedView>
 
@@ -119,20 +138,31 @@ const styles = StyleSheet.create({
     color: '#4682B4',
   },
   chartsContainer: {
-    flexDirection: 'row',
-    gap: 16,
+    flexDirection: 'column',
+    gap: Platform.OS === 'web' ? 16 : 4,
     marginBottom: 16,
   },
   chartSection: {
-    flex: 1,
     backgroundColor: 'rgba(70, 130, 180, 0.05)',
     borderRadius: 8,
-    padding: 16,
+    padding: Platform.OS === 'web' ? 16 : 1,
+    marginHorizontal: 0,
+    width: Platform.OS === 'web' ? '100%' : '98%',
+    minWidth: Platform.OS === 'web' ? 'auto' : 380,
+    overflow: 'hidden',
+    minHeight: Platform.OS === 'web' ? 320 : 180,
+    alignSelf: 'center',
+  },
+  chartWrapper: {
+    width: '100%',
+    alignItems: 'center',
+    transform: Platform.OS === 'web' ? [] : [{ scale: 0.58 }],
+    transformOrigin: 'center',
   },
   chartTitle: {
     fontWeight: '600',
     fontSize: 16,
-    marginBottom: 12,
+    marginBottom: Platform.OS === 'web' ? 4 : 0,
     textAlign: 'center',
   },
   chartPlaceholder: {

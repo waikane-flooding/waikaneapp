@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { Svg, Path, Line, Circle, Defs, LinearGradient, Stop, Text as SvgText } from 'react-native-svg';
 
 const WaikaneStreamGraph = () => {
@@ -16,8 +16,7 @@ const WaikaneStreamGraph = () => {
       });
   }, []);
 
-  // Chart dimensions - same as WaikaneTideLevel
-  const screenWidth = Dimensions.get('window').width;
+  // Chart dimensions - responsive but maintain aspect ratio
   const chartWidth = 650;
   const chartHeight = 300;
   const padding = 40;
@@ -388,7 +387,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 8,
     padding: 10,
-    margin: 10,
+    margin: 2,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,

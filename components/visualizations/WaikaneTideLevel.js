@@ -1,14 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
-import Svg, { Path, Line, Text as SvgText } from 'react-native-svg';
-
-function polarToCartesian(cx, cy, r, angle) {
-  const rad = (angle - 90) * Math.PI / 180.0;
-  return {
-    x: cx + r * Math.cos(rad),
-    y: cy + r * Math.sin(rad)
-  };
-}
+import Svg, { Path, Text as SvgText } from 'react-native-svg';
 
 const WaikaneTideLevel = () => {
   const [tideLevel, setTideLevel] = useState(null);
@@ -46,9 +38,7 @@ const WaikaneTideLevel = () => {
         }
       })
       .catch(err => console.error("Failed to load tide data", err));
-  }, []);
-
-  const percent = tideLevel !== null ? (tideLevel - minLevel) / (maxLevel - minLevel) : 0;
+  }, [animatedValue, minLevel, maxLevel]);
 
   const greenEnd = 2.12;
   const yellowEnd = 2.92;
@@ -60,10 +50,6 @@ const WaikaneTideLevel = () => {
     return '#F44336';
   };
 
-  // Proportional segments
-  const greenPercent = (greenEnd - minLevel) / (maxLevel - minLevel);
-  const yellowPercent = (yellowEnd - minLevel) / (maxLevel - minLevel);
-
   const formattedDateTime = tideTime
     ? 'Latest Reading: ' + new Date(tideTime).toLocaleString('en-US', {
         month: 'short',
@@ -72,7 +58,7 @@ const WaikaneTideLevel = () => {
         hour: '2-digit',
         minute: '2-digit',
         hour12: true,
-        tiwhymeZone: 'Pacific/Honolulu'
+        timeZone: 'Pacific/Honolulu'
       }) + ' HST'
     : 'Loading...';
 

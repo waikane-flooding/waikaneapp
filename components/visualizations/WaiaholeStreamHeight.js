@@ -1,14 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
-import Svg, { Path, Line, Text as SvgText } from 'react-native-svg';
-
-function polarToCartesian(cx, cy, r, angle) {
-  const rad = (angle - 90) * Math.PI / 180.0;
-  return {
-    x: cx + r * Math.cos(rad),
-    y: cy + r * Math.sin(rad)
-  };
-}
+import Svg, { Path, Text as SvgText } from 'react-native-svg';
 
 const WaiaholeStreamHeight = () => {
   const [streamLevel, setStreamLevel] = useState(null);
@@ -57,7 +49,7 @@ const WaiaholeStreamHeight = () => {
         }
       })
       .catch(err => console.error("Failed to load stream data", err));
-  }, []);
+  }, [animatedValue, maxLevel, minLevel]);
 
   const formattedDateTime = streamTime
     ? 'Latest Reading: ' + new Date(streamTime).toLocaleString('en-US', {
@@ -152,8 +144,8 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 10,
-    marginBottom: 10,
+    marginTop: 2,
+    marginBottom: 2,
     position: 'relative',
   },
   gaugeContainer: {

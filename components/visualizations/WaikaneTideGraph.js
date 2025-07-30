@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { Svg, Path, Line, Circle, Polygon, Defs, LinearGradient, Stop, Text as SvgText } from 'react-native-svg';
 
 const WaikaneTideGraph = () => {
@@ -29,10 +29,9 @@ const WaikaneTideGraph = () => {
   }, []);
 
   // Chart dimensions - fill the container
-  const screenWidth = Dimensions.get('window').width;
   const chartWidth = 700; // Add small padding to prevent extending to edge
   const chartHeight = 300;
-  const padding = 40;
+  const padding = 50; // Increased padding to give more space for Y-axis labels
   const graphWidth = chartWidth - 2 * padding;
   const graphHeight = chartHeight - 2 * padding;
 

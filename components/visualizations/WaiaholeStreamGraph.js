@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import Svg, { 
   Path, 
   Line, 
@@ -25,7 +25,6 @@ const WaiaholeStreamGraph = () => {
   }, []);
 
   // Chart dimensions - same as WaikaneTideGraph
-  const screenWidth = Dimensions.get('window').width;
   const chartWidth = 650;
   const chartHeight = 300;
   const padding = 40;
@@ -301,9 +300,9 @@ const WaiaholeStreamGraph = () => {
             return (
               <SvgText
                 key={tick}
-                x={padding - 10}
-                y={y + 3}
-                fontSize="12"
+                x={padding - 15}
+                y={y + 4}
+                fontSize="14"
                 fill="#666"
                 textAnchor="end"
               >
@@ -317,8 +316,8 @@ const WaiaholeStreamGraph = () => {
             <SvgText
               key={`x-label-${index}`}
               x={tick.x}
-              y={padding + graphHeight + 15}
-              fontSize="10"
+              y={padding + graphHeight + 18}
+              fontSize="12"
               fill="#666"
               textAnchor="middle"
             >
@@ -331,8 +330,8 @@ const WaiaholeStreamGraph = () => {
             <SvgText
               key={`x-date-${index}`}
               x={tick.x}
-              y={padding + graphHeight + 28}
-              fontSize="9"
+              y={padding + graphHeight + 34}
+              fontSize="11"
               fill="#999"
               textAnchor="middle"
             >
@@ -355,17 +354,17 @@ const WaiaholeStreamGraph = () => {
           
           {/* Threshold labels */}
           <SvgText
-            x={padding + 5}
-            y={threshold1Y - 5}
-            fontSize="10"
+            x={padding + 8}
+            y={threshold1Y - 6}
+            fontSize="12"
             fill="#FFC107"
           >
             12 ft
           </SvgText>
           <SvgText
-            x={padding + 5}
-            y={threshold2Y - 5}
-            fontSize="10"
+            x={padding + 8}
+            y={threshold2Y - 6}
+            fontSize="12"
             fill="#F44336"
           >
             16.4 ft
@@ -396,7 +395,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 8,
     padding: 10,
-    margin: 10,
+    margin: 2,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -410,8 +409,8 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   loadingContainer: {
-    width: 700,
-    height: 300,
+    width: 720,
+    height: 320,
     justifyContent: 'center',
     alignItems: 'center',
   },
