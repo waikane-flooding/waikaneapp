@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, RefreshControl } from 'react-native';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
@@ -10,19 +10,62 @@ import RainGauge from '@/components/visualizations/RainGauge';
 
 export default function RainConditionsScreen() {
   const [refreshing, setRefreshing] = useState(false);
-  const [rainData] = useState<{
+  const [rainData, setRainData] = useState<{
     currentRainfall: string | null;
     status: string;
     statusColor?: string;
   }>({ currentRainfall: null, status: 'Loading...' });
 
+  const getStatusFromRainfall = (rainfall: number) => {
+    if (rainfall >= 0 && rainfall <= 2.8) {
+      return { status: 'Normal', color: '#4CAF50' };
+    } else if (rainfall > 2.8 && rainfall <= 4.1) {
+      return { status: 'Warning', color: '#FFC107' };
+    } else if (rainfall > 4.1 && rainfall <= 8) {
+      return { status: 'Danger', color: '#F44336' };
+    } else {
+      return { status: 'Unknown', color: '#999999' };
+    }
+  };
+
+  const fetchRainData = useCallback(() => {
+    fetch('http://149.165.153.234:5000/api/rain_data')
+      .then(res => res.json())
+      .then(data => {
+        // Calculate the sum of the "in" column for total rainfall
+        const totalRainfall = data.reduce((sum: number, item: any) => {
+          return sum + (item["in"] || 0);
+        }, 0);
+        
+        const statusInfo = getStatusFromRainfall(totalRainfall);
+        
+        setRainData({
+          currentRainfall: `${totalRainfall.toFixed(1)} in`,
+          status: statusInfo.status,
+          statusColor: statusInfo.color
+        });
+      })
+      .catch(err => {
+        console.error("Failed to load rain data", err);
+        setRainData({
+          currentRainfall: 'Error loading data',
+          status: 'Error',
+          statusColor: '#999999'
+        });
+      });
+  }, []);
+
+  useEffect(() => {
+    fetchRainData();
+  }, [fetchRainData]);
+
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    // TODO: Add rain data fetching logic here
+    fetchRainData();
     setTimeout(() => {
       setRefreshing(false);
     }, 2000);
-  }, []);
+  }, [fetchRainData]);
 
   return (
     <ParallaxScrollView
@@ -65,7 +108,7 @@ export default function RainConditionsScreen() {
 
       <ThemedView style={styles.chartsContainer}>
         <ThemedView style={styles.chartSection}>
-          <ThemedText style={styles.chartTitle}>Rain Gauge Chart</ThemedText>
+          <ThemedText style={styles.chartTitle}>Amount of Rainfall in the Last Hour</ThemedText>
           <ThemedView style={styles.chartWrapper}>
             <RainGauge />
           </ThemedView>

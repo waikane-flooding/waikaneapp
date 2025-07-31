@@ -11,47 +11,35 @@ const RainGauge = () => {
   const maxLevel = 8;
 
   useEffect(() => {
-    // TODO: Replace with actual rain data API endpoint
     fetch('http://149.165.153.234:5000/api/rain_data')
       .then(res => res.json())
       .then(data => {
-        const now = new Date();
-        const pastRainData = data
-          .map(item => ({
-            time: new Date(item["DateTime"]),
-            inches: item["Rain_inches"]
-          }))
-          .filter(d => d.time <= now)
-          .sort((a, b) => b.time - a.time);
-
-        if (pastRainData.length > 0) {
-          const latest = pastRainData[0];
-          setRainLevel(latest.inches);
-          setRainTime(latest.time);
-          
-          // Animate to new rain level
-          const targetPercent = (latest.inches - minLevel) / (maxLevel - minLevel);
-          Animated.timing(animatedValue, {
-            toValue: targetPercent,
-            duration: 2000,
-            useNativeDriver: false,
-          }).start();
-        }
-      })
-      .catch(err => {
-        console.error("Failed to load rain data", err);
-        // For testing purposes, set a dummy value
-        const dummyRain = 3.5; // Example value in the yellow range
-        const dummyTime = new Date();
-        setRainLevel(dummyRain);
-        setRainTime(dummyTime);
+        // Calculate the sum of the "in" column
+        const totalRainfall = data.reduce((sum, item) => {
+          return sum + (item["in"] || 0);
+        }, 0);
         
-        const targetPercent = (dummyRain - minLevel) / (maxLevel - minLevel);
+        // Get the most recent timestamp for display
+        const timestamps = data
+          .map(item => new Date(item["DateTime"] || item["datetime"] || new Date()))
+          .filter(date => !isNaN(date.getTime()))
+          .sort((a, b) => b - a);
+        
+        const latestTime = timestamps.length > 0 ? timestamps[0] : new Date();
+        
+        setRainLevel(totalRainfall);
+        setRainTime(latestTime);
+        
+        // Animate to new rain level
+        const targetPercent = Math.min((totalRainfall - minLevel) / (maxLevel - minLevel), 1);
         Animated.timing(animatedValue, {
           toValue: targetPercent,
           duration: 2000,
           useNativeDriver: false,
         }).start();
+      })
+      .catch(err => {
+        console.error("Failed to load rain data", err);
       });
   }, [animatedValue, minLevel, maxLevel]);
 
