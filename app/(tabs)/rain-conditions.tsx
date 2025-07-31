@@ -6,6 +6,7 @@ import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
+import RainGauge from '@/components/visualizations/RainGauge';
 
 export default function RainConditionsScreen() {
   const [refreshing, setRefreshing] = useState(false);
@@ -66,12 +67,7 @@ export default function RainConditionsScreen() {
         <ThemedView style={styles.chartSection}>
           <ThemedText style={styles.chartTitle}>Rain Gauge Chart</ThemedText>
           <ThemedView style={styles.chartWrapper}>
-            <ThemedView style={styles.chartPlaceholder}>
-              <Ionicons name="bar-chart-outline" size={64} color="#4682B4" />
-              <ThemedText style={styles.placeholderText}>
-                Rain gauge chart will be displayed here
-              </ThemedText>
-            </ThemedView>
+            <RainGauge />
           </ThemedView>
         </ThemedView>
       </ThemedView>
