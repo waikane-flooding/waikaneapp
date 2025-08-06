@@ -154,8 +154,22 @@ export default function WaveWeatherScreen() {
                     </ThemedView>
                   </ThemedView>
                   <ThemedText style={styles.alertTime}>
-                    {alert.properties.effective ? `From: ${new Date(alert.properties.effective).toLocaleString()}` : ''}
-                    {alert.properties.ends ? `  To: ${new Date(alert.properties.ends).toLocaleString()}` : ''}
+                    {alert.properties.effective ? `From: ${new Date(alert.properties.effective).toLocaleString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: true
+                    })} HST` : ''}
+                    {alert.properties.ends ? `  To: ${new Date(alert.properties.ends).toLocaleString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: true
+                    })} HST` : ''}
                   </ThemedText>
                   <ThemedText style={styles.alertArea}>{alert.properties.areaDesc}</ThemedText>
                   {alert.properties.headline && (

@@ -66,8 +66,8 @@ export default function TideConditionsScreen() {
     try {
       // Fetch both tide curve and tide predictions
       const [curveResponse, tidesResponse] = await Promise.all([
-        fetch('http://149.165.153.234:5000/api/waikane_tide_curve'),
-        fetch('http://149.165.153.234:5000/api/waikane_tides')
+        fetch('http://149.165.169.164:5000/api/waikane_tide_curve'),
+        fetch('http://149.165.169.164:5000/api/waikane_tides')
       ]);
 
       const curveData = await curveResponse.json();
@@ -107,8 +107,7 @@ export default function TideConditionsScreen() {
           const timeStr = tideTime.toLocaleString('en-US', {
             hour: '2-digit',
             minute: '2-digit',
-            hour12: true,
-            timeZone: 'Pacific/Honolulu'
+            hour12: true
           }) + ' HST';
           const tideType = nextTide["Type"] === 'H' ? 'High' : 'Low';
           nextTideText = `${tideType} Tide at ${timeStr}`;

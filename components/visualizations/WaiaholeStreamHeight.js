@@ -22,7 +22,7 @@ const WaiaholeStreamHeight = () => {
   const customTicks = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22];
 
   useEffect(() => {
-    fetch('http://149.165.153.234:5000/api/waiahole_stream')
+    fetch('http://149.165.169.164:5000/api/waiahole_stream')
       .then(res => res.json())
       .then(data => {
         const now = new Date();
@@ -58,8 +58,7 @@ const WaiaholeStreamHeight = () => {
         year: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
-        hour12: true,
-        timeZone: 'Pacific/Honolulu'
+        hour12: true
       }) + ' HST'
     : 'Loading...';
 

@@ -11,20 +11,23 @@ const WaikaneTideLevel = () => {
   const maxLevel = 4;
 
   useEffect(() => {
-    fetch('http://149.165.153.234:5000/api/waikane_tide_curve')
+    fetch('http://149.165.169.164:5000/api/waikane_tide_curve')
       .then(res => res.json())
       .then(data => {
-        const now = new Date();
+        // Get current time in HST to match the JSON data timezone
+        const nowHST = new Date().toLocaleString("en-US", {timeZone: "Pacific/Honolulu"});
+        const now = new Date(nowHST);
+        
         const pastTides = data
           .map(item => ({
             time: new Date(item["Datetime"]),
             height: item["Predicted_ft_MSL"]
           }))
-          .filter(d => d.time <= now)
+          .filter(d => d.time <= now && !isNaN(d.time.getTime()) && d.height != null)
           .sort((a, b) => b.time - a.time);
 
         if (pastTides.length > 0) {
-          const latest = pastTides[0];
+          const latest = pastTides[0]; // Most recent PAST reading
           setTideLevel(latest.height);
           setTideTime(latest.time);
           
@@ -57,8 +60,7 @@ const WaikaneTideLevel = () => {
         year: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
-        hour12: true,
-        timeZone: 'Pacific/Honolulu'
+        hour12: true
       }) + ' HST'
     : 'Loading...';
 

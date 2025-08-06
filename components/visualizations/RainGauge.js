@@ -11,7 +11,7 @@ const RainGauge = () => {
   const maxLevel = 8;
 
   useEffect(() => {
-    fetch('http://149.165.153.234:5000/api/rain_data')
+    fetch('http://149.165.169.164:5000/api/rain_data')
       .then(res => res.json())
       .then(data => {
         // Calculate the sum of the "in" column
@@ -60,8 +60,7 @@ const RainGauge = () => {
         year: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
-        hour12: true,
-        timeZone: 'Pacific/Honolulu'
+        hour12: true
       }) + ' HST'
     : 'Loading...';
 

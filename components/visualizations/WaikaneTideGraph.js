@@ -7,7 +7,7 @@ const WaikaneTideGraph = () => {
   const [tideData, setTideData] = useState([]);
 
   useEffect(() => {
-    fetch('http://149.165.153.234:5000/api/waikane_tide_curve')
+    fetch('http://149.165.169.164:5000/api/waikane_tide_curve')
       .then(res => res.json())
       .then(curve => {
         setCurveData(curve);
@@ -18,7 +18,7 @@ const WaikaneTideGraph = () => {
   }, []);
 
   useEffect(() => {
-    fetch('http://149.165.153.234:5000/api/waikane_tides')
+    fetch('http://149.165.169.164:5000/api/waikane_tides')
       .then(res => res.json())
       .then(data => {
         setTideData(data);
@@ -122,7 +122,8 @@ const WaikaneTideGraph = () => {
   const lowTides = tidePoints.filter(point => point.type === 'L');
 
   // Find current time marker on the curve
-  const currentTime = new Date().getTime();
+  const currentTimeHST = new Date().toLocaleString("en-US", {timeZone: "Pacific/Honolulu"});
+  const currentTime = new Date(currentTimeHST).getTime();
   let currentTimePoint = null;
   
   if (currentTime >= timeMin && currentTime <= timeMax) {
@@ -183,20 +184,20 @@ const WaikaneTideGraph = () => {
     const hour = currentTick.getHours();
     let timeLabel = '';
     if (hour === 0) {
-      timeLabel = '12:00 AM';
+      timeLabel = '12:00 AM HST';
     } else if (hour === 6) {
-      timeLabel = '6:00 AM';
+      timeLabel = '6:00 AM HST';
     } else if (hour === 12) {
-      timeLabel = '12:00 PM';
+      timeLabel = '12:00 PM HST';
     } else if (hour === 18) {
-      timeLabel = '6:00 PM';
+      timeLabel = '6:00 PM HST';
     } else {
       // Fallback for other hours (shouldn't happen with 6-hour intervals)
       timeLabel = currentTick.toLocaleTimeString('en-US', { 
         hour: 'numeric', 
         minute: '2-digit', 
         hour12: true 
-      });
+      }) + ' HST';
     }
     
     xTicks.push({

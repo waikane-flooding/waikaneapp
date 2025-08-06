@@ -50,7 +50,7 @@ export default function StreamMonitorScreen() {
   // Fetch Waikane stream data
   const fetchWaikaneData = async () => {
     try {
-      const response = await fetch('http://149.165.153.234:5000/api/waikane_stream');
+      const response = await fetch('http://149.165.169.164:5000/api/waikane_stream');
       const data = await response.json();
       
       const now = new Date();
@@ -68,8 +68,7 @@ export default function StreamMonitorScreen() {
         const formattedTime = latest.time.toLocaleString('en-US', {
           hour: '2-digit',
           minute: '2-digit',
-          hour12: true,
-          timeZone: 'Pacific/Honolulu'
+          hour12: true
         }) + ' HST';
 
         setWaikaneData({
@@ -88,7 +87,7 @@ export default function StreamMonitorScreen() {
   // Fetch Waiahole stream data
   const fetchWaiaholeData = async () => {
     try {
-      const response = await fetch('http://149.165.153.234:5000/api/waiahole_stream');
+      const response = await fetch('http://149.165.169.164:5000/api/waiahole_stream');
       const data = await response.json();
       
       const now = new Date();
@@ -106,8 +105,7 @@ export default function StreamMonitorScreen() {
         const formattedTime = latest.time.toLocaleString('en-US', {
           hour: '2-digit',
           minute: '2-digit',
-          hour12: true,
-          timeZone: 'Pacific/Honolulu'
+          hour12: true
         }) + ' HST';
 
         setWaiaholeData({

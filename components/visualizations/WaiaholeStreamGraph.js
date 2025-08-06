@@ -14,7 +14,7 @@ const WaiaholeStreamGraph = () => {
   const [streamData, setStreamData] = useState([]);
 
   useEffect(() => {
-    fetch('http://149.165.153.234:5000/api/waiahole_stream')
+    fetch('http://149.165.169.164:5000/api/waiahole_stream')
       .then(res => res.json())
       .then(data => {
         setStreamData(data);
@@ -93,7 +93,8 @@ const WaiaholeStreamGraph = () => {
   }, '');
 
   // Find current time marker on the curve
-  const currentTime = new Date().getTime();
+  const currentTimeHST = new Date().toLocaleString("en-US", {timeZone: "Pacific/Honolulu"});
+  const currentTime = new Date(currentTimeHST).getTime();
   let currentTimePoint = null;
   
   if (currentTime >= timeMin && currentTime <= timeMax) {
@@ -154,20 +155,20 @@ const WaiaholeStreamGraph = () => {
     const hour = currentTick.getHours();
     let timeLabel = '';
     if (hour === 0) {
-      timeLabel = '12:00 AM';
+      timeLabel = '12:00 AM HST';
     } else if (hour === 6) {
-      timeLabel = '6:00 AM';
+      timeLabel = '6:00 AM HST';
     } else if (hour === 12) {
-      timeLabel = '12:00 PM';
+      timeLabel = '12:00 PM HST';
     } else if (hour === 18) {
-      timeLabel = '6:00 PM';
+      timeLabel = '6:00 PM HST';
     } else {
       // Fallback for other hours (shouldn't happen with 6-hour intervals)
       timeLabel = currentTick.toLocaleTimeString('en-US', { 
         hour: 'numeric', 
         minute: '2-digit', 
         hour12: true 
-      });
+      }) + ' HST';
     }
     
     xTicks.push({
