@@ -32,35 +32,6 @@ export default function TideConditionsScreen() {
     return { status: 'Danger', color: '#F44336' };
   };
 
-  // Calculate tide direction based on future trend
-  const getTideDirection = (currentTime: Date, curveData: any[]) => {
-    const now = currentTime.getTime();
-    
-    // Get the current tide level
-    const currentData = curveData
-      .filter((item: any) => {
-        const time = new Date(item["Datetime"]).getTime();
-        return time <= now;
-      })
-      .sort((a: any, b: any) => new Date(b["Datetime"]).getTime() - new Date(a["Datetime"]).getTime())[0];
-    
-    // Get the next future data point
-    const nextData = curveData
-      .filter((item: any) => {
-        const time = new Date(item["Datetime"]).getTime();
-        return time > now;
-      })
-      .sort((a: any, b: any) => new Date(a["Datetime"]).getTime() - new Date(b["Datetime"]).getTime())[0];
-    
-    if (!currentData || !nextData) return 'Rising';
-    
-    // Compare current height with next height
-    const currentHeight = currentData["Predicted_ft_MSL"];
-    const nextHeight = nextData["Predicted_ft_MSL"];
-    
-    return nextHeight > currentHeight ? 'Rising' : 'Falling';
-  };
-
   // Fetch tide data
   const fetchTideData = async () => {
     try {
@@ -73,30 +44,42 @@ export default function TideConditionsScreen() {
       const curveData = await curveResponse.json();
       const tidesData = await tidesResponse.json();
 
-      const now = new Date();
+      // Get current time in HST to match the JSON data timezone
+      const nowHST = new Date().toLocaleString("en-US", {timeZone: "Pacific/Honolulu"});
+      const now = new Date(nowHST);
       
-      // Get current tide level
+      // Get current tide level (most recent past data point)
       const pastTides = curveData
         .map((item: any) => ({
           time: new Date(item["Datetime"]),
           height: item["Predicted_ft_MSL"]
         }))
-        .filter((d: any) => d.time <= now)
+        .filter((d: any) => d.time <= now && !isNaN(d.time.getTime()) && d.height != null)
         .sort((a: any, b: any) => b.time - a.time);
 
       if (pastTides.length > 0) {
-        const currentTide = pastTides[0];
+        const currentTide = pastTides[0]; // Most recent past reading
         const statusInfo = getTideStatus(currentTide.height);
         
-        // Get tide direction using future data
-        const direction = getTideDirection(now, curveData);
+        // Get tide direction by comparing current with next future data point
+        const nextFutureTide = curveData
+          .map((item: any) => ({
+            time: new Date(item["Datetime"]),
+            height: item["Predicted_ft_MSL"]
+          }))
+          .filter((d: any) => d.time > now && !isNaN(d.time.getTime()) && d.height != null)
+          .sort((a: any, b: any) => a.time - b.time)[0]; // Earliest future point
 
-        // Get next predicted tide (from the latest reading time, not current time)
-        const latestReadingTime = currentTide.time;
+        let direction = 'Unknown';
+        if (nextFutureTide) {
+          direction = nextFutureTide.height > currentTide.height ? 'Rising' : 'Falling';
+        }
+
+        // Get next predicted tide event (high/low) after current time
         const futureTides = tidesData
           .filter((d: any) => {
             const tideTime = new Date(d["Date Time"]);
-            return tideTime > latestReadingTime;
+            return tideTime > now && !isNaN(tideTime.getTime());
           })
           .sort((a: any, b: any) => new Date(a["Date Time"]).getTime() - new Date(b["Date Time"]).getTime());
 
