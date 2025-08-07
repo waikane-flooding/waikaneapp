@@ -4,7 +4,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View, StyleSheet, TouchableOpacity, Modal, Linking, ScrollView, TouchableWithoutFeedback } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -45,6 +45,58 @@ const emergencyContacts = [
   }
 ];
 
+// Risk assessment functions for each data source
+const assessWaikaneStreamRisk = (level: number | null): string => {
+  if (!level) return 'UNKNOWN';
+  const greenEnd = 7;
+  const yellowEnd = 10.8;
+  if (level < greenEnd) return 'LOW';
+  if (level < yellowEnd) return 'MEDIUM';
+  return 'HIGH';
+};
+
+const assessWaiaholeStreamRisk = (level: number | null): string => {
+  if (!level) return 'UNKNOWN';
+  const greenEnd = 12;
+  const yellowEnd = 16.4;
+  if (level < greenEnd) return 'LOW';
+  if (level < yellowEnd) return 'MEDIUM';
+  return 'HIGH';
+};
+
+const assessTideRisk = (level: number | null): string => {
+  if (!level) return 'UNKNOWN';
+  const greenEnd = 2.12;
+  const yellowEnd = 2.92;
+  if (level < greenEnd) return 'LOW';
+  if (level < yellowEnd) return 'MEDIUM';
+  return 'HIGH';
+};
+
+const assessRainRisk = (level: number | null): string => {
+  if (!level) return 'UNKNOWN';
+  const greenEnd = 2.8;
+  const yellowEnd = 4.1;
+  if (level <= greenEnd) return 'LOW';
+  if (level <= yellowEnd) return 'MEDIUM';
+  return 'HIGH';
+};
+
+// Overall risk assessment
+const assessOverallRisk = (waikaneStream: number | null, waiaholeStream: number | null, tide: number | null, rain: number | null): string => {
+  const risks = [
+    assessWaikaneStreamRisk(waikaneStream),
+    assessWaiaholeStreamRisk(waiaholeStream),
+    assessTideRisk(tide),
+    assessRainRisk(rain)
+  ].filter(risk => risk !== 'UNKNOWN');
+
+  if (risks.length === 0) return 'UNKNOWN';
+  if (risks.includes('HIGH')) return 'HIGH';
+  if (risks.includes('MEDIUM')) return 'MEDIUM';
+  return 'LOW';
+};
+
 // Flood risk levels with detailed information
 const FLOOD_RISK_LEVELS = {
   LOW: { 
@@ -52,11 +104,11 @@ const FLOOD_RISK_LEVELS = {
     icon: 'checkmark-circle', 
     text: 'LOW',
     title: 'Low Flood Risk',
-    description: 'Stream levels are normal. No immediate flood concerns. Continue with regular activities.',
+    description: 'All monitored conditions are within normal ranges. No immediate flood concerns.',
     details: [
-      '• Stream levels below warning thresholds',
-      '• Weather conditions stable',
-      '• No flood alerts active',
+      '• All stream levels below warning thresholds',
+      '• Tide levels normal',
+      '• Rainfall within safe limits',
       '• Safe for outdoor activities'
     ]
   },
@@ -65,11 +117,11 @@ const FLOOD_RISK_LEVELS = {
     icon: 'warning', 
     text: 'MED',
     title: 'Moderate Flood Risk',
-    description: 'Stream levels are elevated. Monitor conditions and avoid low-lying areas.',
+    description: 'One or more conditions are elevated. Monitor conditions and exercise caution.',
     details: [
-      '• Stream levels approaching warning levels',
+      '• Some levels approaching warning thresholds',
       '• Recent or forecasted heavy rainfall',
-      '• Avoid stream crossings',
+      '• Avoid stream crossings and low-lying areas',
       '• Stay alert for updates'
     ]
   },
@@ -80,10 +132,23 @@ const FLOOD_RISK_LEVELS = {
     title: 'High Flood Risk',
     description: 'DANGER: Flooding conditions present or imminent. Avoid all flood-prone areas.',
     details: [
-      '• Stream levels at or above flood stage',
-      '• Active flood warnings in effect',
-      '• Stay away from streams and valleys',
+      '• Critical levels detected in monitored systems',
+      '• Active flood warnings may be in effect',
+      '• Stay away from streams, valleys, and coastlines',
       '• Follow evacuation orders if issued'
+    ]
+  },
+  UNKNOWN: {
+    color: '#8E8E93',
+    icon: 'help-circle',
+    text: 'N/A',
+    title: 'Data Unavailable',
+    description: 'Unable to assess current risk levels due to missing data.',
+    details: [
+      '• Some monitoring systems may be offline',
+      '• Check back later for updated information',
+      '• Exercise general caution near water sources',
+      '• Contact emergency services if needed'
     ]
   }
 };
@@ -155,8 +220,100 @@ function ContactsModal({ visible, onClose }: { visible: boolean; onClose: () => 
 function FloodRiskIndicator() {
   const [modalVisible, setModalVisible] = useState(false);
   const [contactsModalVisible, setContactsModalVisible] = useState(false);
-  // This would typically come from your app state/API
-  const currentRiskLevel = 'LOW'; // Change this to 'MEDIUM' or 'HIGH' as needed
+  const [riskData, setRiskData] = useState<{
+    waikaneStream: number | null;
+    waiaholeStream: number | null;
+    tide: number | null;
+    rain: number | null;
+    lastUpdated: Date | null;
+  }>({
+    waikaneStream: null,
+    waiaholeStream: null,
+    tide: null,
+    rain: null,
+    lastUpdated: null,
+  });
+
+  // Fetch data from all sources
+  useEffect(() => {
+    const fetchAllData = async () => {
+      try {
+        const [waikaneRes, waiaholeRes, tideRes, rainRes] = await Promise.all([
+          fetch('http://149.165.169.164:5000/api/waikane_stream'),
+          fetch('http://149.165.169.164:5000/api/waiahole_stream'),
+          fetch('http://149.165.169.164:5000/api/waikane_tide_curve'),
+          fetch('http://149.165.169.164:5000/api/rain_data')
+        ]);
+
+        const [waikaneData, waiaholeData, tideData, rainData] = await Promise.all([
+          waikaneRes.json(),
+          waiaholeRes.json(),
+          tideRes.json(),
+          rainRes.json()
+        ]);
+
+        // Process Waikane Stream data
+        const now = new Date();
+        const waikaneLatest = waikaneData
+          .filter((d: any) => d.ft != null && d.DateTime)
+          .map((d: any) => ({
+            time: new Date(d.DateTime),
+            value: d.ft
+          }))
+          .filter((d: any) => d.time <= now)
+          .sort((a: any, b: any) => b.time - a.time)[0];
+
+        // Process Waiahole Stream data
+        const waiaholeLatest = waiaholeData
+          .filter((d: any) => d.ft != null && d.DateTime)
+          .map((d: any) => ({
+            time: new Date(d.DateTime),
+            value: d.ft
+          }))
+          .filter((d: any) => d.time <= now)
+          .sort((a: any, b: any) => b.time - a.time)[0];
+
+        // Process Tide data
+        const nowHST = new Date().toLocaleString("en-US", {timeZone: "Pacific/Honolulu"});
+        const nowHSTDate = new Date(nowHST);
+        const tideLatest = tideData
+          .map((item: any) => ({
+            time: new Date(item["Datetime"]),
+            height: item["Predicted_ft_MSL"]
+          }))
+          .filter((d: any) => d.time <= nowHSTDate && !isNaN(d.time.getTime()) && d.height != null)
+          .sort((a: any, b: any) => b.time - a.time)[0];
+
+        // Process Rain data
+        const totalRainfall = rainData.reduce((sum: number, item: any) => {
+          return sum + (item["in"] || 0);
+        }, 0);
+
+        setRiskData({
+          waikaneStream: waikaneLatest?.value || null,
+          waiaholeStream: waiaholeLatest?.value || null,
+          tide: tideLatest?.height || null,
+          rain: totalRainfall,
+          lastUpdated: new Date(),
+        });
+
+      } catch (error) {
+        console.error('Error fetching risk data:', error);
+      }
+    };
+
+    fetchAllData();
+    // Refresh data every 5 minutes
+    const interval = setInterval(fetchAllData, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const currentRiskLevel = assessOverallRisk(
+    riskData.waikaneStream,
+    riskData.waiaholeStream, 
+    riskData.tide,
+    riskData.rain
+  ) as keyof typeof FLOOD_RISK_LEVELS;
   const risk = FLOOD_RISK_LEVELS[currentRiskLevel];
 
   return (
@@ -218,15 +375,64 @@ function FloodRiskIndicator() {
             </ThemedText>
             
             <View style={styles.detailsList}>
-              {risk.details.map((detail, index) => (
+              {risk.details.map((detail: string, index: number) => (
                 <ThemedText key={index} style={styles.detailItem}>
                   {detail}
                 </ThemedText>
               ))}
             </View>
+
+            {/* Current Readings Section */}
+            <View style={styles.readingsSection}>
+              <ThemedText style={styles.readingsTitle}>Current Readings:</ThemedText>
+              
+              <View style={styles.readingItem}>
+                <ThemedText style={styles.readingLabel}>Waikane Stream:</ThemedText>
+                <ThemedText style={[styles.readingValue, { 
+                  color: riskData.waikaneStream ? 
+                    (assessWaikaneStreamRisk(riskData.waikaneStream) === 'HIGH' ? '#FF3B30' : 
+                     assessWaikaneStreamRisk(riskData.waikaneStream) === 'MEDIUM' ? '#FF9500' : '#34C759') : '#8E8E93' 
+                }]}>
+                  {riskData.waikaneStream ? `${riskData.waikaneStream.toFixed(2)} ft` : 'No data'}
+                </ThemedText>
+              </View>
+
+              <View style={styles.readingItem}>
+                <ThemedText style={styles.readingLabel}>Waiahole Stream:</ThemedText>
+                <ThemedText style={[styles.readingValue, { 
+                  color: riskData.waiaholeStream ? 
+                    (assessWaiaholeStreamRisk(riskData.waiaholeStream) === 'HIGH' ? '#FF3B30' : 
+                     assessWaiaholeStreamRisk(riskData.waiaholeStream) === 'MEDIUM' ? '#FF9500' : '#34C759') : '#8E8E93' 
+                }]}>
+                  {riskData.waiaholeStream ? `${riskData.waiaholeStream.toFixed(2)} ft` : 'No data'}
+                </ThemedText>
+              </View>
+
+              <View style={styles.readingItem}>
+                <ThemedText style={styles.readingLabel}>Waikane Tide:</ThemedText>
+                <ThemedText style={[styles.readingValue, { 
+                  color: riskData.tide ? 
+                    (assessTideRisk(riskData.tide) === 'HIGH' ? '#FF3B30' : 
+                     assessTideRisk(riskData.tide) === 'MEDIUM' ? '#FF9500' : '#34C759') : '#8E8E93' 
+                }]}>
+                  {riskData.tide ? `${riskData.tide.toFixed(2)} ft MSL` : 'No data'}
+                </ThemedText>
+              </View>
+
+              <View style={styles.readingItem}>
+                <ThemedText style={styles.readingLabel}>Rainfall:</ThemedText>
+                <ThemedText style={[styles.readingValue, { 
+                  color: riskData.rain !== null ? 
+                    (assessRainRisk(riskData.rain) === 'HIGH' ? '#FF3B30' : 
+                     assessRainRisk(riskData.rain) === 'MEDIUM' ? '#FF9500' : '#34C759') : '#8E8E93' 
+                }]}>
+                  {riskData.rain !== null ? `${riskData.rain.toFixed(2)} in` : 'No data'}
+                </ThemedText>
+              </View>
+            </View>
             
             <ThemedText style={styles.lastUpdated}>
-              Last updated: Just now
+              Last updated: {riskData.lastUpdated ? riskData.lastUpdated.toLocaleTimeString() : 'Never'}
             </ThemedText>
           </ThemedView>
         </TouchableOpacity>
@@ -433,5 +639,35 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666666',
     fontWeight: '400',
+  },
+  readingsSection: {
+    marginTop: 16,
+    marginBottom: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0, 0, 0, 0.1)',
+  },
+  readingsTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 12,
+    color: '#333333',
+  },
+  readingItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  readingLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#666666',
+    flex: 1,
+  },
+  readingValue: {
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'right',
   },
 });
