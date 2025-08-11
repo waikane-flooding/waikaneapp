@@ -415,7 +415,7 @@ function FloodRiskIndicator() {
                     (assessTideRisk(riskData.tide) === 'HIGH' ? '#FF3B30' : 
                      assessTideRisk(riskData.tide) === 'MEDIUM' ? '#FF9500' : '#34C759') : '#8E8E93' 
                 }]}>
-                  {riskData.tide ? `${riskData.tide.toFixed(2)} ft MSL` : 'No data'}
+                  {riskData.tide ? `${riskData.tide.toFixed(2)} ft` : 'No data'}
                 </ThemedText>
               </View>
 
