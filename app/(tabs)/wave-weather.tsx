@@ -14,7 +14,7 @@
 */
 
 import { Ionicons } from '@expo/vector-icons';
-import { StyleSheet, ActivityIndicator, Linking, TouchableOpacity, ScrollView } from 'react-native';
+import { StyleSheet, ActivityIndicator, ScrollView } from 'react-native';
 import React, { useEffect, useState } from 'react';
 
 import ParallaxScrollView from '@/components/ParallaxScrollView';
@@ -61,19 +61,33 @@ export default function WaveWeatherScreen() {
       try {
         const resp = await fetch('https://api.weather.gov/alerts/active?area=HI');
         const data = await resp.json();
-        // Filter out Coastal/Marine and Winter hazards, and only include Oʻahu East alerts, only includes alerts for Kāneʻohe, Waikāne, Waiahole, Kualoa, Waimanalo, Heʻeia, Windward, or Koʻolaupoko.https://www.weather.gov/wrh/hazards
-        const eastOahuKeywords = [
-          'Kāneʻohe', 'Kaneohe', 'Waikāne', 'Waikane', 'Waiahole', 'Kualoa', 'Waimanalo', 'Heʻeia', 'Heeia', 'Oahu East', 'Windward', 'Koʻolaupoko', 'Koolaupoko'
+        // Filter out Coastal/Marine and Winter hazards, and only include alerts specifically for East Oʻahu areas
+        // Only show alerts that are primarily for East Oahu locations, not multi-island alerts
+        const eastOahuSpecificAreas = [
+          'Kāneʻohe', 'Kaneohe', 'Waikāne', 'Waikane', 'Waiahole', 'Kualoa', 'Waimanalo', 
+          'Heʻeia', 'Heeia', 'Windward Oahu', 'Koʻolaupoko', 'Koolaupoko', 'Oahu Windward'
         ];
         const excludeKeywords = ['Coastal', 'Marine', 'Winter'];
+        const excludeOtherIslands = [
+          'Maui', 'Big Island', 'Kauai', 'Molokai', 'Lanai', 'Kahoolawe', 'Kona', 'Hilo', 'Kohala'
+        ];
+        
         const filtered = (data.features || []).filter((alert: any) => {
           const event = alert.properties.event || '';
           const headline = alert.properties.headline || '';
           const desc = alert.properties.areaDesc || '';
+          
           // Exclude if event or headline contains any exclude keywords
           if (excludeKeywords.some(word => event.includes(word) || headline.includes(word))) return false;
-          // Only include if areaDesc contains any east Oahu keywords
-          return eastOahuKeywords.some(word => desc.includes(word));
+          
+          // Exclude alerts that mention other islands (these are usually multi-island alerts)
+          if (excludeOtherIslands.some(island => desc.includes(island))) return false;
+          
+          // Only include if areaDesc contains East Honolulu, Honolulu Metro, or specific east Oahu areas
+          const includeGeneralOahu = desc.includes('East Honolulu') || desc.includes('Honolulu Metro');
+          const includeSpecificEastOahu = eastOahuSpecificAreas.some(area => desc.includes(area));
+          
+          return includeGeneralOahu || includeSpecificEastOahu;
         });
         setAlerts(filtered);
       } catch {
@@ -92,13 +106,13 @@ export default function WaveWeatherScreen() {
         <IconSymbol
           size={200}
           color="#4169E1"
-          name="cloud.rain"
+          name="cloud"
           style={styles.headerImage}
         />
       }
     >
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title" style={styles.thinText}>Wave &amp; Weather Conditions</ThemedText>
+        <ThemedText type="title" style={styles.thinText}>Weather Conditions</ThemedText>
       </ThemedView>
 
       <ThemedView style={styles.section}>
@@ -140,8 +154,22 @@ export default function WaveWeatherScreen() {
                     </ThemedView>
                   </ThemedView>
                   <ThemedText style={styles.alertTime}>
-                    {alert.properties.effective ? `From: ${new Date(alert.properties.effective).toLocaleString()}` : ''}
-                    {alert.properties.ends ? `  To: ${new Date(alert.properties.ends).toLocaleString()}` : ''}
+                    {alert.properties.effective ? `From: ${new Date(alert.properties.effective).toLocaleString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: true
+                    })} HST` : ''}
+                    {alert.properties.ends ? `  To: ${new Date(alert.properties.ends).toLocaleString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: true
+                    })} HST` : ''}
                   </ThemedText>
                   <ThemedText style={styles.alertArea}>{alert.properties.areaDesc}</ThemedText>
                   {alert.properties.headline && (
@@ -154,7 +182,7 @@ export default function WaveWeatherScreen() {
             })}
           </ThemedView>
         ) : (
-          <ThemedText style={styles.noAlertsText}>No active alerts for East Oahu.</ThemedText>
+          <ThemedText style={styles.noAlertsText}>No active alerts for East Oʻahu/Windward side.</ThemedText>
         )}
       </ThemedView>
 
@@ -187,12 +215,12 @@ export default function WaveWeatherScreen() {
         </ThemedView>
       </ThemedView>
 
-      <ThemedView style={styles.section}>
+      {/* <ThemedView style={styles.section}>
         <ThemedText style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 36 }}>
           Surf Forecast - Oʻahu East
         </ThemedText>
         <SurfForecastLink />
-      </ThemedView>
+      </ThemedView> */}
     </ParallaxScrollView>
   );
 }
@@ -235,7 +263,7 @@ function getAlertSeverity(alert: any) {
 }
 
 // Update the SurfForecastLink button to remove the icon and ensure the text is centered
-function SurfForecastLink() {
+/* function SurfForecastLink() {
   return (
     <TouchableOpacity
       style={{
@@ -260,7 +288,7 @@ function SurfForecastLink() {
       </ThemedText>
     </TouchableOpacity>
   );
-}
+} */
 
 const styles = StyleSheet.create({
   headerImage: {

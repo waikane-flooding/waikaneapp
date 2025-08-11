@@ -1,14 +1,141 @@
 import { Ionicons } from '@expo/vector-icons';
-import { StyleSheet, Pressable } from 'react-native';
+import { StyleSheet, Pressable, Platform, RefreshControl } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import { Image } from 'expo-image';
+import { useState, useCallback, useEffect } from 'react';
 
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
+import WaikaneStreamHeight from '@/components/visualizations/WaikaneStreamHeight';
+import WaiaholeStreamHeight from '@/components/visualizations/WaiaholeStreamHeight';
+import WaikaneStreamGraph from '@/components/visualizations/WaikaneStreamGraph';
+import WaiaholeStreamGraph from '@/components/visualizations/WaiaholeStreamGraph';
 
 export default function StreamMonitorScreen() {
+  const [refreshing, setRefreshing] = useState(false);
+  const [waikaneData, setWaikaneData] = useState<{ 
+    height: string | null; 
+    lastReading: string | null; 
+    status: string; 
+    statusColor?: string; 
+  }>({ height: null, lastReading: null, status: 'Loading...' });
+  const [waiaholeData, setWaiaholeData] = useState<{ 
+    height: string | null; 
+    lastReading: string | null; 
+    status: string; 
+    statusColor?: string; 
+  }>({ height: null, lastReading: null, status: 'Loading...' });
+
+  // Threshold values from WaikaneStreamHeight component
+  const waikaneThresholds = {
+    greenEnd: 7,
+    yellowEnd: 10.8
+  };
+
+  // Threshold values from WaiaholeStreamHeight component  
+  const waiaholeThresholds = {
+    greenEnd: 12,
+    yellowEnd: 16.4
+  };
+
+  // Get status based on stream level
+  const getStreamStatus = (level: number, thresholds: { greenEnd: number; yellowEnd: number }) => {
+    if (level < thresholds.greenEnd) return { status: 'Normal', color: '#34C759' };
+    if (level < thresholds.yellowEnd) return { status: 'Warning', color: '#FFC107' };
+    return { status: 'Danger', color: '#F44336' };
+  };
+
+  // Fetch Waikane stream data
+  const fetchWaikaneData = async () => {
+    try {
+      const response = await fetch('http://149.165.169.164:5000/api/waikane_stream');
+      const data = await response.json();
+      
+      const now = new Date();
+      const latest = data
+        .filter((d: any) => d.ft != null && d.DateTime)
+        .map((d: any) => ({
+          time: new Date(d.DateTime),
+          value: d.ft
+        }))
+        .filter((d: any) => d.time <= now)
+        .sort((a: any, b: any) => b.time - a.time)[0]; // Most recent past point
+
+      if (latest) {
+        const statusInfo = getStreamStatus(latest.value, waikaneThresholds);
+        const formattedTime = latest.time.toLocaleString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        }) + ' HST';
+
+        setWaikaneData({
+          height: `${latest.value.toFixed(2)} ft`,
+          lastReading: formattedTime,
+          status: statusInfo.status,
+          statusColor: statusInfo.color
+        });
+      }
+    } catch (error) {
+      console.error('Failed to load Waikane stream data', error);
+      setWaikaneData({ height: 'Error', lastReading: 'Error', status: 'Error' });
+    }
+  };
+
+  // Fetch Waiahole stream data
+  const fetchWaiaholeData = async () => {
+    try {
+      const response = await fetch('http://149.165.169.164:5000/api/waiahole_stream');
+      const data = await response.json();
+      
+      const now = new Date();
+      const latest = data
+        .filter((d: any) => d.ft != null && d.DateTime)
+        .map((d: any) => ({
+          time: new Date(d.DateTime),
+          value: d.ft
+        }))
+        .filter((d: any) => d.time <= now)
+        .sort((a: any, b: any) => b.time - a.time)[0]; // Most recent past point
+
+      if (latest) {
+        const statusInfo = getStreamStatus(latest.value, waiaholeThresholds);
+        const formattedTime = latest.time.toLocaleString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        }) + ' HST';
+
+        setWaiaholeData({
+          height: `${latest.value.toFixed(2)} ft`,
+          lastReading: formattedTime,
+          status: statusInfo.status,
+          statusColor: statusInfo.color
+        });
+      }
+    } catch (error) {
+      console.error('Failed to load Waiahole stream data', error);
+      setWaiaholeData({ height: 'Error', lastReading: 'Error', status: 'Error' });
+    }
+  };
+
+  // Load data on component mount
+  useEffect(() => {
+    fetchWaikaneData();
+    fetchWaiaholeData();
+  }, []);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await Promise.all([fetchWaikaneData(), fetchWaiaholeData()]);
+    // Add a small delay to show the refresh indicator
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 500);
+  }, []);
+
   const openMap = async () => {
     await WebBrowser.openBrowserAsync('https://experience.arcgis.com/experience/60260cda4f744186bbd9c67163b747d3');
   };
@@ -24,6 +151,14 @@ export default function StreamMonitorScreen() {
           style={styles.headerImage}
         />
       }
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor="#007AFF"
+          colors={['#007AFF']}
+        />
+      }
     >
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title" style={styles.thinText}>Stream Monitor</ThemedText>
@@ -37,18 +172,18 @@ export default function StreamMonitorScreen() {
         <ThemedView style={styles.monitorInfo}>
           <ThemedView style={styles.infoItem}>
             <ThemedText style={styles.label}>Current Height:</ThemedText>
-            <ThemedText style={styles.value}>Loading...</ThemedText>
+            <ThemedText style={styles.value}>{waikaneData.height || 'Loading...'}</ThemedText>
           </ThemedView>
           
           <ThemedView style={styles.infoItem}>
             <ThemedText style={styles.label}>Last Reading:</ThemedText>
-            <ThemedText style={styles.value}>Loading...</ThemedText>
+            <ThemedText style={styles.value}>{waikaneData.lastReading || 'Loading...'}</ThemedText>
           </ThemedView>
           
           <ThemedView style={styles.statusContainer}>
             <ThemedText style={styles.label}>Status:</ThemedText>
-            <ThemedView style={styles.statusBar}>
-              <ThemedText style={styles.statusText}>Normal</ThemedText>
+            <ThemedView style={[styles.statusBar, { backgroundColor: waikaneData.statusColor || (waikaneData.status === 'Loading...' ? '#999999' : '#34C759') }]}>
+              <ThemedText style={styles.statusText}>{waikaneData.status}</ThemedText>
             </ThemedView>
           </ThemedView>
         </ThemedView>
@@ -57,15 +192,15 @@ export default function StreamMonitorScreen() {
       <ThemedView style={styles.chartsContainer}>
         <ThemedView style={styles.chartSection}>
           <ThemedText style={styles.chartTitle}>Waikāne Stream Height Gauge</ThemedText>
-          <ThemedView style={styles.chartPlaceholder}>
-            <ThemedText style={styles.placeholderText}>Gauge Chart Space</ThemedText>
+          <ThemedView style={styles.chartWrapper}>
+            <WaikaneStreamHeight />
           </ThemedView>
         </ThemedView>
         
         <ThemedView style={styles.chartSection}>
           <ThemedText style={styles.chartTitle}>Stream Height Trend</ThemedText>
-          <ThemedView style={styles.chartPlaceholder}>
-            <ThemedText style={styles.placeholderText}>Line Graph Space</ThemedText>
+          <ThemedView style={styles.chartWrapper}>
+            <WaikaneStreamGraph />
           </ThemedView>
         </ThemedView>
       </ThemedView>
@@ -78,18 +213,18 @@ export default function StreamMonitorScreen() {
         <ThemedView style={styles.monitorInfo}>
           <ThemedView style={styles.infoItem}>
             <ThemedText style={styles.label}>Current Height:</ThemedText>
-            <ThemedText style={styles.value}>Loading...</ThemedText>
+            <ThemedText style={styles.value}>{waiaholeData.height || 'Loading...'}</ThemedText>
           </ThemedView>
           
           <ThemedView style={styles.infoItem}>
             <ThemedText style={styles.label}>Last Reading:</ThemedText>
-            <ThemedText style={styles.value}>Loading...</ThemedText>
+            <ThemedText style={styles.value}>{waiaholeData.lastReading || 'Loading...'}</ThemedText>
           </ThemedView>
           
           <ThemedView style={styles.statusContainer}>
             <ThemedText style={styles.label}>Status:</ThemedText>
-            <ThemedView style={styles.statusBar}>
-              <ThemedText style={styles.statusText}>Normal</ThemedText>
+            <ThemedView style={[styles.statusBar, { backgroundColor: waiaholeData.statusColor || (waiaholeData.status === 'Loading...' ? '#999999' : '#34C759') }]}>
+              <ThemedText style={styles.statusText}>{waiaholeData.status}</ThemedText>
             </ThemedView>
           </ThemedView>
         </ThemedView>
@@ -98,15 +233,15 @@ export default function StreamMonitorScreen() {
       <ThemedView style={styles.chartsContainer}>
         <ThemedView style={styles.chartSection}>
           <ThemedText style={styles.chartTitle}>Waiahole Stream Height Gauge</ThemedText>
-          <ThemedView style={styles.chartPlaceholder}>
-            <ThemedText style={styles.placeholderText}>Gauge Chart Space</ThemedText>
+          <ThemedView style={styles.chartWrapper}>
+            <WaiaholeStreamHeight />
           </ThemedView>
         </ThemedView>
         
         <ThemedView style={styles.chartSection}>
           <ThemedText style={styles.chartTitle}>Stream Height Trend</ThemedText>
-          <ThemedView style={styles.chartPlaceholder}>
-            <ThemedText style={styles.placeholderText}>Line Graph Space</ThemedText>
+          <ThemedView style={styles.chartWrapper}>
+            <WaiaholeStreamGraph />
           </ThemedView>
         </ThemedView>
       </ThemedView>
@@ -236,20 +371,27 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   chartsContainer: {
-    flexDirection: 'row',
-    gap: 16,
+    flexDirection: 'column',
+    gap: Platform.OS === 'web' ? 16 : 4,
     marginBottom: 16,
+    paddingHorizontal: 0,
+    alignItems: 'center',
   },
   chartSection: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 122, 255, 0.05)',
-    borderRadius: 8,
-    padding: 16,
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  chartWrapper: {
+    width: '100%',
+    alignItems: 'center',
+    transform: Platform.OS === 'web' ? [] : [{ scale: 0.58 }],
+    transformOrigin: 'center',
   },
   chartTitle: {
     fontWeight: '600',
     fontSize: 16,
-    marginBottom: 12,
+    marginBottom: Platform.OS === 'web' ? 4 : 0,
     textAlign: 'center',
   },
   chartPlaceholder: {

@@ -97,14 +97,14 @@ export default function HomeScreen() {
         <ThemedText type="title" style={styles.thinText}>Waikāne Flood Tracker</ThemedText>
       </ThemedView>
 
-      <ThemedView style={styles.welcomeSection}>
+      {/* <ThemedView style={styles.welcomeSection}>
         <ThemedText style={styles.welcomeText}>
           Stay informed about flood conditions in Waikāne and Waiahole areas of windward Oʻahu.
         </ThemedText>
         <ThemedText style={styles.descriptionText}>
           Monitor real-time data and get alerts to make informed decisions during heavy rainfall.
         </ThemedText>
-      </ThemedView>
+      </ThemedView> */}
 
       <ThemedView style={styles.section}>
         <ThemedText type="subtitle" style={styles.sectionTitle}>
