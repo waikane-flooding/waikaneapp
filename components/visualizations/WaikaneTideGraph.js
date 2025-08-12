@@ -121,41 +121,26 @@ const WaikaneTideGraph = () => {
   const highTides = tidePoints.filter(point => point.type === 'H');
   const lowTides = tidePoints.filter(point => point.type === 'L');
 
-  // Find current time marker on the curve
-  const currentTimeHST = new Date().toLocaleString("en-US", {timeZone: "Pacific/Honolulu"});
-  const currentTime = new Date(currentTimeHST).getTime();
-  let currentTimePoint = null;
+  // Find latest reading marker on the curve (matching WaikaneTideLevel logic)
+  const nowHST = new Date().toLocaleString("en-US", {timeZone: "Pacific/Honolulu"});
+  const now = new Date(nowHST);
+  let latestReadingPoint = null;
   
-  if (currentTime >= timeMin && currentTime <= timeMax) {
-    // Find the closest data point to current time or interpolate
-    const currentTimeData = filteredData.find(d => {
-      const dataTime = new Date(d["Datetime"]).getTime();
-      return Math.abs(dataTime - currentTime) < 30 * 60 * 1000; // Within 30 minutes
-    });
-    
-    if (currentTimeData) {
-      const time = new Date(currentTimeData["Datetime"]).getTime();
-      const value = currentTimeData["Predicted_ft_MSL"];
-      const x = padding + ((time - timeMin) / timeRange) * graphWidth;
-      const y = padding + ((yMax - value) / yRange) * graphHeight;
-      currentTimePoint = { x, y, time, value };
-    } else {
-      // Interpolate between nearest points
-      const beforePoint = filteredData.filter(d => new Date(d["Datetime"]).getTime() <= currentTime).pop();
-      const afterPoint = filteredData.find(d => new Date(d["Datetime"]).getTime() > currentTime);
-      
-      if (beforePoint && afterPoint) {
-        const beforeTime = new Date(beforePoint["Datetime"]).getTime();
-        const afterTime = new Date(afterPoint["Datetime"]).getTime();
-        const ratio = (currentTime - beforeTime) / (afterTime - beforeTime);
-        const interpolatedValue = beforePoint["Predicted_ft_MSL"] + 
-          (afterPoint["Predicted_ft_MSL"] - beforePoint["Predicted_ft_MSL"]) * ratio;
-        
-        const x = padding + ((currentTime - timeMin) / timeRange) * graphWidth;
-        const y = padding + ((yMax - interpolatedValue) / yRange) * graphHeight;
-        currentTimePoint = { x, y, time: currentTime, value: interpolatedValue };
-      }
-    }
+  // Filter to get only past readings and find the most recent
+  const pastReadings = filteredData
+    .filter(d => {
+      const dataTime = new Date(d["Datetime"]);
+      return dataTime <= now && !isNaN(dataTime.getTime()) && d["Predicted_ft_MSL"] != null;
+    })
+    .sort((a, b) => new Date(b["Datetime"]) - new Date(a["Datetime"]));
+  
+  if (pastReadings.length > 0) {
+    const latestData = pastReadings[0]; // Most recent PAST reading
+    const time = new Date(latestData["Datetime"]).getTime();
+    const value = latestData["Predicted_ft_MSL"];
+    const x = padding + ((time - timeMin) / timeRange) * graphWidth;
+    const y = padding + ((yMax - value) / yRange) * graphHeight;
+    latestReadingPoint = { x, y, time, value };
   }
 
   // Y-axis labels
@@ -336,15 +321,15 @@ const WaikaneTideGraph = () => {
             />
           ))}
           
-          {/* Current time marker */}
-          {currentTimePoint && (
+          {/* Latest reading marker */}
+          {latestReadingPoint && (
             <Line
-              x1={currentTimePoint.x}
+              x1={latestReadingPoint.x}
               y1={padding}
-              x2={currentTimePoint.x}
+              x2={latestReadingPoint.x}
               y2={padding + graphHeight}
               stroke="#000000"
-              strokeWidth={2}
+              strokeWidth={3}
             />
           )}
           
@@ -440,8 +425,8 @@ const WaikaneTideGraph = () => {
             <Text style={styles.legendText}>Low Tides</Text>
           </View>
           <View style={styles.legendItem}>
-            <View style={[styles.legendVerticalLine]} />
-            <Text style={styles.legendText}>Current Time</Text>
+            <View style={[styles.legendBar]} />
+            <Text style={styles.legendText}>Latest Reading</Text>
           </View>
         </View>
       </View>
@@ -506,6 +491,13 @@ const styles = StyleSheet.create({
   legendVerticalLine: {
     width: 2,
     height: 12,
+    backgroundColor: '#000000',
+    marginRight: 6,
+    alignSelf: 'center',
+  },
+  legendBar: {
+    width: 3,
+    height: 16,
     backgroundColor: '#000000',
     marginRight: 6,
     alignSelf: 'center',

@@ -62,7 +62,7 @@ const WaikaneStreamGraph = () => {
   }
 
   const timeMin = new Date(filteredData[0].DateTime).getTime();
-  const timeMax = new Date(filteredData[filteredData.length - 1].DateTime).getTime();
+  const timeMax = new Date(filteredData[filteredData.length - 1].DateTime).getTime() + (6 * 60 * 60 * 1000); // Add 6 hours
   const timeRange = timeMax - timeMin;
 
   // Convert data to SVG coordinates
@@ -84,41 +84,17 @@ const WaikaneStreamGraph = () => {
     return `${path} L${point.x},${point.y}`;
   }, '');
 
-  // Find current time marker on the curve
-  const currentTimeHST = new Date().toLocaleString("en-US", {timeZone: "Pacific/Honolulu"});
-  const currentTime = new Date(currentTimeHST).getTime();
-  let currentTimePoint = null;
+  // Find latest reading marker on the curve
+  let latestReadingPoint = null;
   
-  if (currentTime >= timeMin && currentTime <= timeMax) {
-    // Find the closest data point to current time or interpolate
-    const currentTimeData = filteredData.find(d => {
-      const dataTime = new Date(d.DateTime).getTime();
-      return Math.abs(dataTime - currentTime) < 30 * 60 * 1000; // Within 30 minutes
-    });
-    
-    if (currentTimeData) {
-      const time = new Date(currentTimeData.DateTime).getTime();
-      const value = currentTimeData.ft;
-      const x = padding + ((time - timeMin) / timeRange) * graphWidth;
-      const y = padding + ((yMax - value) / yRange) * graphHeight;
-      currentTimePoint = { x, y, time, value };
-    } else {
-      // Interpolate between nearest points
-      const beforePoint = filteredData.filter(d => new Date(d.DateTime).getTime() <= currentTime).pop();
-      const afterPoint = filteredData.find(d => new Date(d.DateTime).getTime() > currentTime);
-      
-      if (beforePoint && afterPoint) {
-        const beforeTime = new Date(beforePoint.DateTime).getTime();
-        const afterTime = new Date(afterPoint.DateTime).getTime();
-        const ratio = (currentTime - beforeTime) / (afterTime - beforeTime);
-        const interpolatedValue = beforePoint.ft + 
-          (afterPoint.ft - beforePoint.ft) * ratio;
-        
-        const x = padding + ((currentTime - timeMin) / timeRange) * graphWidth;
-        const y = padding + ((yMax - interpolatedValue) / yRange) * graphHeight;
-        currentTimePoint = { x, y, time: currentTime, value: interpolatedValue };
-      }
-    }
+  if (filteredData.length > 0) {
+    // Get the latest data point
+    const latestData = filteredData[filteredData.length - 1];
+    const time = new Date(latestData.DateTime).getTime();
+    const value = latestData.ft;
+    const x = padding + ((time - timeMin) / timeRange) * graphWidth;
+    const y = padding + ((yMax - value) / yRange) * graphHeight;
+    latestReadingPoint = { x, y, time, value };
   }
 
   // Y-axis labels - specific to stream heights
@@ -275,15 +251,15 @@ const WaikaneStreamGraph = () => {
             fill="none"
           />
           
-          {/* Current time marker */}
-          {currentTimePoint && (
-            <Circle
-              cx={currentTimePoint.x}
-              cy={currentTimePoint.y}
-              r={5}
-              fill="#000000"
-              stroke="#fff"
-              strokeWidth={2}
+          {/* Latest reading marker */}
+          {latestReadingPoint && (
+            <Line
+              x1={latestReadingPoint.x}
+              y1={padding}
+              x2={latestReadingPoint.x}
+              y2={padding + graphHeight}
+              stroke="#000000"
+              strokeWidth={3}
             />
           )}
           
@@ -371,8 +347,8 @@ const WaikaneStreamGraph = () => {
             <Text style={styles.legendText}>Stream Height</Text>
           </View>
           <View style={styles.legendItem}>
-            <View style={[styles.legendColor, { backgroundColor: '#000000' }]} />
-            <Text style={styles.legendText}>Current Time</Text>
+            <View style={[styles.legendBar]} />
+            <Text style={styles.legendText}>Latest Reading</Text>
           </View>
         </View>
       </View>
@@ -427,6 +403,12 @@ const styles = StyleSheet.create({
     width: 20,
     height: 2,
     backgroundColor: 'rgba(0, 122, 255, 0.8)',
+    marginRight: 5,
+  },
+  legendBar: {
+    width: 3,
+    height: 16,
+    backgroundColor: '#000000',
     marginRight: 5,
   },
   legendColor: {
