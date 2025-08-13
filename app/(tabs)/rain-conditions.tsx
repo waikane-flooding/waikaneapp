@@ -40,7 +40,7 @@ export default function RainConditionsScreen() {
         const statusInfo = getStatusFromRainfall(totalRainfall);
         
         setRainData({
-          currentRainfall: `${totalRainfall.toFixed(1)} in`,
+          currentRainfall: `${totalRainfall.toFixed(2)} in`,
           status: statusInfo.status,
           statusColor: statusInfo.color
         });

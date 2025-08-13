@@ -122,10 +122,21 @@ const RainGauge = () => {
         </Svg>
       </View>
       <View style={styles.valueContainer}>
-        <Text style={[styles.value, { color: rainLevel !== null ? getColorForLevel(rainLevel) : 'white' }]}>
-          {rainLevel !== null ? `${rainLevel.toFixed(1)} in` : 'Loading...'}
+        <Text style={[styles.value, { color: rainLevel !== null ? getColorForLevel(rainLevel) : 'white' }]}> 
+          {rainLevel !== null ? `${rainLevel.toFixed(2)} in` : 'Loading...'}
         </Text>
-        <Text style={styles.datetime}>{formattedDateTime}</Text>
+        <Text style={styles.datetime}>{
+          rainTime && rainLevel !== null
+            ? `Latest Reading: ${new Date(rainTime).toLocaleString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+              })} HST`
+            : 'Loading...'}
+        </Text>
       </View>
       <View style={styles.legendContainer}>
         <View style={styles.legendItem}>

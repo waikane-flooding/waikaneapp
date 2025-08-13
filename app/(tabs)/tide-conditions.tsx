@@ -13,11 +13,12 @@ export default function TideConditionsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [tideData, setTideData] = useState<{
     currentHeight: string | null;
+    latestReadingTime?: string | null;
     direction: string | null;
     nextTide: string | null;
     status: string;
     statusColor?: string;
-  }>({ currentHeight: null, direction: null, nextTide: null, status: 'Loading...' });
+  }>({ currentHeight: null, latestReadingTime: null, direction: null, nextTide: null, status: 'Loading...' });
 
   // Threshold values from WaikaneTideLevel component
   const tideThresholds = {
@@ -60,7 +61,7 @@ export default function TideConditionsScreen() {
       if (pastTides.length > 0) {
         const currentTide = pastTides[0]; // Most recent past reading
         const statusInfo = getTideStatus(currentTide.height);
-        
+
         // Get tide direction by comparing current with next future data point
         const nextFutureTide = curveData
           .map((item: any) => ({
@@ -96,8 +97,19 @@ export default function TideConditionsScreen() {
           nextTideText = `${tideType} Tide at ${timeStr}`;
         }
 
+        // Format the latest reading time for display
+        let latestReadingTime: string | null = null;
+        if (currentTide.time instanceof Date && !isNaN(currentTide.time.getTime())) {
+          latestReadingTime = currentTide.time.toLocaleString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+          }) + ' HST';
+        }
+
         setTideData({
           currentHeight: `${currentTide.height.toFixed(2)} ft`,
+          latestReadingTime,
           direction: direction,
           nextTide: nextTideText,
           status: statusInfo.status,
@@ -162,6 +174,11 @@ export default function TideConditionsScreen() {
           <ThemedView style={styles.infoItem}>
             <ThemedText style={styles.label}>Current Height:</ThemedText>
             <ThemedText style={styles.value}>{tideData.currentHeight || 'Loading...'}</ThemedText>
+          </ThemedView>
+          {/* Latest Reading Section */}
+          <ThemedView style={styles.infoItem}>
+            <ThemedText style={styles.label}>Last Reading:</ThemedText>
+            <ThemedText style={styles.value}>{tideData.latestReadingTime || 'Loading...'}</ThemedText>
           </ThemedView>
           
           <ThemedView style={styles.infoItem}>

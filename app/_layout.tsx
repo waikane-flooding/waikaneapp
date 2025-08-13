@@ -141,9 +141,9 @@ const FLOOD_RISK_LEVELS = {
   UNKNOWN: {
     color: '#8E8E93',
     icon: 'help-circle',
-    text: 'N/A',
-    title: 'Data Unavailable',
-    description: 'Unable to assess current risk levels due to missing data.',
+    text: 'Loading',
+    title: 'Loading Data',
+    description: 'Unable to assess current risk levels due to loading data.',
     details: [
       '• Some monitoring systems may be offline',
       '• Check back later for updated information',
