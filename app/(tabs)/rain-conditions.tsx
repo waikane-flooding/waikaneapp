@@ -29,7 +29,7 @@ export default function RainConditionsScreen() {
   };
 
   const fetchRainData = useCallback(() => {
-    fetch('http://149.165.169.164:5000/api/rain_data')
+    fetch('http://149.165.172.129:5000/api/rain_data')
       .then(res => res.json())
       .then(data => {
         // Calculate the sum of the "in" column for total rainfall

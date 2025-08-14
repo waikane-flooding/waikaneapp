@@ -11,7 +11,7 @@ const WaikaneTideLevel = () => {
   const maxLevel = 4;
 
   useEffect(() => {
-    fetch('http://149.165.169.164:5000/api/waikane_tide_curve')
+    fetch('http://149.165.172.129:5000/api/waikane_tide_curve')
       .then(res => res.json())
       .then(data => {
         // Get current time in HST to match the JSON data timezone

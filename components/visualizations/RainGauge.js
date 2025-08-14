@@ -11,7 +11,7 @@ const RainGauge = () => {
   const maxLevel = 8;
 
   useEffect(() => {
-    fetch('http://149.165.169.164:5000/api/rain_data')
+    fetch('http://149.165.172.129:5000/api/rain_data')
       .then(res => res.json())
       .then(data => {
         // Calculate the sum of the "in" column

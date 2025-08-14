@@ -14,7 +14,7 @@ const WaiaholeStreamGraph = () => {
   const [streamData, setStreamData] = useState([]);
 
   useEffect(() => {
-    fetch('http://149.165.169.164:5000/api/waiahole_stream')
+    fetch('http://149.165.172.129:5000/api/waiahole_stream')
       .then(res => res.json())
       .then(data => {
         setStreamData(data);
@@ -51,12 +51,21 @@ const WaiaholeStreamGraph = () => {
     );
   }
 
-  // Get time range (24 hours before last data point + future data)
-  const lastDataTime = new Date(sortedStreamData[sortedStreamData.length - 1].DateTime);
-  const startTime = new Date(lastDataTime.getTime() - 24 * 60 * 60 * 1000); // 24 hours before last data point
+  // Get current time in HST
+  const nowHST = new Date().toLocaleString("en-US", { timeZone: "Pacific/Honolulu" });
+  const now = new Date(nowHST);
+  // Calculate 12 AM previous day and 12 AM next day in HST
+  const prevDay = new Date(now);
+  prevDay.setHours(0, 0, 0, 0);
+  prevDay.setDate(prevDay.getDate() - 1);
+  const nextDay = new Date(now);
+  nextDay.setHours(0, 0, 0, 0);
+  nextDay.setDate(nextDay.getDate() + 1);
+  const startTime = prevDay;
+  const endTime = nextDay;
   const filteredData = sortedStreamData.filter(d => {
     const date = new Date(d.DateTime);
-    return date >= startTime; // Include all data from 24 hours before last point onwards
+    return date >= startTime && date <= endTime;
   });
 
   if (filteredData.length === 0) {
@@ -69,8 +78,9 @@ const WaiaholeStreamGraph = () => {
     );
   }
 
-  const timeMin = new Date(filteredData[0].DateTime).getTime();
-  const timeMax = new Date(filteredData[filteredData.length - 1].DateTime).getTime() + (6 * 60 * 60 * 1000); // Add 6 hours
+  // Always use the full window from 12 AM previous day to 12 AM next day
+  const timeMin = startTime.getTime();
+  const timeMax = endTime.getTime();
   const timeRange = timeMax - timeMin;
 
   // Convert data to SVG coordinates
@@ -131,13 +141,13 @@ const WaiaholeStreamGraph = () => {
     const hour = currentTick.getHours();
     let timeLabel = '';
     if (hour === 0) {
-      timeLabel = '12:00 AM HST';
+      timeLabel = '12:00 AM';
     } else if (hour === 6) {
-      timeLabel = '6:00 AM HST';
+      timeLabel = '6:00 AM';
     } else if (hour === 12) {
-      timeLabel = '12:00 PM HST';
+      timeLabel = '12:00 PM';
     } else if (hour === 18) {
-      timeLabel = '6:00 PM HST';
+      timeLabel = '6:00 PM';
     } else {
       // Fallback for other hours (shouldn't happen with 6-hour intervals)
       timeLabel = currentTick.toLocaleTimeString('en-US', { 
@@ -293,8 +303,8 @@ const WaiaholeStreamGraph = () => {
             <SvgText
               key={`x-label-${index}`}
               x={tick.x}
-              y={padding + graphHeight + 18}
-              fontSize="12"
+              y={padding + graphHeight + 15}
+              fontSize="10"
               fill="#666"
               textAnchor="middle"
             >
@@ -307,8 +317,8 @@ const WaiaholeStreamGraph = () => {
             <SvgText
               key={`x-date-${index}`}
               x={tick.x}
-              y={padding + graphHeight + 34}
-              fontSize="11"
+              y={padding + graphHeight + 28}
+              fontSize="9"
               fill="#999"
               textAnchor="middle"
             >

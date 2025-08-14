@@ -36,10 +36,10 @@ export default function TideConditionsScreen() {
   // Fetch tide data
   const fetchTideData = async () => {
     try {
-      // Fetch both tide curve and tide predictions
+      // Fetch tide curve and tide predictions only
       const [curveResponse, tidesResponse] = await Promise.all([
-        fetch('http://149.165.169.164:5000/api/waikane_tide_curve'),
-        fetch('http://149.165.169.164:5000/api/waikane_tides')
+        fetch('http://149.165.172.129:5000/api/waikane_tide_curve'),
+        fetch('http://149.165.172.129:5000/api/waikane_tides')
       ]);
 
       const curveData = await curveResponse.json();
@@ -48,7 +48,7 @@ export default function TideConditionsScreen() {
       // Get current time in HST to match the JSON data timezone
       const nowHST = new Date().toLocaleString("en-US", {timeZone: "Pacific/Honolulu"});
       const now = new Date(nowHST);
-      
+
       // Get current tide level (most recent past data point)
       const pastTides = curveData
         .map((item: any) => ({
@@ -57,6 +57,33 @@ export default function TideConditionsScreen() {
         }))
         .filter((d: any) => d.time <= now && !isNaN(d.time.getTime()) && d.height != null)
         .sort((a: any, b: any) => b.time - a.time);
+
+      // Find the next tide event after the latest reading
+      let nextTideText = 'N/A';
+      if (pastTides.length > 0 && Array.isArray(tidesData)) {
+        const latestReadingTime = pastTides[0].time;
+        // Find the next tide event after the latest reading
+        const nextTideEvent = tidesData
+          .map((item: any) => ({
+            time: new Date(item["Date Time"]),
+            type: item["Type"],
+            height: item["Prediction_ft_MSL"]
+          }))
+          .filter((d: any) => d.time > latestReadingTime && !isNaN(d.time.getTime()) && d.height != null)
+          .sort((a: any, b: any) => a.time - b.time)[0];
+        if (nextTideEvent) {
+          const timeStr = nextTideEvent.time.toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+          }) + ' HST';
+          const tideType = nextTideEvent.type === 'H' ? 'High' : 'Low';
+          nextTideText = `${tideType} Tide: ${timeStr}`;
+        }
+      }
 
       if (pastTides.length > 0) {
         const currentTide = pastTides[0]; // Most recent past reading
@@ -74,27 +101,6 @@ export default function TideConditionsScreen() {
         let direction = 'Unknown';
         if (nextFutureTide) {
           direction = nextFutureTide.height > currentTide.height ? 'Rising' : 'Falling';
-        }
-
-        // Get next predicted tide event (high/low) after current time
-        const futureTides = tidesData
-          .filter((d: any) => {
-            const tideTime = new Date(d["Date Time"]);
-            return tideTime > now && !isNaN(tideTime.getTime());
-          })
-          .sort((a: any, b: any) => new Date(a["Date Time"]).getTime() - new Date(b["Date Time"]).getTime());
-
-        let nextTideText = 'N/A';
-        if (futureTides.length > 0) {
-          const nextTide = futureTides[0];
-          const tideTime = new Date(nextTide["Date Time"]);
-          const timeStr = tideTime.toLocaleString('en-US', {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true
-          }) + ' HST';
-          const tideType = nextTide["Type"] === 'H' ? 'High' : 'Low';
-          nextTideText = `${tideType} Tide at ${timeStr}`;
         }
 
         // Format the latest reading time for display

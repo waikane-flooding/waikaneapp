@@ -7,7 +7,7 @@ const WaikaneTideGraph = () => {
   const [tideData, setTideData] = useState([]);
 
   useEffect(() => {
-    fetch('http://149.165.169.164:5000/api/waikane_tide_curve')
+    fetch('http://149.165.172.129:5000/api/waikane_tide_curve')
       .then(res => res.json())
       .then(curve => {
         setCurveData(curve);
@@ -18,7 +18,7 @@ const WaikaneTideGraph = () => {
   }, []);
 
   useEffect(() => {
-    fetch('http://149.165.169.164:5000/api/waikane_tides')
+    fetch('http://149.165.172.129:5000/api/waikane_tides')
       .then(res => res.json())
       .then(data => {
         setTideData(data);
@@ -42,7 +42,7 @@ const WaikaneTideGraph = () => {
 
   // Process data
   const sortedCurveData = [...curveData].sort((a, b) => new Date(a["Datetime"]) - new Date(b["Datetime"]));
-  
+
   if (sortedCurveData.length === 0) {
     return (
       <View style={styles.container}>
@@ -53,12 +53,21 @@ const WaikaneTideGraph = () => {
     );
   }
 
-  // Get time range (24 hours before last data point + future data)
-  const lastDataTime = new Date(sortedCurveData[sortedCurveData.length - 1]["Datetime"]);
-  const startTime = new Date(lastDataTime.getTime() - 24 * 60 * 60 * 1000); // 24 hours before last data point
+  // Get current time in HST (define once for the whole component)
+  const nowHST = new Date().toLocaleString("en-US", { timeZone: "Pacific/Honolulu" });
+  const now = new Date(nowHST);
+  // Calculate 12 AM previous day and 12 AM next day in HST
+  const prevDay = new Date(now);
+  prevDay.setHours(0, 0, 0, 0);
+  prevDay.setDate(prevDay.getDate() - 1);
+  const nextDay = new Date(now);
+  nextDay.setHours(0, 0, 0, 0);
+  nextDay.setDate(nextDay.getDate() + 1);
+  const startTime = prevDay;
+  const endTime = nextDay;
   const filteredData = sortedCurveData.filter(d => {
     const date = new Date(d["Datetime"]);
-    return date >= startTime; // Include all data from 24 hours before last point onwards
+    return date >= startTime && date <= endTime;
   });
 
   if (filteredData.length === 0) {
@@ -71,8 +80,9 @@ const WaikaneTideGraph = () => {
     );
   }
 
-  const timeMin = new Date(filteredData[0]["Datetime"]).getTime();
-  const timeMax = new Date(filteredData[filteredData.length - 1]["Datetime"]).getTime();
+  // Always use the full window from 12 AM previous day to 12 AM next day
+  const timeMin = startTime.getTime();
+  const timeMax = endTime.getTime();
   const timeRange = timeMax - timeMin;
 
   // Convert data to SVG coordinates
@@ -108,7 +118,7 @@ const WaikaneTideGraph = () => {
   const tidePoints = tideData
     .filter(d => {
       const date = new Date(d["Date Time"]);
-      return date >= startTime; // Use same time range as curve data
+      return date >= startTime && date <= endTime; // Use same time range as curve data
     })
     .map(d => {
       const time = new Date(d["Date Time"]).getTime();
@@ -122,10 +132,7 @@ const WaikaneTideGraph = () => {
   const lowTides = tidePoints.filter(point => point.type === 'L');
 
   // Find latest reading marker on the curve (matching WaikaneTideLevel logic)
-  const nowHST = new Date().toLocaleString("en-US", {timeZone: "Pacific/Honolulu"});
-  const now = new Date(nowHST);
   let latestReadingPoint = null;
-  
   // Filter to get only past readings and find the most recent
   const pastReadings = filteredData
     .filter(d => {
@@ -133,7 +140,6 @@ const WaikaneTideGraph = () => {
       return dataTime <= now && !isNaN(dataTime.getTime()) && d["Predicted_ft_MSL"] != null;
     })
     .sort((a, b) => new Date(b["Datetime"]) - new Date(a["Datetime"]));
-  
   if (pastReadings.length > 0) {
     const latestData = pastReadings[0]; // Most recent PAST reading
     const time = new Date(latestData["Datetime"]).getTime();
@@ -169,13 +175,13 @@ const WaikaneTideGraph = () => {
     const hour = currentTick.getHours();
     let timeLabel = '';
     if (hour === 0) {
-      timeLabel = '12:00 AM HST';
+      timeLabel = '12:00 AM';
     } else if (hour === 6) {
-      timeLabel = '6:00 AM HST';
+      timeLabel = '6:00 AM';
     } else if (hour === 12) {
-      timeLabel = '12:00 PM HST';
+      timeLabel = '12:00 PM';
     } else if (hour === 18) {
-      timeLabel = '6:00 PM HST';
+      timeLabel = '6:00 PM';
     } else {
       // Fallback for other hours (shouldn't happen with 6-hour intervals)
       timeLabel = currentTick.toLocaleTimeString('en-US', { 
