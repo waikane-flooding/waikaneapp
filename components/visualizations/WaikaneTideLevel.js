@@ -14,23 +14,39 @@ const WaikaneTideLevel = () => {
     fetch('http://149.165.172.129:5000/api/waikane_tide_curve')
       .then(res => res.json())
       .then(data => {
-        // Get current time in HST to match the JSON data timezone
-        const nowHST = new Date().toLocaleString("en-US", {timeZone: "Pacific/Honolulu"});
-        const now = new Date(nowHST);
-        
+        // Get current time in HST (UTC-10, no DST)
+        const nowUTC = new Date();
+        const utcYear = nowUTC.getUTCFullYear();
+        const utcMonth = nowUTC.getUTCMonth();
+        const utcDate = nowUTC.getUTCDate();
+        const utcHour = nowUTC.getUTCHours();
+        const utcMinute = nowUTC.getUTCMinutes();
+        const utcSecond = nowUTC.getUTCSeconds();
+        // HST is UTC-10
+        const nowHST = new Date(Date.UTC(utcYear, utcMonth, utcDate, utcHour - 10, utcMinute, utcSecond));
+
+        // Helper to parse API timestamp as HST (treat as HST, not local/UTC)
+        function parseHSTTimestamp(str) {
+          // str: 'YYYY-MM-DDTHH:mm:ss.sss'
+          const [datePart, timePart] = str.split('T');
+          const [year, month, day] = datePart.split('-').map(Number);
+          const [hour, minute, second] = timePart.split(':');
+          // Construct a UTC date that represents the same wall time as HST
+          return new Date(Date.UTC(year, month - 1, day, Number(hour) + 10, Number(minute), Number(second)));
+        }
+
         const pastTides = data
           .map(item => ({
-            time: new Date(item["Datetime"]),
+            time: parseHSTTimestamp(item["Datetime"]),
             height: item["Predicted_ft_MSL"]
           }))
-          .filter(d => d.time <= now && !isNaN(d.time.getTime()) && d.height != null)
+          .filter(d => d.time <= nowUTC && !isNaN(d.time.getTime()) && d.height != null)
           .sort((a, b) => b.time - a.time);
 
         if (pastTides.length > 0) {
           const latest = pastTides[0]; // Most recent PAST reading
           setTideLevel(latest.height);
           setTideTime(latest.time);
-          
           // Animate to new tide level
           const targetPercent = (latest.height - minLevel) / (maxLevel - minLevel);
           Animated.timing(animatedValue, {
@@ -55,6 +71,7 @@ const WaikaneTideLevel = () => {
 
   const formattedDateTime = tideTime
     ? 'Latest Reading: ' + new Date(tideTime).toLocaleString('en-US', {
+        timeZone: 'Pacific/Honolulu',
         month: 'short',
         day: 'numeric',
         year: 'numeric',

@@ -53,24 +53,52 @@ const WaikaneTideGraph = () => {
     );
   }
 
-  // Get current time in HST (define once for the whole component)
-  const nowHST = new Date().toLocaleString("en-US", { timeZone: "Pacific/Honolulu" });
-  const now = new Date(nowHST);
-  // Calculate 12 AM previous day and 12 AM next day in HST
-  const prevDay = new Date(now);
-  prevDay.setHours(0, 0, 0, 0);
-  prevDay.setDate(prevDay.getDate() - 1);
-  const nextDay = new Date(now);
-  nextDay.setHours(0, 0, 0, 0);
-  nextDay.setDate(nextDay.getDate() + 1);
-  const startTime = prevDay;
-  const endTime = nextDay;
+  // Robust HST 'now' logic: get UTC, subtract 10h, format as HST string, parse as local time
+  function getNowHSTAsLocalDate() {
+    const nowUTC = new Date();
+    nowUTC.setUTCHours(nowUTC.getUTCHours() - 10);
+    // Format as 'YYYY-MM-DDTHH:mm:ss' (API format)
+    const yyyy = nowUTC.getUTCFullYear();
+    const mm = String(nowUTC.getUTCMonth() + 1).padStart(2, '0');
+    const dd = String(nowUTC.getUTCDate()).padStart(2, '0');
+    const hh = String(nowUTC.getUTCHours()).padStart(2, '0');
+    const min = String(nowUTC.getUTCMinutes()).padStart(2, '0');
+    const ss = String(nowUTC.getUTCSeconds()).padStart(2, '0');
+    const hstString = `${yyyy}-${mm}-${dd}T${hh}:${min}:${ss}`;
+    return new Date(hstString);
+  }
+  // Get current HST time as local date
+  const nowHST = getNowHSTAsLocalDate();
+
+  // Calculate 12 AM previous day in HST (start window)
+  const startWindow = new Date(nowHST);
+  startWindow.setHours(0, 0, 0, 0);
+  startWindow.setDate(startWindow.getDate() - 1);
+
+  // Find the latest reading in the filtered window (for end window)
   const filteredData = sortedCurveData.filter(d => {
     const date = new Date(d["Datetime"]);
-    return date >= startTime && date <= endTime;
+    return date >= startWindow && date <= nowHST;
   });
 
-  if (filteredData.length === 0) {
+  // Find the latest reading in the window
+  let latestReadingDate = nowHST;
+  if (filteredData.length > 0) {
+    latestReadingDate = new Date(filteredData[filteredData.length - 1]["Datetime"]);
+  }
+
+  // Calculate 12 AM the next day after the latest reading (end window)
+  const endWindow = new Date(latestReadingDate);
+  endWindow.setHours(0, 0, 0, 0);
+  endWindow.setDate(endWindow.getDate() + 1);
+
+  // Final data for graph: all points between startWindow and endWindow
+  const displayData = sortedCurveData.filter(d => {
+    const date = new Date(d["Datetime"]);
+    return date >= startWindow && date <= endWindow;
+  });
+
+  if (displayData.length === 0) {
     return (
       <View style={styles.container}>
         <View style={styles.loadingContainer}>
@@ -81,12 +109,12 @@ const WaikaneTideGraph = () => {
   }
 
   // Always use the full window from 12 AM previous day to 12 AM next day
-  const timeMin = startTime.getTime();
-  const timeMax = endTime.getTime();
+  const timeMin = startWindow.getTime();
+  const timeMax = endWindow.getTime();
   const timeRange = timeMax - timeMin;
 
   // Convert data to SVG coordinates
-  const points = filteredData.map(d => {
+  const points = displayData.map(d => {
     const time = new Date(d["Datetime"]).getTime();
     const value = d["Predicted_ft_MSL"];
     
@@ -118,7 +146,7 @@ const WaikaneTideGraph = () => {
   const tidePoints = tideData
     .filter(d => {
       const date = new Date(d["Date Time"]);
-      return date >= startTime && date <= endTime; // Use same time range as curve data
+      return date >= startWindow && date <= endWindow; // Use same time range as curve data
     })
     .map(d => {
       const time = new Date(d["Date Time"]).getTime();
@@ -131,22 +159,28 @@ const WaikaneTideGraph = () => {
   const highTides = tidePoints.filter(point => point.type === 'H');
   const lowTides = tidePoints.filter(point => point.type === 'L');
 
-  // Find latest reading marker on the curve (matching WaikaneTideLevel logic)
+  // Find latest reading marker on the curve (MUST match WaikaneTideLevel logic exactly)
   let latestReadingPoint = null;
-  // Filter to get only past readings and find the most recent
-  const pastReadings = filteredData
-    .filter(d => {
-      const dataTime = new Date(d["Datetime"]);
-      return dataTime <= now && !isNaN(dataTime.getTime()) && d["Predicted_ft_MSL"] != null;
-    })
-    .sort((a, b) => new Date(b["Datetime"]) - new Date(a["Datetime"]));
-  if (pastReadings.length > 0) {
-    const latestData = pastReadings[0]; // Most recent PAST reading
-    const time = new Date(latestData["Datetime"]).getTime();
-    const value = latestData["Predicted_ft_MSL"];
+  let latestReading = null;
+  let latestReadingTime = null;
+  // Sort curveData by Datetime ascending (just in case)
+  const sortedByTime = [...curveData].sort((a, b) => new Date(a["Datetime"]) - new Date(b["Datetime"]));
+  for (let i = sortedByTime.length - 1; i >= 0; i--) {
+    const d = sortedByTime[i];
+    const dataTime = new Date(d["Datetime"]);
+    if (dataTime <= nowHST && !isNaN(dataTime.getTime()) && d["Predicted_ft_MSL"] != null) {
+      latestReading = d;
+      latestReadingTime = dataTime;
+      break;
+    }
+  }
+  if (latestReading && latestReadingTime) {
+    const time = latestReadingTime.getTime();
+    const value = latestReading["Predicted_ft_MSL"];
+    // Project this time onto the current graph window
     const x = padding + ((time - timeMin) / timeRange) * graphWidth;
     const y = padding + ((yMax - value) / yRange) * graphHeight;
-    latestReadingPoint = { x, y, time, value };
+    latestReadingPoint = { x, y, time, value, datetime: latestReading["Datetime"] };
   }
 
   // Y-axis labels
@@ -329,14 +363,16 @@ const WaikaneTideGraph = () => {
           
           {/* Latest reading marker */}
           {latestReadingPoint && (
-            <Line
-              x1={latestReadingPoint.x}
-              y1={padding}
-              x2={latestReadingPoint.x}
-              y2={padding + graphHeight}
-              stroke="#000000"
-              strokeWidth={3}
-            />
+            <>
+              <Line
+                x1={latestReadingPoint.x}
+                y1={padding}
+                x2={latestReadingPoint.x}
+                y2={padding + graphHeight}
+                stroke="#000000"
+                strokeWidth={3}
+              />
+            </>
           )}
           
           {/* Y-axis labels */}

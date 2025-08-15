@@ -43,18 +43,30 @@ const WaikaneStreamGraph = () => {
     );
   }
 
-  // Get current time in HST
-  const nowHST = new Date().toLocaleString("en-US", { timeZone: "Pacific/Honolulu" });
-  const now = new Date(nowHST);
-  // Calculate 12 AM previous day and 12 AM next day in HST
-  const prevDay = new Date(now);
-  prevDay.setHours(0, 0, 0, 0);
-  prevDay.setDate(prevDay.getDate() - 1);
-  const nextDay = new Date(now);
-  nextDay.setHours(0, 0, 0, 0);
-  nextDay.setDate(nextDay.getDate() + 1);
-  const startTime = prevDay;
-  const endTime = nextDay;
+  // Find the latest reading's date
+  let latestDate = null;
+  if (sortedStreamData.length > 0) {
+    latestDate = new Date(sortedStreamData[sortedStreamData.length - 1].DateTime);
+  }
+  // Set window: 12 AM the day before latest, to 12 AM the day after latest
+  let startTime, endTime;
+  if (latestDate) {
+    startTime = new Date(latestDate);
+    startTime.setHours(0, 0, 0, 0);
+    startTime.setDate(startTime.getDate() - 1);
+    endTime = new Date(latestDate);
+    endTime.setHours(0, 0, 0, 0);
+    endTime.setDate(endTime.getDate() + 1);
+  } else {
+    // fallback to previous logic if no data
+    const now = new Date();
+    startTime = new Date(now);
+    startTime.setHours(0, 0, 0, 0);
+    startTime.setDate(startTime.getDate() - 1);
+    endTime = new Date(now);
+    endTime.setHours(0, 0, 0, 0);
+    endTime.setDate(endTime.getDate() + 1);
+  }
   const filteredData = sortedStreamData.filter(d => {
     const date = new Date(d.DateTime);
     return date >= startTime && date <= endTime;

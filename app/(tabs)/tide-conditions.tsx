@@ -45,9 +45,21 @@ export default function TideConditionsScreen() {
       const curveData = await curveResponse.json();
       const tidesData = await tidesResponse.json();
 
-      // Get current time in HST to match the JSON data timezone
-      const nowHST = new Date().toLocaleString("en-US", {timeZone: "Pacific/Honolulu"});
-      const now = new Date(nowHST);
+      // Robust HST 'now' logic: get UTC, subtract 10h, format as HST string, parse as local time
+      function getNowHSTAsLocalDate() {
+        const nowUTC = new Date();
+        nowUTC.setUTCHours(nowUTC.getUTCHours() - 10);
+        // Format as 'YYYY-MM-DDTHH:mm:ss' (API format)
+        const yyyy = nowUTC.getUTCFullYear();
+        const mm = String(nowUTC.getUTCMonth() + 1).padStart(2, '0');
+        const dd = String(nowUTC.getUTCDate()).padStart(2, '0');
+        const hh = String(nowUTC.getUTCHours()).padStart(2, '0');
+        const min = String(nowUTC.getUTCMinutes()).padStart(2, '0');
+        const ss = String(nowUTC.getUTCSeconds()).padStart(2, '0');
+        const hstString = `${yyyy}-${mm}-${dd}T${hh}:${min}:${ss}`;
+        return new Date(hstString);
+      }
+      const now = getNowHSTAsLocalDate();
 
       // Get current tide level (most recent past data point)
       const pastTides = curveData
@@ -73,15 +85,12 @@ export default function TideConditionsScreen() {
           .sort((a: any, b: any) => a.time - b.time)[0];
         if (nextTideEvent) {
           const timeStr = nextTideEvent.time.toLocaleString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
             hour: '2-digit',
             minute: '2-digit',
             hour12: true
           }) + ' HST';
           const tideType = nextTideEvent.type === 'H' ? 'High' : 'Low';
-          nextTideText = `${tideType} Tide: ${timeStr}`;
+          nextTideText = `${tideType}, ${timeStr}`;
         }
       }
 

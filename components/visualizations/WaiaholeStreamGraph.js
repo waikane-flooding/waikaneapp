@@ -51,18 +51,31 @@ const WaiaholeStreamGraph = () => {
     );
   }
 
-  // Get current time in HST
-  const nowHST = new Date().toLocaleString("en-US", { timeZone: "Pacific/Honolulu" });
-  const now = new Date(nowHST);
-  // Calculate 12 AM previous day and 12 AM next day in HST
-  const prevDay = new Date(now);
-  prevDay.setHours(0, 0, 0, 0);
-  prevDay.setDate(prevDay.getDate() - 1);
-  const nextDay = new Date(now);
-  nextDay.setHours(0, 0, 0, 0);
-  nextDay.setDate(nextDay.getDate() + 1);
-  const startTime = prevDay;
-  const endTime = nextDay;
+  // Robust cross-platform date handling for time window
+  let latestDate = null;
+  if (sortedStreamData.length > 0) {
+    // Use the latest reading's date (in UTC, then treat as local for window)
+    latestDate = new Date(sortedStreamData[sortedStreamData.length - 1].DateTime);
+  }
+  let startTime, endTime;
+  if (latestDate) {
+    startTime = new Date(latestDate);
+    startTime.setHours(0, 0, 0, 0);
+    startTime.setDate(startTime.getDate() - 1);
+    endTime = new Date(latestDate);
+    endTime.setHours(0, 0, 0, 0);
+    endTime.setDate(endTime.getDate() + 1);
+  } else {
+    // fallback to previous logic if no data
+    const now = new Date();
+    startTime = new Date(now);
+    startTime.setHours(0, 0, 0, 0);
+    startTime.setDate(startTime.getDate() - 1);
+    endTime = new Date(now);
+    endTime.setHours(0, 0, 0, 0);
+    endTime.setDate(endTime.getDate() + 1);
+  }
+  // Filter data within window
   const filteredData = sortedStreamData.filter(d => {
     const date = new Date(d.DateTime);
     return date >= startTime && date <= endTime;

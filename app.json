@@ -12,7 +12,10 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.chiaraduyn.waikaneapp",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true
+        }
       }
     },
     "android": {
