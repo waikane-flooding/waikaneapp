@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { StyleSheet, RefreshControl } from 'react-native';
+import { StyleSheet, Platform, RefreshControl } from 'react-native';
 import { useState, useCallback, useEffect } from 'react';
 
 import ParallaxScrollView from '@/components/ParallaxScrollView';
@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
   },
   chartsContainer: {
     flexDirection: 'column',
-    gap: 16,
+    gap: Platform.OS === 'web' ? 16 : 4,
     marginBottom: 16,
   },
   chartSection: {
@@ -188,11 +188,13 @@ const styles = StyleSheet.create({
   chartWrapper: {
     width: '100%',
     alignItems: 'center',
+    transform: Platform.OS === 'web' ? [] : [{ scale: 0.58 }],
+    transformOrigin: 'center',
   },
   chartTitle: {
     fontWeight: '600',
     fontSize: 16,
-    marginBottom: 4,
+    marginBottom: Platform.OS === 'web' ? 4 : 0,
     textAlign: 'center',
   },
   chartPlaceholder: {

@@ -27,14 +27,14 @@ export default function TideConditionsScreen() {
   };
 
   // Get status based on tide level
-  const getTideStatus = (level: number) => {
+  const getTideStatus = useCallback((level: number) => {
     if (level < tideThresholds.greenEnd) return { status: 'Normal', color: '#34C759' };
     if (level < tideThresholds.yellowEnd) return { status: 'Warning', color: '#FFC107' };
     return { status: 'Danger', color: '#F44336' };
-  };
+  }, [tideThresholds.greenEnd, tideThresholds.yellowEnd]);
 
   // Fetch tide data
-  const fetchTideData = async () => {
+  const fetchTideData = useCallback(async () => {
     try {
       // Fetch tide curve and tide predictions only
       const [curveResponse, tidesResponse] = await Promise.all([
@@ -140,12 +140,12 @@ export default function TideConditionsScreen() {
         status: 'Error' 
       });
     }
-  };
+  }, [getTideStatus]);
 
   // Load data on component mount
   useEffect(() => {
     fetchTideData();
-  }, []);
+  }, [fetchTideData]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -154,7 +154,7 @@ export default function TideConditionsScreen() {
     setTimeout(() => {
       setRefreshing(false);
     }, 500);
-  }, []);
+  }, [fetchTideData]);
 
   return (
     <ParallaxScrollView

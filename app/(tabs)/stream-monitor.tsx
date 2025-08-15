@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Pressable, Platform, RefreshControl } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import { Image } from 'expo-image';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
@@ -30,27 +30,26 @@ export default function StreamMonitorScreen() {
     statusColor?: string; 
   }>({ height: null, lastReading: null, direction: null, status: 'Loading...' });
 
-  // Threshold values from WaikaneStreamHeight component
-  const waikaneThresholds = {
+    // Threshold values for different stream levels
+  const waikaneThresholds = useMemo(() => ({
     greenEnd: 7,
     yellowEnd: 10.8
-  };
+  }), []);
 
-  // Threshold values from WaiaholeStreamHeight component  
-  const waiaholeThresholds = {
+  const waiaholeThresholds = useMemo(() => ({
     greenEnd: 12,
     yellowEnd: 16.4
-  };
+  }), []);
 
   // Get status based on stream level
-  const getStreamStatus = (level: number, thresholds: { greenEnd: number; yellowEnd: number }) => {
+  const getStreamStatus = useCallback((level: number, thresholds: { greenEnd: number; yellowEnd: number }) => {
     if (level < thresholds.greenEnd) return { status: 'Normal', color: '#34C759' };
     if (level < thresholds.yellowEnd) return { status: 'Warning', color: '#FFC107' };
     return { status: 'Danger', color: '#F44336' };
-  };
+  }, []);
 
   // Fetch Waikane and Waiahole stream data, including trend
-  const fetchWaikaneData = async () => {
+  const fetchWaikaneData = useCallback(async () => {
     try {
       const [streamRes, trendRes] = await Promise.all([
         fetch('http://149.165.172.129:5000/api/waikane_stream'),
@@ -96,9 +95,9 @@ export default function StreamMonitorScreen() {
       console.error('Failed to load Waikane stream data', error);
       setWaikaneData({ height: 'Error', lastReading: 'Error', direction: 'Error', status: 'Error' });
     }
-  };
+  }, [getStreamStatus, waikaneThresholds]);
 
-  const fetchWaiaholeData = async () => {
+  const fetchWaiaholeData = useCallback(async () => {
     try {
       const [streamRes, trendRes] = await Promise.all([
         fetch('http://149.165.172.129:5000/api/waiahole_stream'),
@@ -144,13 +143,13 @@ export default function StreamMonitorScreen() {
       console.error('Failed to load Waiahole stream data', error);
       setWaiaholeData({ height: 'Error', lastReading: 'Error', direction: 'Error', status: 'Error' });
     }
-  };
+  }, [getStreamStatus, waiaholeThresholds]);
 
   // Load data on component mount
   useEffect(() => {
     fetchWaikaneData();
     fetchWaiaholeData();
-  }, []);
+  }, [fetchWaikaneData, fetchWaiaholeData]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -159,7 +158,7 @@ export default function StreamMonitorScreen() {
     setTimeout(() => {
       setRefreshing(false);
     }, 500);
-  }, []);
+  }, [fetchWaikaneData, fetchWaiaholeData]);
 
   const openMap = async () => {
     await WebBrowser.openBrowserAsync('https://experience.arcgis.com/experience/60260cda4f744186bbd9c67163b747d3');
