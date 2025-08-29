@@ -13,11 +13,12 @@ export default function TideConditionsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [tideData, setTideData] = useState<{
     currentHeight: string | null;
+    latestReadingTime?: string | null;
     direction: string | null;
     nextTide: string | null;
     status: string;
     statusColor?: string;
-  }>({ currentHeight: null, direction: null, nextTide: null, status: 'Loading...' });
+  }>({ currentHeight: null, latestReadingTime: null, direction: null, nextTide: null, status: 'Loading...' });
 
   // Threshold values from WaikaneTideLevel component
   const tideThresholds = {
@@ -26,28 +27,40 @@ export default function TideConditionsScreen() {
   };
 
   // Get status based on tide level
-  const getTideStatus = (level: number) => {
+  const getTideStatus = useCallback((level: number) => {
     if (level < tideThresholds.greenEnd) return { status: 'Normal', color: '#34C759' };
     if (level < tideThresholds.yellowEnd) return { status: 'Warning', color: '#FFC107' };
     return { status: 'Danger', color: '#F44336' };
-  };
+  }, [tideThresholds.greenEnd, tideThresholds.yellowEnd]);
 
   // Fetch tide data
-  const fetchTideData = async () => {
+  const fetchTideData = useCallback(async () => {
     try {
-      // Fetch both tide curve and tide predictions
+      // Fetch tide curve and tide predictions only
       const [curveResponse, tidesResponse] = await Promise.all([
-        fetch('http://149.165.169.164:5000/api/waikane_tide_curve'),
-        fetch('http://149.165.169.164:5000/api/waikane_tides')
+        fetch('http://149.165.172.129:5000/api/waikane_tide_curve'),
+        fetch('http://149.165.172.129:5000/api/waikane_tides')
       ]);
 
       const curveData = await curveResponse.json();
       const tidesData = await tidesResponse.json();
 
-      // Get current time in HST to match the JSON data timezone
-      const nowHST = new Date().toLocaleString("en-US", {timeZone: "Pacific/Honolulu"});
-      const now = new Date(nowHST);
-      
+      // Robust HST 'now' logic: get UTC, subtract 10h, format as HST string, parse as local time
+      function getNowHSTAsLocalDate() {
+        const nowUTC = new Date();
+        nowUTC.setUTCHours(nowUTC.getUTCHours() - 10);
+        // Format as 'YYYY-MM-DDTHH:mm:ss' (API format)
+        const yyyy = nowUTC.getUTCFullYear();
+        const mm = String(nowUTC.getUTCMonth() + 1).padStart(2, '0');
+        const dd = String(nowUTC.getUTCDate()).padStart(2, '0');
+        const hh = String(nowUTC.getUTCHours()).padStart(2, '0');
+        const min = String(nowUTC.getUTCMinutes()).padStart(2, '0');
+        const ss = String(nowUTC.getUTCSeconds()).padStart(2, '0');
+        const hstString = `${yyyy}-${mm}-${dd}T${hh}:${min}:${ss}`;
+        return new Date(hstString);
+      }
+      const now = getNowHSTAsLocalDate();
+
       // Get current tide level (most recent past data point)
       const pastTides = curveData
         .map((item: any) => ({
@@ -57,10 +70,34 @@ export default function TideConditionsScreen() {
         .filter((d: any) => d.time <= now && !isNaN(d.time.getTime()) && d.height != null)
         .sort((a: any, b: any) => b.time - a.time);
 
+      // Find the next tide event after the latest reading
+      let nextTideText = 'N/A';
+      if (pastTides.length > 0 && Array.isArray(tidesData)) {
+        const latestReadingTime = pastTides[0].time;
+        // Find the next tide event after the latest reading
+        const nextTideEvent = tidesData
+          .map((item: any) => ({
+            time: new Date(item["Date Time"]),
+            type: item["Type"],
+            height: item["Prediction_ft_MSL"]
+          }))
+          .filter((d: any) => d.time > latestReadingTime && !isNaN(d.time.getTime()) && d.height != null)
+          .sort((a: any, b: any) => a.time - b.time)[0];
+        if (nextTideEvent) {
+          const timeStr = nextTideEvent.time.toLocaleString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+          }) + ' HST';
+          const tideType = nextTideEvent.type === 'H' ? 'High' : 'Low';
+          nextTideText = `${tideType}, ${timeStr}`;
+        }
+      }
+
       if (pastTides.length > 0) {
         const currentTide = pastTides[0]; // Most recent past reading
         const statusInfo = getTideStatus(currentTide.height);
-        
+
         // Get tide direction by comparing current with next future data point
         const nextFutureTide = curveData
           .map((item: any) => ({
@@ -75,29 +112,19 @@ export default function TideConditionsScreen() {
           direction = nextFutureTide.height > currentTide.height ? 'Rising' : 'Falling';
         }
 
-        // Get next predicted tide event (high/low) after current time
-        const futureTides = tidesData
-          .filter((d: any) => {
-            const tideTime = new Date(d["Date Time"]);
-            return tideTime > now && !isNaN(tideTime.getTime());
-          })
-          .sort((a: any, b: any) => new Date(a["Date Time"]).getTime() - new Date(b["Date Time"]).getTime());
-
-        let nextTideText = 'N/A';
-        if (futureTides.length > 0) {
-          const nextTide = futureTides[0];
-          const tideTime = new Date(nextTide["Date Time"]);
-          const timeStr = tideTime.toLocaleString('en-US', {
+        // Format the latest reading time for display
+        let latestReadingTime: string | null = null;
+        if (currentTide.time instanceof Date && !isNaN(currentTide.time.getTime())) {
+          latestReadingTime = currentTide.time.toLocaleString('en-US', {
             hour: '2-digit',
             minute: '2-digit',
             hour12: true
           }) + ' HST';
-          const tideType = nextTide["Type"] === 'H' ? 'High' : 'Low';
-          nextTideText = `${tideType} Tide at ${timeStr}`;
         }
 
         setTideData({
           currentHeight: `${currentTide.height.toFixed(2)} ft`,
+          latestReadingTime,
           direction: direction,
           nextTide: nextTideText,
           status: statusInfo.status,
@@ -113,12 +140,12 @@ export default function TideConditionsScreen() {
         status: 'Error' 
       });
     }
-  };
+  }, [getTideStatus]);
 
   // Load data on component mount
   useEffect(() => {
     fetchTideData();
-  }, []);
+  }, [fetchTideData]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -127,7 +154,7 @@ export default function TideConditionsScreen() {
     setTimeout(() => {
       setRefreshing(false);
     }, 500);
-  }, []);
+  }, [fetchTideData]);
 
   return (
     <ParallaxScrollView
@@ -162,6 +189,11 @@ export default function TideConditionsScreen() {
           <ThemedView style={styles.infoItem}>
             <ThemedText style={styles.label}>Current Height:</ThemedText>
             <ThemedText style={styles.value}>{tideData.currentHeight || 'Loading...'}</ThemedText>
+          </ThemedView>
+          {/* Latest Reading Section */}
+          <ThemedView style={styles.infoItem}>
+            <ThemedText style={styles.label}>Last Reading:</ThemedText>
+            <ThemedText style={styles.value}>{tideData.latestReadingTime || 'Loading...'}</ThemedText>
           </ThemedView>
           
           <ThemedView style={styles.infoItem}>

@@ -22,7 +22,7 @@ const WaikaneStreamHeight = () => {
   const customTicks = [0, 2, 4, 6, 8, 10, 12, 14, 16];
 
   useEffect(() => {
-    fetch('http://149.165.169.164:5000/api/waikane_stream')
+    fetch('http://149.165.172.129:5000/api/waikane_stream')
       .then(res => res.json())
       .then(data => {
         const now = new Date();

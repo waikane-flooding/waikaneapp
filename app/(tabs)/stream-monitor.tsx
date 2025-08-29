@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Pressable, Platform, RefreshControl } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import { Image } from 'expo-image';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
@@ -18,41 +18,46 @@ export default function StreamMonitorScreen() {
   const [waikaneData, setWaikaneData] = useState<{ 
     height: string | null; 
     lastReading: string | null; 
+    direction: string | null;
     status: string; 
     statusColor?: string; 
-  }>({ height: null, lastReading: null, status: 'Loading...' });
+  }>({ height: null, lastReading: null, direction: null, status: 'Loading...' });
   const [waiaholeData, setWaiaholeData] = useState<{ 
     height: string | null; 
     lastReading: string | null; 
+    direction: string | null;
     status: string; 
     statusColor?: string; 
-  }>({ height: null, lastReading: null, status: 'Loading...' });
+  }>({ height: null, lastReading: null, direction: null, status: 'Loading...' });
 
-  // Threshold values from WaikaneStreamHeight component
-  const waikaneThresholds = {
+    // Threshold values for different stream levels
+  const waikaneThresholds = useMemo(() => ({
     greenEnd: 7,
     yellowEnd: 10.8
-  };
+  }), []);
 
-  // Threshold values from WaiaholeStreamHeight component  
-  const waiaholeThresholds = {
+  const waiaholeThresholds = useMemo(() => ({
     greenEnd: 12,
     yellowEnd: 16.4
-  };
+  }), []);
 
   // Get status based on stream level
-  const getStreamStatus = (level: number, thresholds: { greenEnd: number; yellowEnd: number }) => {
+  const getStreamStatus = useCallback((level: number, thresholds: { greenEnd: number; yellowEnd: number }) => {
     if (level < thresholds.greenEnd) return { status: 'Normal', color: '#34C759' };
     if (level < thresholds.yellowEnd) return { status: 'Warning', color: '#FFC107' };
     return { status: 'Danger', color: '#F44336' };
-  };
+  }, []);
 
-  // Fetch Waikane stream data
-  const fetchWaikaneData = async () => {
+  // Fetch Waikane and Waiahole stream data, including trend
+  const fetchWaikaneData = useCallback(async () => {
     try {
-      const response = await fetch('http://149.165.169.164:5000/api/waikane_stream');
-      const data = await response.json();
-      
+      const [streamRes, trendRes] = await Promise.all([
+        fetch('http://149.165.172.129:5000/api/waikane_stream'),
+        fetch('http://149.165.172.129:5000/api/stream_trend')
+      ]);
+      const data = await streamRes.json();
+      const trendData = await trendRes.json();
+
       const now = new Date();
       const latest = data
         .filter((d: any) => d.ft != null && d.DateTime)
@@ -62,6 +67,13 @@ export default function StreamMonitorScreen() {
         }))
         .filter((d: any) => d.time <= now)
         .sort((a: any, b: any) => b.time - a.time)[0]; // Most recent past point
+
+      // Find Waikane trend
+      let direction: string | null = null;
+      if (trendData && Array.isArray(trendData)) {
+        const waikaneTrend = trendData.find((t: any) => t.Name && t.Name.toLowerCase().includes('waikane'));
+        direction = waikaneTrend && waikaneTrend.Trend ? waikaneTrend.Trend : null;
+      }
 
       if (latest) {
         const statusInfo = getStreamStatus(latest.value, waikaneThresholds);
@@ -74,22 +86,26 @@ export default function StreamMonitorScreen() {
         setWaikaneData({
           height: `${latest.value.toFixed(2)} ft`,
           lastReading: formattedTime,
+          direction,
           status: statusInfo.status,
           statusColor: statusInfo.color
         });
       }
     } catch (error) {
       console.error('Failed to load Waikane stream data', error);
-      setWaikaneData({ height: 'Error', lastReading: 'Error', status: 'Error' });
+      setWaikaneData({ height: 'Error', lastReading: 'Error', direction: 'Error', status: 'Error' });
     }
-  };
+  }, [getStreamStatus, waikaneThresholds]);
 
-  // Fetch Waiahole stream data
-  const fetchWaiaholeData = async () => {
+  const fetchWaiaholeData = useCallback(async () => {
     try {
-      const response = await fetch('http://149.165.169.164:5000/api/waiahole_stream');
-      const data = await response.json();
-      
+      const [streamRes, trendRes] = await Promise.all([
+        fetch('http://149.165.172.129:5000/api/waiahole_stream'),
+        fetch('http://149.165.172.129:5000/api/stream_trend')
+      ]);
+      const data = await streamRes.json();
+      const trendData = await trendRes.json();
+
       const now = new Date();
       const latest = data
         .filter((d: any) => d.ft != null && d.DateTime)
@@ -99,6 +115,13 @@ export default function StreamMonitorScreen() {
         }))
         .filter((d: any) => d.time <= now)
         .sort((a: any, b: any) => b.time - a.time)[0]; // Most recent past point
+
+      // Find Waiahole trend
+      let direction: string | null = null;
+      if (trendData && Array.isArray(trendData)) {
+        const waiaholeTrend = trendData.find((t: any) => t.Name && t.Name.toLowerCase().includes('waiahole'));
+        direction = waiaholeTrend && waiaholeTrend.Trend ? waiaholeTrend.Trend : null;
+      }
 
       if (latest) {
         const statusInfo = getStreamStatus(latest.value, waiaholeThresholds);
@@ -111,21 +134,22 @@ export default function StreamMonitorScreen() {
         setWaiaholeData({
           height: `${latest.value.toFixed(2)} ft`,
           lastReading: formattedTime,
+          direction,
           status: statusInfo.status,
           statusColor: statusInfo.color
         });
       }
     } catch (error) {
       console.error('Failed to load Waiahole stream data', error);
-      setWaiaholeData({ height: 'Error', lastReading: 'Error', status: 'Error' });
+      setWaiaholeData({ height: 'Error', lastReading: 'Error', direction: 'Error', status: 'Error' });
     }
-  };
+  }, [getStreamStatus, waiaholeThresholds]);
 
   // Load data on component mount
   useEffect(() => {
     fetchWaikaneData();
     fetchWaiaholeData();
-  }, []);
+  }, [fetchWaikaneData, fetchWaiaholeData]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -134,7 +158,7 @@ export default function StreamMonitorScreen() {
     setTimeout(() => {
       setRefreshing(false);
     }, 500);
-  }, []);
+  }, [fetchWaikaneData, fetchWaiaholeData]);
 
   const openMap = async () => {
     await WebBrowser.openBrowserAsync('https://experience.arcgis.com/experience/60260cda4f744186bbd9c67163b747d3');
@@ -180,9 +204,13 @@ export default function StreamMonitorScreen() {
             <ThemedText style={styles.value}>{waikaneData.lastReading || 'Loading...'}</ThemedText>
           </ThemedView>
           
+          <ThemedView style={styles.infoItem}>
+            <ThemedText style={styles.label}>Stream Direction:</ThemedText>
+            <ThemedText style={styles.value}>{waikaneData.direction || 'Loading...'}</ThemedText>
+          </ThemedView>
           <ThemedView style={styles.statusContainer}>
             <ThemedText style={styles.label}>Status:</ThemedText>
-            <ThemedView style={[styles.statusBar, { backgroundColor: waikaneData.statusColor || (waikaneData.status === 'Loading...' ? '#999999' : '#34C759') }]}>
+            <ThemedView style={[styles.statusBar, { backgroundColor: waikaneData.statusColor || (waikaneData.status === 'Loading...' ? '#999999' : '#34C759') }]}> 
               <ThemedText style={styles.statusText}>{waikaneData.status}</ThemedText>
             </ThemedView>
           </ThemedView>
@@ -221,9 +249,13 @@ export default function StreamMonitorScreen() {
             <ThemedText style={styles.value}>{waiaholeData.lastReading || 'Loading...'}</ThemedText>
           </ThemedView>
           
+          <ThemedView style={styles.infoItem}>
+            <ThemedText style={styles.label}>Stream Direction:</ThemedText>
+            <ThemedText style={styles.value}>{waiaholeData.direction || 'Loading...'}</ThemedText>
+          </ThemedView>
           <ThemedView style={styles.statusContainer}>
             <ThemedText style={styles.label}>Status:</ThemedText>
-            <ThemedView style={[styles.statusBar, { backgroundColor: waiaholeData.statusColor || (waiaholeData.status === 'Loading...' ? '#999999' : '#34C759') }]}>
+            <ThemedView style={[styles.statusBar, { backgroundColor: waiaholeData.statusColor || (waiaholeData.status === 'Loading...' ? '#999999' : '#34C759') }]}> 
               <ThemedText style={styles.statusText}>{waiaholeData.status}</ThemedText>
             </ThemedView>
           </ThemedView>
