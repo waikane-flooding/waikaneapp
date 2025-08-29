@@ -11,7 +11,7 @@ const RainGauge = () => {
   const maxLevel = 8;
 
   useEffect(() => {
-    fetch('http://149.165.169.164:5000/api/rain_data')
+    fetch('http://149.165.172.129:5000/api/rain_data')
       .then(res => res.json())
       .then(data => {
         // Calculate the sum of the "in" column
@@ -122,10 +122,21 @@ const RainGauge = () => {
         </Svg>
       </View>
       <View style={styles.valueContainer}>
-        <Text style={[styles.value, { color: rainLevel !== null ? getColorForLevel(rainLevel) : 'white' }]}>
-          {rainLevel !== null ? `${rainLevel.toFixed(1)} in` : 'Loading...'}
+        <Text style={[styles.value, { color: rainLevel !== null ? getColorForLevel(rainLevel) : 'white' }]}> 
+          {rainLevel !== null ? `${rainLevel.toFixed(2)} in` : 'Loading...'}
         </Text>
-        <Text style={styles.datetime}>{formattedDateTime}</Text>
+        <Text style={styles.datetime}>{
+          rainTime && rainLevel !== null
+            ? `Latest Reading: ${new Date(rainTime).toLocaleString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+              })} HST`
+            : 'Loading...'}
+        </Text>
       </View>
       <View style={styles.legendContainer}>
         <View style={styles.legendItem}>

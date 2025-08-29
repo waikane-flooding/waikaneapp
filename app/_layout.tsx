@@ -141,9 +141,9 @@ const FLOOD_RISK_LEVELS = {
   UNKNOWN: {
     color: '#8E8E93',
     icon: 'help-circle',
-    text: 'N/A',
-    title: 'Data Unavailable',
-    description: 'Unable to assess current risk levels due to missing data.',
+    text: 'Loading',
+    title: 'Loading Data',
+    description: 'Unable to assess current risk levels due to loading data.',
     details: [
       '• Some monitoring systems may be offline',
       '• Check back later for updated information',
@@ -239,10 +239,10 @@ function FloodRiskIndicator() {
     const fetchAllData = async () => {
       try {
         const [waikaneRes, waiaholeRes, tideRes, rainRes] = await Promise.all([
-          fetch('http://149.165.169.164:5000/api/waikane_stream'),
-          fetch('http://149.165.169.164:5000/api/waiahole_stream'),
-          fetch('http://149.165.169.164:5000/api/waikane_tide_curve'),
-          fetch('http://149.165.169.164:5000/api/rain_data')
+          fetch('http://149.165.172.129:5000/api/waikane_stream'),
+          fetch('http://149.165.172.129:5000/api/waiahole_stream'),
+          fetch('http://149.165.172.129:5000/api/waikane_tide_curve'),
+          fetch('http://149.165.172.129:5000/api/rain_data')
         ]);
 
         const [waikaneData, waiaholeData, tideData, rainData] = await Promise.all([
@@ -273,9 +273,21 @@ function FloodRiskIndicator() {
           .filter((d: any) => d.time <= now)
           .sort((a: any, b: any) => b.time - a.time)[0];
 
-        // Process Tide data
-        const nowHST = new Date().toLocaleString("en-US", {timeZone: "Pacific/Honolulu"});
-        const nowHSTDate = new Date(nowHST);
+        // Process Tide data using robust HST logic (match WaikaneTideLevel)
+        function getNowHSTAsLocalDate() {
+          const nowUTC = new Date();
+          nowUTC.setUTCHours(nowUTC.getUTCHours() - 10);
+          // Format as 'YYYY-MM-DDTHH:mm:ss' (API format)
+          const yyyy = nowUTC.getUTCFullYear();
+          const mm = String(nowUTC.getUTCMonth() + 1).padStart(2, '0');
+          const dd = String(nowUTC.getUTCDate()).padStart(2, '0');
+          const hh = String(nowUTC.getUTCHours()).padStart(2, '0');
+          const min = String(nowUTC.getUTCMinutes()).padStart(2, '0');
+          const ss = String(nowUTC.getUTCSeconds()).padStart(2, '0');
+          const hstString = `${yyyy}-${mm}-${dd}T${hh}:${min}:${ss}`;
+          return new Date(hstString);
+        }
+        const nowHSTDate = getNowHSTAsLocalDate();
         const tideLatest = tideData
           .map((item: any) => ({
             time: new Date(item["Datetime"]),

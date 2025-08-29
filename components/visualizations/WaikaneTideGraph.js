@@ -7,7 +7,7 @@ const WaikaneTideGraph = () => {
   const [tideData, setTideData] = useState([]);
 
   useEffect(() => {
-    fetch('http://149.165.169.164:5000/api/waikane_tide_curve')
+    fetch('http://149.165.172.129:5000/api/waikane_tide_curve')
       .then(res => res.json())
       .then(curve => {
         setCurveData(curve);
@@ -18,7 +18,7 @@ const WaikaneTideGraph = () => {
   }, []);
 
   useEffect(() => {
-    fetch('http://149.165.169.164:5000/api/waikane_tides')
+    fetch('http://149.165.172.129:5000/api/waikane_tides')
       .then(res => res.json())
       .then(data => {
         setTideData(data);
@@ -42,7 +42,7 @@ const WaikaneTideGraph = () => {
 
   // Process data
   const sortedCurveData = [...curveData].sort((a, b) => new Date(a["Datetime"]) - new Date(b["Datetime"]));
-  
+
   if (sortedCurveData.length === 0) {
     return (
       <View style={styles.container}>
@@ -53,15 +53,52 @@ const WaikaneTideGraph = () => {
     );
   }
 
-  // Get time range (24 hours before last data point + future data)
-  const lastDataTime = new Date(sortedCurveData[sortedCurveData.length - 1]["Datetime"]);
-  const startTime = new Date(lastDataTime.getTime() - 24 * 60 * 60 * 1000); // 24 hours before last data point
+  // Robust HST 'now' logic: get UTC, subtract 10h, format as HST string, parse as local time
+  function getNowHSTAsLocalDate() {
+    const nowUTC = new Date();
+    nowUTC.setUTCHours(nowUTC.getUTCHours() - 10);
+    // Format as 'YYYY-MM-DDTHH:mm:ss' (API format)
+    const yyyy = nowUTC.getUTCFullYear();
+    const mm = String(nowUTC.getUTCMonth() + 1).padStart(2, '0');
+    const dd = String(nowUTC.getUTCDate()).padStart(2, '0');
+    const hh = String(nowUTC.getUTCHours()).padStart(2, '0');
+    const min = String(nowUTC.getUTCMinutes()).padStart(2, '0');
+    const ss = String(nowUTC.getUTCSeconds()).padStart(2, '0');
+    const hstString = `${yyyy}-${mm}-${dd}T${hh}:${min}:${ss}`;
+    return new Date(hstString);
+  }
+  // Get current HST time as local date
+  const nowHST = getNowHSTAsLocalDate();
+
+  // Calculate 12 AM previous day in HST (start window)
+  const startWindow = new Date(nowHST);
+  startWindow.setHours(0, 0, 0, 0);
+  startWindow.setDate(startWindow.getDate() - 1);
+
+  // Find the latest reading in the filtered window (for end window)
   const filteredData = sortedCurveData.filter(d => {
     const date = new Date(d["Datetime"]);
-    return date >= startTime; // Include all data from 24 hours before last point onwards
+    return date >= startWindow && date <= nowHST;
   });
 
-  if (filteredData.length === 0) {
+  // Find the latest reading in the window
+  let latestReadingDate = nowHST;
+  if (filteredData.length > 0) {
+    latestReadingDate = new Date(filteredData[filteredData.length - 1]["Datetime"]);
+  }
+
+  // Calculate 12 AM the next day after the latest reading (end window)
+  const endWindow = new Date(latestReadingDate);
+  endWindow.setHours(0, 0, 0, 0);
+  endWindow.setDate(endWindow.getDate() + 1);
+
+  // Final data for graph: all points between startWindow and endWindow
+  const displayData = sortedCurveData.filter(d => {
+    const date = new Date(d["Datetime"]);
+    return date >= startWindow && date <= endWindow;
+  });
+
+  if (displayData.length === 0) {
     return (
       <View style={styles.container}>
         <View style={styles.loadingContainer}>
@@ -71,12 +108,13 @@ const WaikaneTideGraph = () => {
     );
   }
 
-  const timeMin = new Date(filteredData[0]["Datetime"]).getTime();
-  const timeMax = new Date(filteredData[filteredData.length - 1]["Datetime"]).getTime();
+  // Always use the full window from 12 AM previous day to 12 AM next day
+  const timeMin = startWindow.getTime();
+  const timeMax = endWindow.getTime();
   const timeRange = timeMax - timeMin;
 
   // Convert data to SVG coordinates
-  const points = filteredData.map(d => {
+  const points = displayData.map(d => {
     const time = new Date(d["Datetime"]).getTime();
     const value = d["Predicted_ft_MSL"];
     
@@ -108,7 +146,7 @@ const WaikaneTideGraph = () => {
   const tidePoints = tideData
     .filter(d => {
       const date = new Date(d["Date Time"]);
-      return date >= startTime; // Use same time range as curve data
+      return date >= startWindow && date <= endWindow; // Use same time range as curve data
     })
     .map(d => {
       const time = new Date(d["Date Time"]).getTime();
@@ -121,41 +159,28 @@ const WaikaneTideGraph = () => {
   const highTides = tidePoints.filter(point => point.type === 'H');
   const lowTides = tidePoints.filter(point => point.type === 'L');
 
-  // Find current time marker on the curve
-  const currentTimeHST = new Date().toLocaleString("en-US", {timeZone: "Pacific/Honolulu"});
-  const currentTime = new Date(currentTimeHST).getTime();
-  let currentTimePoint = null;
-  
-  if (currentTime >= timeMin && currentTime <= timeMax) {
-    // Find the closest data point to current time or interpolate
-    const currentTimeData = filteredData.find(d => {
-      const dataTime = new Date(d["Datetime"]).getTime();
-      return Math.abs(dataTime - currentTime) < 30 * 60 * 1000; // Within 30 minutes
-    });
-    
-    if (currentTimeData) {
-      const time = new Date(currentTimeData["Datetime"]).getTime();
-      const value = currentTimeData["Predicted_ft_MSL"];
-      const x = padding + ((time - timeMin) / timeRange) * graphWidth;
-      const y = padding + ((yMax - value) / yRange) * graphHeight;
-      currentTimePoint = { x, y, time, value };
-    } else {
-      // Interpolate between nearest points
-      const beforePoint = filteredData.filter(d => new Date(d["Datetime"]).getTime() <= currentTime).pop();
-      const afterPoint = filteredData.find(d => new Date(d["Datetime"]).getTime() > currentTime);
-      
-      if (beforePoint && afterPoint) {
-        const beforeTime = new Date(beforePoint["Datetime"]).getTime();
-        const afterTime = new Date(afterPoint["Datetime"]).getTime();
-        const ratio = (currentTime - beforeTime) / (afterTime - beforeTime);
-        const interpolatedValue = beforePoint["Predicted_ft_MSL"] + 
-          (afterPoint["Predicted_ft_MSL"] - beforePoint["Predicted_ft_MSL"]) * ratio;
-        
-        const x = padding + ((currentTime - timeMin) / timeRange) * graphWidth;
-        const y = padding + ((yMax - interpolatedValue) / yRange) * graphHeight;
-        currentTimePoint = { x, y, time: currentTime, value: interpolatedValue };
-      }
+  // Find latest reading marker on the curve (MUST match WaikaneTideLevel logic exactly)
+  let latestReadingPoint = null;
+  let latestReading = null;
+  let latestReadingTime = null;
+  // Sort curveData by Datetime ascending (just in case)
+  const sortedByTime = [...curveData].sort((a, b) => new Date(a["Datetime"]) - new Date(b["Datetime"]));
+  for (let i = sortedByTime.length - 1; i >= 0; i--) {
+    const d = sortedByTime[i];
+    const dataTime = new Date(d["Datetime"]);
+    if (dataTime <= nowHST && !isNaN(dataTime.getTime()) && d["Predicted_ft_MSL"] != null) {
+      latestReading = d;
+      latestReadingTime = dataTime;
+      break;
     }
+  }
+  if (latestReading && latestReadingTime) {
+    const time = latestReadingTime.getTime();
+    const value = latestReading["Predicted_ft_MSL"];
+    // Project this time onto the current graph window
+    const x = padding + ((time - timeMin) / timeRange) * graphWidth;
+    const y = padding + ((yMax - value) / yRange) * graphHeight;
+    latestReadingPoint = { x, y, time, value, datetime: latestReading["Datetime"] };
   }
 
   // Y-axis labels
@@ -184,13 +209,13 @@ const WaikaneTideGraph = () => {
     const hour = currentTick.getHours();
     let timeLabel = '';
     if (hour === 0) {
-      timeLabel = '12:00 AM HST';
+      timeLabel = '12:00 AM';
     } else if (hour === 6) {
-      timeLabel = '6:00 AM HST';
+      timeLabel = '6:00 AM';
     } else if (hour === 12) {
-      timeLabel = '12:00 PM HST';
+      timeLabel = '12:00 PM';
     } else if (hour === 18) {
-      timeLabel = '6:00 PM HST';
+      timeLabel = '6:00 PM';
     } else {
       // Fallback for other hours (shouldn't happen with 6-hour intervals)
       timeLabel = currentTick.toLocaleTimeString('en-US', { 
@@ -336,16 +361,18 @@ const WaikaneTideGraph = () => {
             />
           ))}
           
-          {/* Current time marker */}
-          {currentTimePoint && (
-            <Line
-              x1={currentTimePoint.x}
-              y1={padding}
-              x2={currentTimePoint.x}
-              y2={padding + graphHeight}
-              stroke="#000000"
-              strokeWidth={2}
-            />
+          {/* Latest reading marker */}
+          {latestReadingPoint && (
+            <>
+              <Line
+                x1={latestReadingPoint.x}
+                y1={padding}
+                x2={latestReadingPoint.x}
+                y2={padding + graphHeight}
+                stroke="#000000"
+                strokeWidth={3}
+              />
+            </>
           )}
           
           {/* Y-axis labels */}
@@ -440,8 +467,8 @@ const WaikaneTideGraph = () => {
             <Text style={styles.legendText}>Low Tides</Text>
           </View>
           <View style={styles.legendItem}>
-            <View style={[styles.legendVerticalLine]} />
-            <Text style={styles.legendText}>Current Time</Text>
+            <View style={[styles.legendBar]} />
+            <Text style={styles.legendText}>Latest Reading</Text>
           </View>
         </View>
       </View>
@@ -506,6 +533,13 @@ const styles = StyleSheet.create({
   legendVerticalLine: {
     width: 2,
     height: 12,
+    backgroundColor: '#000000',
+    marginRight: 6,
+    alignSelf: 'center',
+  },
+  legendBar: {
+    width: 3,
+    height: 16,
     backgroundColor: '#000000',
     marginRight: 6,
     alignSelf: 'center',
