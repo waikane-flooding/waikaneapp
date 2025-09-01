@@ -16,6 +16,13 @@ export default function RainConditionsScreen() {
     statusColor?: string;
   }>({ currentRainfall: null, status: 'Loading...' });
 
+  // Add Mauka rain gauge state
+  const [maukaRainData, setMaukaRainData] = useState<{
+    currentRainfall: string | null;
+    status: string;
+    statusColor?: string;
+  }>({ currentRainfall: null, status: 'Loading...' });
+
   const getStatusFromRainfall = (rainfall: number) => {
     if (rainfall >= 0 && rainfall <= 2.8) {
       return { status: 'Normal', color: '#4CAF50' };
@@ -32,13 +39,11 @@ export default function RainConditionsScreen() {
     fetch('http://149.165.172.129:5000/api/rain_data')
       .then(res => res.json())
       .then(data => {
-        // Calculate the sum of the "in" column for total rainfall
+        // Calculate the sum of the "in" column for total rainfall (makai)
         const totalRainfall = data.reduce((sum: number, item: any) => {
           return sum + (item["in"] || 0);
         }, 0);
-        
         const statusInfo = getStatusFromRainfall(totalRainfall);
-        
         setRainData({
           currentRainfall: `${totalRainfall.toFixed(2)} in`,
           status: statusInfo.status,
@@ -53,6 +58,14 @@ export default function RainConditionsScreen() {
           statusColor: '#999999'
         });
       });
+
+    // Placeholder for Mauka rain gauge data
+    // Replace this with actual API call when available
+    setMaukaRainData({
+      currentRainfall: 'N/A',
+      status: 'N/A',
+      statusColor: '#999999'
+    });
   }, []);
 
   useEffect(() => {
@@ -86,17 +99,16 @@ export default function RainConditionsScreen() {
         <ThemedText type="title" style={styles.thinText}>Rain Conditions</ThemedText>
       </ThemedView>
 
+      {/* Makai Rain Gauge Section */}
       <ThemedView style={styles.section}>
         <ThemedText type="subtitle" style={styles.thinText}>
-          <Ionicons name="rainy-outline" size={16} color="#4682B4" /> Current Rain Status
+          <Ionicons name="rainy-outline" size={16} color="#4682B4" /> Makai Rain Gauge
         </ThemedText>
-        
         <ThemedView style={styles.monitorInfo}>
           <ThemedView style={styles.infoItem}>
             <ThemedText style={styles.label}>Current Rainfall:</ThemedText>
             <ThemedText style={styles.value}>{rainData.currentRainfall || 'Loading...'}</ThemedText>
           </ThemedView>
-          
           <ThemedView style={styles.statusContainer}>
             <ThemedText style={styles.label}>Status:</ThemedText>
             <ThemedView style={[styles.statusBar, { backgroundColor: rainData.statusColor || '#999999' }]}>
@@ -106,11 +118,49 @@ export default function RainConditionsScreen() {
         </ThemedView>
       </ThemedView>
 
+      {/* Makai Rain Gauge Chart */}
       <ThemedView style={styles.chartsContainer}>
         <ThemedView style={styles.chartSection}>
-          <ThemedText style={styles.chartTitle}>Amount of Rainfall in the Last Hour</ThemedText>
+          <ThemedText style={styles.chartTitle}>
+            Amount of Rainfall in the Last Hour {'\n'}
+            <ThemedText style={styles.gaugeLabel}>Towards the ocean</ThemedText>
+          </ThemedText>
           <ThemedView style={styles.chartWrapper}>
             <RainGauge />
+          </ThemedView>
+        </ThemedView>
+      </ThemedView>
+
+      {/* Mauka Rain Gauge Section */}
+      <ThemedView style={styles.section}>
+        <ThemedText type="subtitle" style={styles.thinText}>
+          <Ionicons name="rainy-outline" size={16} color="#4682B4" /> Mauka Rain Gauge
+        </ThemedText>
+        <ThemedView style={styles.monitorInfo}>
+          <ThemedView style={styles.infoItem}>
+            <ThemedText style={styles.label}>Current Rainfall:</ThemedText>
+            <ThemedText style={styles.value}>{maukaRainData.currentRainfall || 'Loading...'}</ThemedText>
+          </ThemedView>
+          <ThemedView style={styles.statusContainer}>
+            <ThemedText style={styles.label}>Status:</ThemedText>
+            <ThemedView style={[styles.statusBar, { backgroundColor: maukaRainData.statusColor || '#999999' }]}>
+              <ThemedText style={styles.statusText}>{maukaRainData.status}</ThemedText>
+            </ThemedView>
+          </ThemedView>
+        </ThemedView>
+      </ThemedView>
+
+      {/* Mauka Rain Gauge Chart Placeholder */}
+      <ThemedView style={styles.chartsContainer}>
+        <ThemedView style={styles.chartSection}>
+          <ThemedText style={styles.chartTitle}>
+            Amount of Rainfall in the Last Hour {'\n'}
+            <ThemedText style={styles.gaugeLabel}>Towards the mountain</ThemedText>
+          </ThemedText>
+          <ThemedView style={styles.chartPlaceholder}>
+            <ThemedText style={styles.placeholderText}>
+              Mauka rain gauge graph will be added here.
+            </ThemedText>
           </ThemedView>
         </ThemedView>
       </ThemedView>
@@ -195,6 +245,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 16,
     marginBottom: Platform.OS === 'web' ? 4 : 0,
+    textAlign: 'center',
+  },
+  gaugeLabel: {
+    fontWeight: '400',
+    fontSize: 13,
+    color: '#4682B4',
     textAlign: 'center',
   },
   chartPlaceholder: {
