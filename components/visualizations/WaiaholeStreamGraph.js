@@ -32,8 +32,8 @@ const WaiaholeStreamGraph = () => {
   const graphHeight = chartHeight - 2 * padding;
 
   // Y-axis range - specific to Waiahole Stream (same as WaiaholeStreamHeight thresholds)
-  const yMin = 0;
-  const yMax = 22;
+  const yMin = 6;
+  const yMax = 18;
   const yRange = yMax - yMin;
 
   // Process data
@@ -129,7 +129,7 @@ const WaiaholeStreamGraph = () => {
   }
 
   // Y-axis labels - specific to Waiahole stream heights
-  const yTicks = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22];
+  const yTicks = [6, 8, 10, 12, 14, 16, 18];
   
   // X-axis labels (every 6 hours, aligned to 12 AM, 6 AM, 12 PM, 6 PM)
   const xTicks = [];
@@ -359,7 +359,7 @@ const WaiaholeStreamGraph = () => {
             fontSize="12"
             fill="#FFC107"
           >
-            12 ft
+            12.0 ft
           </SvgText>
           <SvgText
             x={padding + 8}

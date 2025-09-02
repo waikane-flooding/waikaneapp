@@ -6,7 +6,8 @@ import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
-import RainGauge from '@/components/visualizations/RainGauge';
+import MakaiRainGauge from '@/components/visualizations/MakaiRainGauge';
+import MaukaRainGauge from '@/components/visualizations/MaukaRainGauge';
 
 export default function RainConditionsScreen() {
   const [refreshing, setRefreshing] = useState(false);
@@ -126,7 +127,7 @@ export default function RainConditionsScreen() {
             <ThemedText style={styles.gaugeLabel}>Towards the ocean</ThemedText>
           </ThemedText>
           <ThemedView style={styles.chartWrapper}>
-            <RainGauge />
+            <MakaiRainGauge />
           </ThemedView>
         </ThemedView>
       </ThemedView>

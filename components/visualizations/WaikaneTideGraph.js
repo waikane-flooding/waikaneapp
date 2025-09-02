@@ -36,7 +36,7 @@ const WaikaneTideGraph = () => {
   const graphHeight = chartHeight - 2 * padding;
 
   // Y-axis range
-  const yMin = -1;
+  const yMin = -2;
   const yMax = 4;
   const yRange = yMax - yMin;
 
@@ -184,7 +184,7 @@ const WaikaneTideGraph = () => {
   }
 
   // Y-axis labels
-  const yTicks = [-1, 0, 1, 2, 3, 4];
+  const yTicks = [-2, -1, 0, 1, 2, 3, 4];
   
   // X-axis labels (every 6 hours, aligned to 12 AM, 6 AM, 12 PM, 6 PM)
   const xTicks = [];

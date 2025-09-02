@@ -350,7 +350,7 @@ const WaikaneStreamGraph = () => {
             fontSize="10"
             fill="#FFC107"
           >
-            7 ft
+            7.00 ft
           </SvgText>
           <SvgText
             x={padding + 5}
@@ -358,7 +358,7 @@ const WaikaneStreamGraph = () => {
             fontSize="10"
             fill="#F44336"
           >
-            10.8 ft
+            10.80 ft
           </SvgText>
         </Svg>
         

@@ -7,7 +7,7 @@ const WaikaneTideLevel = () => {
   const [tideTime, setTideTime] = useState(null);
   const [animatedValue] = useState(new Animated.Value(0));
 
-  const minLevel = -1;
+  const minLevel = -2;
   const maxLevel = 4;
 
   useEffect(() => {
@@ -81,7 +81,7 @@ const WaikaneTideLevel = () => {
       }) + ' HST'
     : 'Loading...';
 
-  const customTicks = [-1, 0, 1, 2, 3, 4];
+  const customTicks = [-2, -1, 0, 1, 2, 3, 4];
 
   return (
     <View style={styles.container}>
@@ -134,6 +134,44 @@ const WaikaneTideLevel = () => {
               >
                 {`${tick} ft`}
               </SvgText>
+            );
+          })}
+          {/* Threshold tick marks and labels */}
+          {[{ value: minLevel, color: '#4CAF50', label: '0.00 ft' },{ value: greenEnd, color: '#FFC107', label: '2.12 ft' }, { value: yellowEnd, color: '#F44336', label: '2.92 ft' }].map((threshold, idx) => {
+            const percent = (threshold.value - minLevel) / (maxLevel - minLevel);
+            const angle = Math.PI - percent * Math.PI;
+            const tickRadius = 250;
+            const tickLength = 20;
+            const x1 = 350 + tickRadius * Math.cos(angle);
+            const y1 = 280 - tickRadius * Math.sin(angle);
+            const x2 = 350 + (tickRadius - tickLength) * Math.cos(angle);
+            const y2 = 280 - (tickRadius - tickLength) * Math.sin(angle);
+            // Increase labelRadius for more space between tick and label
+            const labelRadius = 200;
+            const lx = 350 + labelRadius * Math.cos(angle);
+            const ly = 280 - labelRadius * Math.sin(angle);
+            return (
+              <React.Fragment key={threshold.value}>
+                {/* Tick mark */}
+                <Path
+                  d={`M${x1},${y1} L${x2},${y2}`}
+                  stroke={threshold.color}
+                  strokeWidth={5}
+                  strokeLinecap="round"
+                />
+                {/* Label */}
+                <SvgText
+                  x={lx}
+                  y={ly}
+                  fontSize="14"
+                  fill={threshold.color}
+                  textAnchor="middle"
+                  alignmentBaseline="middle"
+                  fontWeight="bold"
+                >
+                  {threshold.label}
+                </SvgText>
+              </React.Fragment>
             );
           })}
         </Svg>
@@ -195,7 +233,7 @@ const styles = StyleSheet.create({
   },
   legendContainer: {
     position: 'absolute',
-    bottom: 10,
+    bottom: 40,
     left: 0,
     right: 0,
     flexDirection: 'row',

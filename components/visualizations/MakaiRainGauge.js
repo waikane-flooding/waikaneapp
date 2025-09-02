@@ -2,57 +2,59 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import Svg, { Path, Text as SvgText } from 'react-native-svg';
 
-const WaiaholeStreamHeight = () => {
-  const [streamLevel, setStreamLevel] = useState(null);
-  const [streamTime, setStreamTime] = useState(null);
+const MakaiRainGauge = () => {
+  const [rainLevel, setRainLevel] = useState(null);
+  const [rainTime, setRainTime] = useState(null);
   const [animatedValue] = useState(new Animated.Value(0));
 
-  const minLevel = 6;
-  const maxLevel = 18;
-  const greenEnd = 12;
-  const yellowEnd = 16.4;
+  const minLevel = 0;
+  const maxLevel = 6;
 
-  // Get color based on stream level
+  useEffect(() => {
+    fetch('http://149.165.172.129:5000/api/rain_data')
+      .then(res => res.json())
+      .then(data => {
+        // Calculate the sum of the "in" column
+        const totalRainfall = data.reduce((sum, item) => {
+          return sum + (item["in"] || 0);
+        }, 0);
+        
+        // Get the most recent timestamp for display
+        const timestamps = data
+          .map(item => new Date(item["DateTime"] || item["datetime"] || new Date()))
+          .filter(date => !isNaN(date.getTime()))
+          .sort((a, b) => b - a);
+        
+        const latestTime = timestamps.length > 0 ? timestamps[0] : new Date();
+        
+        setRainLevel(totalRainfall);
+        setRainTime(latestTime);
+        
+        // Animate to new rain level
+        const targetPercent = Math.min((totalRainfall - minLevel) / (maxLevel - minLevel), 1);
+        Animated.timing(animatedValue, {
+          toValue: targetPercent,
+          duration: 2000,
+          useNativeDriver: false,
+        }).start();
+      })
+      .catch(err => {
+        console.error("Failed to load rain data", err);
+      });
+  }, [animatedValue, minLevel, maxLevel]);
+
+  const greenEnd = 2.8;
+  const yellowEnd = 4.1;
+
+  // Get color based on rain level
   const getColorForLevel = (level) => {
-    if (level < greenEnd) return '#4CAF50';
-    if (level < yellowEnd) return '#FFC107';
+    if (level <= greenEnd) return '#4CAF50';
+    if (level <= yellowEnd) return '#FFC107';
     return '#F44336';
   };
 
-  const customTicks = [6, 8, 10, 12, 14, 16, 18];
-
-  useEffect(() => {
-    fetch('http://149.165.172.129:5000/api/waiahole_stream')
-      .then(res => res.json())
-      .then(data => {
-        const now = new Date();
-        const latest = data
-          .filter(d => d.ft != null && d.DateTime)
-          .map(d => ({
-            time: new Date(d.DateTime),
-            value: d.ft
-          }))
-          .filter(d => d.time <= now)
-          .sort((a, b) => b.time - a.time)[0];
-
-        if (latest) {
-          setStreamLevel(latest.value);
-          setStreamTime(latest.time);
-          
-          // Animate to new stream level
-          const targetPercent = (latest.value - minLevel) / (maxLevel - minLevel);
-          Animated.timing(animatedValue, {
-            toValue: targetPercent,
-            duration: 2000,
-            useNativeDriver: false,
-          }).start();
-        }
-      })
-      .catch(err => console.error("Failed to load stream data", err));
-  }, [animatedValue, maxLevel, minLevel]);
-
-  const formattedDateTime = streamTime
-    ? 'Latest Reading: ' + new Date(streamTime).toLocaleString('en-US', {
+  const formattedDateTime = rainTime
+    ? 'Latest Reading: ' + new Date(rainTime).toLocaleString('en-US', {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
@@ -61,6 +63,8 @@ const WaiaholeStreamHeight = () => {
         hour12: true
       }) + ' HST'
     : 'Loading...';
+
+  const customTicks = [0, 1, 2, 3, 4, 5, 6];
 
   return (
     <View style={styles.container}>
@@ -75,9 +79,9 @@ const WaiaholeStreamHeight = () => {
             strokeLinecap="round"
           />
           
-          {/* Animated colored arc based on stream level */}
-          {streamLevel !== null && (() => {
-            const percent = Math.min((streamLevel - minLevel) / (maxLevel - minLevel), 0.98); // Cap at 98%
+          {/* Animated colored arc based on rain level */}
+          {rainLevel !== null && (() => {
+            const percent = Math.min((rainLevel - minLevel) / (maxLevel - minLevel), 0.98); // Cap at 98%
             const angle = percent * Math.PI;
             const endX = 350 + 250 * Math.cos(Math.PI - angle);
             const endY = 280 - 250 * Math.sin(Math.PI - angle);
@@ -86,7 +90,7 @@ const WaiaholeStreamHeight = () => {
             return (
               <Path
                 d={`M100,280 A250,250 0 0,1 ${endX},${endY}`}
-                stroke={getColorForLevel(streamLevel)}
+                stroke={getColorForLevel(rainLevel)}
                 strokeWidth={20}
                 fill="none"
                 strokeLinecap="round"
@@ -111,12 +115,12 @@ const WaiaholeStreamHeight = () => {
                 textAnchor="middle"
                 alignmentBaseline="middle"
               >
-                {`${tick} ft`}
+                {`${tick} in`}
               </SvgText>
             );
           })}
           {/* Threshold tick marks and labels */}
-          {[{ value: minLevel, color: '#4CAF50', label: '0.00 ft' }, { value: greenEnd, color: '#FFC107', label: '12.00 ft' }, { value: yellowEnd, color: '#F44336', label: '16.40 ft' }].map((threshold, idx) => {
+          {[{ value: minLevel, color: '#4CAF50', label: '0.00 in' }, { value: greenEnd, color: '#FFC107', label: '2.80 in' }, { value: yellowEnd, color: '#F44336', label: '4.10 in' }].map((threshold, idx) => {
             const percent = (threshold.value - minLevel) / (maxLevel - minLevel);
             const angle = Math.PI - percent * Math.PI;
             const tickRadius = 250;
@@ -156,10 +160,21 @@ const WaiaholeStreamHeight = () => {
         </Svg>
       </View>
       <View style={styles.valueContainer}>
-        <Text style={[styles.value, { color: streamLevel !== null ? getColorForLevel(streamLevel) : 'white' }]}>
-          {streamLevel !== null ? `${streamLevel.toFixed(2)} ft` : 'Loading...'}
+        <Text style={[styles.value, { color: rainLevel !== null ? getColorForLevel(rainLevel) : 'white' }]}> 
+          {rainLevel !== null ? `${rainLevel.toFixed(2)} in` : 'Loading...'}
         </Text>
-        <Text style={styles.datetime}>{formattedDateTime}</Text>
+        <Text style={styles.datetime}>{
+          rainTime && rainLevel !== null
+            ? `Latest Reading: ${new Date(rainTime).toLocaleString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+              })} HST`
+            : 'Loading...'}
+        </Text>
       </View>
       <View style={styles.legendContainer}>
         <View style={styles.legendItem}>
@@ -183,8 +198,8 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 2,
-    marginBottom: 2,
+    marginTop: 10,
+    marginBottom: 10,
     position: 'relative',
   },
   gaugeContainer: {
@@ -237,4 +252,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default WaiaholeStreamHeight;
+export default MakaiRainGauge;

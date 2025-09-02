@@ -2,15 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import Svg, { Path, Text as SvgText } from 'react-native-svg';
 
-const RainGauge = () => {
+const MaukaRainGauge = () => {
   const [rainLevel, setRainLevel] = useState(null);
   const [rainTime, setRainTime] = useState(null);
   const [animatedValue] = useState(new Animated.Value(0));
 
   const minLevel = 0;
-  const maxLevel = 8;
+  const maxLevel = 6;
 
   useEffect(() => {
+    // REPLACE
     fetch('http://149.165.172.129:5000/api/rain_data')
       .then(res => res.json())
       .then(data => {
@@ -64,7 +65,7 @@ const RainGauge = () => {
       }) + ' HST'
     : 'Loading...';
 
-  const customTicks = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+  const customTicks = [0, 1, 2, 3, 4, 5, 6];
 
   return (
     <View style={styles.container}>
@@ -117,6 +118,44 @@ const RainGauge = () => {
               >
                 {`${tick} in`}
               </SvgText>
+            );
+          })}
+          {/* Threshold tick marks and labels */}
+          {[{ value: minLevel, color: '#4CAF50', label: '0.00 in' }, { value: greenEnd, color: '#FFC107', label: '2.80 in' }, { value: yellowEnd, color: '#F44336', label: '4.10 in' }].map((threshold, idx) => {
+            const percent = (threshold.value - minLevel) / (maxLevel - minLevel);
+            const angle = Math.PI - percent * Math.PI;
+            const tickRadius = 250;
+            const tickLength = 20;
+            const x1 = 350 + tickRadius * Math.cos(angle);
+            const y1 = 280 - tickRadius * Math.sin(angle);
+            const x2 = 350 + (tickRadius - tickLength) * Math.cos(angle);
+            const y2 = 280 - (tickRadius - tickLength) * Math.sin(angle);
+            // Increase labelRadius for more space between tick and label
+            const labelRadius = 200;
+            const lx = 350 + labelRadius * Math.cos(angle);
+            const ly = 280 - labelRadius * Math.sin(angle);
+            return (
+              <React.Fragment key={threshold.value}>
+                {/* Tick mark */}
+                <Path
+                  d={`M${x1},${y1} L${x2},${y2}`}
+                  stroke={threshold.color}
+                  strokeWidth={5}
+                  strokeLinecap="round"
+                />
+                {/* Label */}
+                <SvgText
+                  x={lx}
+                  y={ly}
+                  fontSize="14"
+                  fill={threshold.color}
+                  textAnchor="middle"
+                  alignmentBaseline="middle"
+                  fontWeight="bold"
+                >
+                  {threshold.label}
+                </SvgText>
+              </React.Fragment>
             );
           })}
         </Svg>
@@ -189,7 +228,7 @@ const styles = StyleSheet.create({
   },
   legendContainer: {
     position: 'absolute',
-    bottom: 10,
+    bottom: 40,
     left: 0,
     right: 0,
     flexDirection: 'row',
@@ -214,4 +253,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default RainGauge;
+export default MaukaRainGauge;
