@@ -40,7 +40,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="stream-monitor"
         options={{
-          title: 'Stream Monitor',
+          title: 'Stream',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="water" color={color} size={size} />
           ),
@@ -49,7 +49,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="tide-conditions"
         options={{
-          title: 'Tide Conditions',
+          title: 'Tide',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="time" color={color} size={size} />
           ),
@@ -58,7 +58,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="rain-conditions"
         options={{
-          title: 'Rain Conditions',
+          title: 'Rain',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="rainy" color={color} size={size} />
           ),
@@ -67,18 +67,18 @@ export default function TabLayout() {
       <Tabs.Screen
         name="wave-weather"
         options={{
-          title: 'Weather Conditions',
+          title: 'Weather',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="cloudy" color={color} size={size} />
           ),
         }}
       />
       <Tabs.Screen
-        name="faq"
+        name="about"
         options={{
-          title: 'FAQ',
+          title: 'About',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="help-circle" color={color} size={size} />
+            <Ionicons name="information-circle" color={color} size={size} />
           ),
         }}
       />

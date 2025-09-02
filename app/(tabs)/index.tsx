@@ -50,36 +50,36 @@ const emergencyContacts = [
 
 const quickActions = [
   {
-    title: 'Stream Monitor',
-    subtitle: 'Real-time water levels',
+    title: 'Stream',
+    subtitle: 'Monitor real-time water levels',
     icon: 'water',
     color: '#007AFF',
     bgColor: 'rgba(0, 122, 255, 0.1)',
     route: '/stream-monitor'
   },
   {
-    title: 'Tide Conditions',
-    subtitle: 'Kāneʻohe Bay tides',
+    title: 'Tide',
+    subtitle: 'Kāneʻohe Bay tide conditions',
     icon: 'time',
     color: '#4682B4',
     bgColor: 'rgba(70, 130, 180, 0.1)',
     route: '/tide-conditions'
   },
   {
-    title: 'Weather & Alerts',
-    subtitle: 'Forecasts & warnings',
+    title: 'Weather',
+    subtitle: 'Forecasts & alerts',
     icon: 'cloudy',
     color: '#4169E1',
     bgColor: 'rgba(65, 105, 225, 0.1)',
     route: '/wave-weather'
   },
   {
-    title: 'FAQ & Help',
-    subtitle: 'App guide & support',
-    icon: 'help-circle',
+    title: 'About',
+    subtitle: 'App information & support',
+    icon: 'information-circle', // Changed from 'help-circle' to 'information-circle'
     color: '#4CAF50',
     bgColor: 'rgba(76, 175, 80, 0.1)',
-    route: '/faq'
+    route: '/about'
   }
 ];
 
@@ -156,7 +156,7 @@ export default function HomeScreen() {
       <ThemedView style={styles.supportSection}>
         <ThemedText style={styles.supportText}>
           <Ionicons name="help-circle" size={16} color="#4CAF50" />{' '}
-          Need help? Check the FAQ tab or contact us at{' '}
+          Need help? Check the About tab or contact us at{' '}
           <ExternalLink href="mailto:windwardfloodapp@gmail.com">
             <ThemedText type="link" style={styles.emailText}>windwardfloodapp@gmail.com</ThemedText>
           </ExternalLink>
