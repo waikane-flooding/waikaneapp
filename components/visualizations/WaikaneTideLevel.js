@@ -11,7 +11,7 @@ const WaikaneTideLevel = () => {
   const maxLevel = 4;
 
   useEffect(() => {
-    fetch('http://149.165.172.129:5000/api/waikane_tide_curve')
+    fetch('http://149.165.159.169:5000/api/waikane_tide_curve')
       .then(res => res.json())
       .then(data => {
         // Get current time in HST (UTC-10, no DST)
@@ -137,7 +137,7 @@ const WaikaneTideLevel = () => {
             );
           })}
           {/* Threshold tick marks and labels */}
-          {[{ value: minLevel, color: '#4CAF50', label: '0.00 ft' },{ value: greenEnd, color: '#FFC107', label: '2.12 ft' }, { value: yellowEnd, color: '#F44336', label: '2.92 ft' }].map((threshold, idx) => {
+          {[{ value: minLevel, color: '#4CAF50', label: '-2.00 ft' },{ value: greenEnd, color: '#FFC107', label: '2.12 ft' }, { value: yellowEnd, color: '#F44336', label: '2.92 ft' }].map((threshold, idx) => {
             const percent = (threshold.value - minLevel) / (maxLevel - minLevel);
             const angle = Math.PI - percent * Math.PI;
             const tickRadius = 250;

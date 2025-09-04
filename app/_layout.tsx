@@ -224,25 +224,28 @@ function FloodRiskIndicator() {
     waikaneStream: number | null;
     waiaholeStream: number | null;
     tide: number | null;
-    rain: number | null;
+    makaiRain: number | null;
+    maukaRain: number | null;
     lastUpdated: Date | null;
   }>({
     waikaneStream: null,
     waiaholeStream: null,
     tide: null,
-    rain: null,
+    makaiRain: null,
+    maukaRain: null,
     lastUpdated: null,
   });
 
   // Fetch data from all sources
   useEffect(() => {
+
     const fetchAllData = async () => {
       try {
         const [waikaneRes, waiaholeRes, tideRes, rainRes] = await Promise.all([
-          fetch('http://149.165.172.129:5000/api/waikane_stream'),
-          fetch('http://149.165.172.129:5000/api/waiahole_stream'),
-          fetch('http://149.165.172.129:5000/api/waikane_tide_curve'),
-          fetch('http://149.165.172.129:5000/api/rain_data')
+          fetch('http://149.165.159.169:5000/api/waikane_stream'),
+          fetch('http://149.165.159.169:5000/api/waiahole_stream'),
+          fetch('http://149.165.159.169:5000/api/waikane_tide_curve'),
+          fetch('http://149.165.159.169:5000/api/rain_data')
         ]);
 
         const [waikaneData, waiaholeData, tideData, rainData] = await Promise.all([
@@ -297,15 +300,16 @@ function FloodRiskIndicator() {
           .sort((a: any, b: any) => b.time - a.time)[0];
 
         // Process Rain data
-        const totalRainfall = rainData.reduce((sum: number, item: any) => {
-          return sum + (item["in"] || 0);
-        }, 0);
+        const rainRows = Array.isArray(rainData) ? rainData : [];
+        const makaiRain = rainRows.find((d: any) => d.Name && d.Rainfall != null && d.Name.toLowerCase().includes('makai'));
+        const maukaRain = rainRows.find((d: any) => d.Name && d.Rainfall != null && d.Name.toLowerCase().includes('mauka'));
 
         setRiskData({
           waikaneStream: waikaneLatest?.value || null,
           waiaholeStream: waiaholeLatest?.value || null,
           tide: tideLatest?.height || null,
-          rain: totalRainfall,
+          makaiRain: makaiRain?.Rainfall ?? null,
+          maukaRain: maukaRain?.Rainfall ?? null,
           lastUpdated: new Date(),
         });
 
@@ -320,11 +324,15 @@ function FloodRiskIndicator() {
     return () => clearInterval(interval);
   }, []);
 
+  // Use Makai and Mauka rainfall for risk assessment (choose max for overall risk)
   const currentRiskLevel = assessOverallRisk(
     riskData.waikaneStream,
     riskData.waiaholeStream, 
     riskData.tide,
-    riskData.rain
+    Math.max(
+      riskData.makaiRain ?? 0,
+      riskData.maukaRain ?? 0
+    )
   ) as keyof typeof FLOOD_RISK_LEVELS;
   const risk = FLOOD_RISK_LEVELS[currentRiskLevel];
 
@@ -397,48 +405,59 @@ function FloodRiskIndicator() {
             {/* Current Readings Section */}
             <View style={styles.readingsSection}>
               <ThemedText style={styles.readingsTitle}>Current Readings:</ThemedText>
-              
+
               <View style={styles.readingItem}>
                 <ThemedText style={styles.readingLabel}>Waikane Stream:</ThemedText>
-                <ThemedText style={[styles.readingValue, { 
-                  color: riskData.waikaneStream ? 
-                    (assessWaikaneStreamRisk(riskData.waikaneStream) === 'HIGH' ? '#FF3B30' : 
-                     assessWaikaneStreamRisk(riskData.waikaneStream) === 'MEDIUM' ? '#FF9500' : '#34C759') : '#8E8E93' 
-                }]}>
+                <ThemedText style={[styles.readingValue, {
+                  color: riskData.waikaneStream ?
+                    (assessWaikaneStreamRisk(riskData.waikaneStream) === 'HIGH' ? '#FF3B30' :
+                      assessWaikaneStreamRisk(riskData.waikaneStream) === 'MEDIUM' ? '#FF9500' : '#34C759') : '#8E8E93'
+                }]}> 
                   {riskData.waikaneStream ? `${riskData.waikaneStream.toFixed(2)} ft` : 'No data'}
                 </ThemedText>
               </View>
 
               <View style={styles.readingItem}>
                 <ThemedText style={styles.readingLabel}>Waiahole Stream:</ThemedText>
-                <ThemedText style={[styles.readingValue, { 
-                  color: riskData.waiaholeStream ? 
-                    (assessWaiaholeStreamRisk(riskData.waiaholeStream) === 'HIGH' ? '#FF3B30' : 
-                     assessWaiaholeStreamRisk(riskData.waiaholeStream) === 'MEDIUM' ? '#FF9500' : '#34C759') : '#8E8E93' 
-                }]}>
+                <ThemedText style={[styles.readingValue, {
+                  color: riskData.waiaholeStream ?
+                    (assessWaiaholeStreamRisk(riskData.waiaholeStream) === 'HIGH' ? '#FF3B30' :
+                      assessWaiaholeStreamRisk(riskData.waiaholeStream) === 'MEDIUM' ? '#FF9500' : '#34C759') : '#8E8E93'
+                }]}> 
                   {riskData.waiaholeStream ? `${riskData.waiaholeStream.toFixed(2)} ft` : 'No data'}
                 </ThemedText>
               </View>
 
               <View style={styles.readingItem}>
                 <ThemedText style={styles.readingLabel}>Waikane Tide:</ThemedText>
-                <ThemedText style={[styles.readingValue, { 
-                  color: riskData.tide ? 
-                    (assessTideRisk(riskData.tide) === 'HIGH' ? '#FF3B30' : 
-                     assessTideRisk(riskData.tide) === 'MEDIUM' ? '#FF9500' : '#34C759') : '#8E8E93' 
-                }]}>
+                <ThemedText style={[styles.readingValue, {
+                  color: riskData.tide ?
+                    (assessTideRisk(riskData.tide) === 'HIGH' ? '#FF3B30' :
+                      assessTideRisk(riskData.tide) === 'MEDIUM' ? '#FF9500' : '#34C759') : '#8E8E93'
+                }]}> 
                   {riskData.tide ? `${riskData.tide.toFixed(2)} ft` : 'No data'}
                 </ThemedText>
               </View>
 
               <View style={styles.readingItem}>
-                <ThemedText style={styles.readingLabel}>Rainfall:</ThemedText>
-                <ThemedText style={[styles.readingValue, { 
-                  color: riskData.rain !== null ? 
-                    (assessRainRisk(riskData.rain) === 'HIGH' ? '#FF3B30' : 
-                     assessRainRisk(riskData.rain) === 'MEDIUM' ? '#FF9500' : '#34C759') : '#8E8E93' 
-                }]}>
-                  {riskData.rain !== null ? `${riskData.rain.toFixed(2)} in` : 'No data'}
+                <ThemedText style={styles.readingLabel}>Makai Rainfall:</ThemedText>
+                <ThemedText style={[styles.readingValue, {
+                  color: riskData.makaiRain !== null ?
+                    (riskData.makaiRain <= 2.8 ? '#34C759' :
+                      riskData.makaiRain <= 4.1 ? '#FF9500' : '#FF3B30') : '#8E8E93'
+                }]}> 
+                  {riskData.makaiRain !== null ? `${riskData.makaiRain.toFixed(2)} in` : 'No data'}
+                </ThemedText>
+              </View>
+
+              <View style={styles.readingItem}>
+                <ThemedText style={styles.readingLabel}>Mauka Rainfall:</ThemedText>
+                <ThemedText style={[styles.readingValue, {
+                  color: riskData.maukaRain !== null ?
+                    (riskData.maukaRain <= 3.11 ? '#34C759' :
+                      riskData.maukaRain <= 4.54 ? '#FF9500' : '#FF3B30') : '#8E8E93'
+                }]}> 
+                  {riskData.maukaRain !== null ? `${riskData.maukaRain.toFixed(2)} in` : 'No data'}
                 </ThemedText>
               </View>
             </View>

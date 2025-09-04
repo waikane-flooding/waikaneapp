@@ -22,7 +22,7 @@ const WaiaholeStreamHeight = () => {
   const customTicks = [6, 8, 10, 12, 14, 16, 18];
 
   useEffect(() => {
-    fetch('http://149.165.172.129:5000/api/waiahole_stream')
+    fetch('http://149.165.159.169:5000/api/waiahole_stream')
       .then(res => res.json())
       .then(data => {
         const now = new Date();
@@ -116,7 +116,7 @@ const WaiaholeStreamHeight = () => {
             );
           })}
           {/* Threshold tick marks and labels */}
-          {[{ value: minLevel, color: '#4CAF50', label: '0.00 ft' }, { value: greenEnd, color: '#FFC107', label: '12.00 ft' }, { value: yellowEnd, color: '#F44336', label: '16.40 ft' }].map((threshold, idx) => {
+          {[{ value: minLevel, color: '#4CAF50', label: '6.00 ft' }, { value: greenEnd, color: '#FFC107', label: '12.00 ft' }, { value: yellowEnd, color: '#F44336', label: '16.40 ft' }].map((threshold, idx) => {
             const percent = (threshold.value - minLevel) / (maxLevel - minLevel);
             const angle = Math.PI - percent * Math.PI;
             const tickRadius = 250;

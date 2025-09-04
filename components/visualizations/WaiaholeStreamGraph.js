@@ -14,7 +14,7 @@ const WaiaholeStreamGraph = () => {
   const [streamData, setStreamData] = useState([]);
 
   useEffect(() => {
-    fetch('http://149.165.172.129:5000/api/waiahole_stream')
+    fetch('http://149.165.159.169:5000/api/waiahole_stream')
       .then(res => res.json())
       .then(data => {
         setStreamData(data);
@@ -359,7 +359,7 @@ const WaiaholeStreamGraph = () => {
             fontSize="12"
             fill="#FFC107"
           >
-            12.0 ft
+            12.00 ft
           </SvgText>
           <SvgText
             x={padding + 8}
@@ -367,7 +367,7 @@ const WaiaholeStreamGraph = () => {
             fontSize="12"
             fill="#F44336"
           >
-            16.4 ft
+            16.40 ft
           </SvgText>
         </Svg>
         

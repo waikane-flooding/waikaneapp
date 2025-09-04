@@ -52,8 +52,8 @@ export default function StreamMonitorScreen() {
   const fetchWaikaneData = useCallback(async () => {
     try {
       const [streamRes, trendRes] = await Promise.all([
-        fetch('http://149.165.172.129:5000/api/waikane_stream'),
-        fetch('http://149.165.172.129:5000/api/stream_trend')
+        fetch('http://149.165.159.169:5000/api/waikane_stream'),
+        fetch('http://149.165.159.169:5000/api/stream_trend')
       ]);
       const data = await streamRes.json();
       const trendData = await trendRes.json();
@@ -100,8 +100,8 @@ export default function StreamMonitorScreen() {
   const fetchWaiaholeData = useCallback(async () => {
     try {
       const [streamRes, trendRes] = await Promise.all([
-        fetch('http://149.165.172.129:5000/api/waiahole_stream'),
-        fetch('http://149.165.172.129:5000/api/stream_trend')
+        fetch('http://149.165.159.169:5000/api/waiahole_stream'),
+        fetch('http://149.165.159.169:5000/api/stream_trend')
       ]);
       const data = await streamRes.json();
       const trendData = await trendRes.json();

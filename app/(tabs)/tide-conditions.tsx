@@ -38,8 +38,8 @@ export default function TideConditionsScreen() {
     try {
       // Fetch tide curve and tide predictions only
       const [curveResponse, tidesResponse] = await Promise.all([
-        fetch('http://149.165.172.129:5000/api/waikane_tide_curve'),
-        fetch('http://149.165.172.129:5000/api/waikane_tides')
+        fetch('http://149.165.159.169:5000/api/waikane_tide_curve'),
+        fetch('http://149.165.159.169:5000/api/waikane_tides')
       ]);
 
       const curveData = await curveResponse.json();

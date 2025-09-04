@@ -6,7 +6,7 @@ const WaikaneStreamGraph = () => {
   const [streamData, setStreamData] = useState([]);
 
   useEffect(() => {
-    fetch('http://149.165.172.129:5000/api/waikane_stream')
+    fetch('http://149.165.159.169:5000/api/waikane_stream')
       .then(res => res.json())
       .then(data => {
         setStreamData(data);

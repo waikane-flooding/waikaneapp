@@ -15,21 +15,37 @@ export default function RainConditionsScreen() {
     currentRainfall: string | null;
     status: string;
     statusColor?: string;
-  }>({ currentRainfall: null, status: 'Loading...' });
+    lastReading?: string | null;
+  }>({ currentRainfall: null, status: 'Loading...', lastReading: null });
 
   // Add Mauka rain gauge state
   const [maukaRainData, setMaukaRainData] = useState<{
     currentRainfall: string | null;
     status: string;
     statusColor?: string;
-  }>({ currentRainfall: null, status: 'Loading...' });
+    lastReading?: string | null;
+  }>({ currentRainfall: null, status: 'Loading...', lastReading: null });
 
-  const getStatusFromRainfall = (rainfall: number) => {
+  // Makai: 0-2.80 (green), 2.80-4.10 (yellow), 4.10-6 (red)
+  const getMakaiStatus = (rainfall: number) => {
     if (rainfall >= 0 && rainfall <= 2.8) {
       return { status: 'Normal', color: '#4CAF50' };
     } else if (rainfall > 2.8 && rainfall <= 4.1) {
       return { status: 'Warning', color: '#FFC107' };
-    } else if (rainfall > 4.1 && rainfall <= 8) {
+    } else if (rainfall > 4.1 && rainfall <= 6) {
+      return { status: 'Danger', color: '#F44336' };
+    } else {
+      return { status: 'Unknown', color: '#999999' };
+    }
+  };
+
+  // Mauka: 0-3.11 (green), 3.11-4.54 (yellow), 4.54-7 (red)
+  const getMaukaStatus = (rainfall: number) => {
+    if (rainfall >= 0 && rainfall <= 3.11) {
+      return { status: 'Normal', color: '#4CAF50' };
+    } else if (rainfall > 3.11 && rainfall <= 4.54) {
+      return { status: 'Warning', color: '#FFC107' };
+    } else if (rainfall > 4.54 && rainfall <= 7) {
       return { status: 'Danger', color: '#F44336' };
     } else {
       return { status: 'Unknown', color: '#999999' };
@@ -37,19 +53,66 @@ export default function RainConditionsScreen() {
   };
 
   const fetchRainData = useCallback(() => {
-    fetch('http://149.165.172.129:5000/api/rain_data')
+    fetch('http://149.165.159.169:5000/api/rain_data')
       .then(res => res.json())
       .then(data => {
-        // Calculate the sum of the "in" column for total rainfall (makai)
-        const totalRainfall = data.reduce((sum: number, item: any) => {
-          return sum + (item["in"] || 0);
-        }, 0);
-        const statusInfo = getStatusFromRainfall(totalRainfall);
-        setRainData({
-          currentRainfall: `${totalRainfall.toFixed(2)} in`,
-          status: statusInfo.status,
-          statusColor: statusInfo.color
-        });
+        // Makai
+        const makaiEntry = data.find((item: any) => item.Name === "Makai");
+        if (makaiEntry) {
+          const rainfall = Number(makaiEntry.Rainfall) || 0;
+          const statusInfo = getMakaiStatus(rainfall);
+          let lastReading = null;
+          if (makaiEntry.DateTime) {
+            const date = new Date(makaiEntry.DateTime);
+            lastReading = date.toLocaleString('en-US', {
+              hour: 'numeric',
+              minute: '2-digit',
+              hour12: true
+            }) + ' HST';
+          }
+          setRainData({
+            currentRainfall: `${rainfall.toFixed(2)} in`,
+            status: statusInfo.status,
+            statusColor: statusInfo.color,
+            lastReading
+          });
+        } else {
+          setRainData({
+            currentRainfall: 'No data',
+            status: 'Unavailable',
+            statusColor: '#999999',
+            lastReading: null
+          });
+        }
+
+        // Mauka
+        const maukaEntry = data.find((item: any) => item.Name === "Mauka");
+        if (maukaEntry) {
+          const rainfall = Number(maukaEntry.Rainfall) || 0;
+          const statusInfo = getMaukaStatus(rainfall);
+          let lastReading = null;
+          if (maukaEntry.DateTime) {
+            const date = new Date(maukaEntry.DateTime);
+            lastReading = date.toLocaleString('en-US', {
+              hour: 'numeric',
+              minute: '2-digit',
+              hour12: true
+            }) + ' HST';
+          }
+          setMaukaRainData({
+            currentRainfall: `${rainfall.toFixed(2)} in`,
+            status: statusInfo.status,
+            statusColor: statusInfo.color,
+            lastReading
+          });
+        } else {
+          setMaukaRainData({
+            currentRainfall: 'No data',
+            status: 'Unavailable',
+            statusColor: '#999999',
+            lastReading: null
+          });
+        }
       })
       .catch(err => {
         console.error("Failed to load rain data", err);
@@ -58,15 +121,12 @@ export default function RainConditionsScreen() {
           status: 'Error',
           statusColor: '#999999'
         });
+        setMaukaRainData({
+          currentRainfall: 'Error loading data',
+          status: 'Error',
+          statusColor: '#999999'
+        });
       });
-
-    // Placeholder for Mauka rain gauge data
-    // Replace this with actual API call when available
-    setMaukaRainData({
-      currentRainfall: 'N/A',
-      status: 'N/A',
-      statusColor: '#999999'
-    });
   }, []);
 
   useEffect(() => {
@@ -110,6 +170,10 @@ export default function RainConditionsScreen() {
             <ThemedText style={styles.label}>Current Rainfall:</ThemedText>
             <ThemedText style={styles.value}>{rainData.currentRainfall || 'Loading...'}</ThemedText>
           </ThemedView>
+          <ThemedView style={styles.infoItem}>
+            <ThemedText style={styles.label}>Last Reading:</ThemedText>
+            <ThemedText style={styles.value}>{rainData.lastReading || 'Loading...'}</ThemedText>
+          </ThemedView>
           <ThemedView style={styles.statusContainer}>
             <ThemedText style={styles.label}>Status:</ThemedText>
             <ThemedView style={[styles.statusBar, { backgroundColor: rainData.statusColor || '#999999' }]}>
@@ -142,6 +206,10 @@ export default function RainConditionsScreen() {
             <ThemedText style={styles.label}>Current Rainfall:</ThemedText>
             <ThemedText style={styles.value}>{maukaRainData.currentRainfall || 'Loading...'}</ThemedText>
           </ThemedView>
+          <ThemedView style={styles.infoItem}>
+            <ThemedText style={styles.label}>Last Reading:</ThemedText>
+            <ThemedText style={styles.value}>{maukaRainData.lastReading || 'Loading...'}</ThemedText>
+          </ThemedView>
           <ThemedView style={styles.statusContainer}>
             <ThemedText style={styles.label}>Status:</ThemedText>
             <ThemedView style={[styles.statusBar, { backgroundColor: maukaRainData.statusColor || '#999999' }]}>
@@ -151,17 +219,15 @@ export default function RainConditionsScreen() {
         </ThemedView>
       </ThemedView>
 
-      {/* Mauka Rain Gauge Chart Placeholder */}
+      {/* Mauka Rain Gauge Chart */}
       <ThemedView style={styles.chartsContainer}>
         <ThemedView style={styles.chartSection}>
           <ThemedText style={styles.chartTitle}>
             Amount of Rainfall in the Last Hour {'\n'}
             <ThemedText style={styles.gaugeLabel}>Towards the mountain</ThemedText>
           </ThemedText>
-          <ThemedView style={styles.chartPlaceholder}>
-            <ThemedText style={styles.placeholderText}>
-              Mauka rain gauge graph will be added here.
-            </ThemedText>
+          <ThemedView style={styles.chartWrapper}>
+            <MaukaRainGauge />
           </ThemedView>
         </ThemedView>
       </ThemedView>
