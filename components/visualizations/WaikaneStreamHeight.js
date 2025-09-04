@@ -52,7 +52,7 @@ const WaikaneStreamHeight = () => {
   }, [animatedValue, maxLevel, minLevel]);
 
   const formattedDateTime = streamTime
-    ? 'Latest Reading: ' + new Date(streamTime).toLocaleString('en-US', {
+    ? 'Last Reading: ' + new Date(streamTime).toLocaleString('en-US', {
         month: 'short',
         day: 'numeric',
         year: 'numeric',

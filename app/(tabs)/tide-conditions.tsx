@@ -109,7 +109,13 @@ export default function TideConditionsScreen() {
 
         let direction = 'Unknown';
         if (nextFutureTide) {
-          direction = nextFutureTide.height > currentTide.height ? 'Rising' : 'Falling';
+          if (nextFutureTide.height > currentTide.height) {
+            direction = 'Rising';
+          } else if (nextFutureTide.height < currentTide.height) {
+            direction = 'Falling';
+          } else {
+            direction = 'Stable';
+          }
         }
 
         // Format the latest reading time for display

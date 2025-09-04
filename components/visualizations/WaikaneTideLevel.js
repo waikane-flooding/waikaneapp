@@ -70,7 +70,7 @@ const WaikaneTideLevel = () => {
   };
 
   const formattedDateTime = tideTime
-    ? 'Latest Reading: ' + new Date(tideTime).toLocaleString('en-US', {
+    ? 'Last Reading: ' + new Date(tideTime).toLocaleString('en-US', {
         timeZone: 'Pacific/Honolulu',
         month: 'short',
         day: 'numeric',

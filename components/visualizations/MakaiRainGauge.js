@@ -51,7 +51,7 @@ const MakaiRainGauge = () => {
   };
 
   const formattedDateTime = rainTime
-    ? 'Latest Reading: ' + new Date(rainTime).toLocaleString('en-US', {
+    ? 'Last Reading: ' + new Date(rainTime).toLocaleString('en-US', {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
@@ -162,7 +162,7 @@ const MakaiRainGauge = () => {
         </Text>
         <Text style={styles.datetime}>{
           rainTime && rainLevel !== null
-            ? `Latest Reading: ${new Date(rainTime).toLocaleString('en-US', {
+            ? `Last Reading: ${new Date(rainTime).toLocaleString('en-US', {
                 month: 'short',
                 day: 'numeric',
                 year: 'numeric',

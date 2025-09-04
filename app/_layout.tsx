@@ -73,7 +73,7 @@ const assessTideRisk = (level: number | null): string => {
   return 'HIGH';
 };
 
-const assessRainRisk = (level: number | null): string => {
+const assessMakaiRainRisk = (level: number | null): string => {
   if (!level) return 'UNKNOWN';
   const greenEnd = 2.8;
   const yellowEnd = 4.1;
@@ -82,13 +82,29 @@ const assessRainRisk = (level: number | null): string => {
   return 'HIGH';
 };
 
+const assessMaukaRainRisk = (level: number | null): string => {
+  if (!level) return 'UNKNOWN';
+  const greenEnd = 3.11;
+  const yellowEnd = 4.54;
+  if (level <= greenEnd) return 'LOW';
+  if (level <= yellowEnd) return 'MEDIUM';
+  return 'HIGH';
+};
+
 // Overall risk assessment
-const assessOverallRisk = (waikaneStream: number | null, waiaholeStream: number | null, tide: number | null, rain: number | null): string => {
+const assessOverallRisk = (
+  waikaneStream: number | null,
+  waiaholeStream: number | null,
+  tide: number | null,
+  makaiRain: number | null,
+  maukaRain: number | null
+): string => {
   const risks = [
     assessWaikaneStreamRisk(waikaneStream),
     assessWaiaholeStreamRisk(waiaholeStream),
     assessTideRisk(tide),
-    assessRainRisk(rain)
+    assessMakaiRainRisk(makaiRain),
+    assessMaukaRainRisk(maukaRain)
   ].filter(risk => risk !== 'UNKNOWN');
 
   if (risks.length === 0) return 'UNKNOWN';
@@ -324,15 +340,13 @@ function FloodRiskIndicator() {
     return () => clearInterval(interval);
   }, []);
 
-  // Use Makai and Mauka rainfall for risk assessment (choose max for overall risk)
+  // Use both Makai and Mauka rainfall for risk assessment
   const currentRiskLevel = assessOverallRisk(
     riskData.waikaneStream,
     riskData.waiaholeStream, 
     riskData.tide,
-    Math.max(
-      riskData.makaiRain ?? 0,
-      riskData.maukaRain ?? 0
-    )
+    riskData.makaiRain,
+    riskData.maukaRain
   ) as keyof typeof FLOOD_RISK_LEVELS;
   const risk = FLOOD_RISK_LEVELS[currentRiskLevel];
 
@@ -443,8 +457,8 @@ function FloodRiskIndicator() {
                 <ThemedText style={styles.readingLabel}>Makai Rainfall:</ThemedText>
                 <ThemedText style={[styles.readingValue, {
                   color: riskData.makaiRain !== null ?
-                    (riskData.makaiRain <= 2.8 ? '#34C759' :
-                      riskData.makaiRain <= 4.1 ? '#FF9500' : '#FF3B30') : '#8E8E93'
+                    (assessMakaiRainRisk(riskData.makaiRain) === 'HIGH' ? '#FF3B30' :
+                      assessMakaiRainRisk(riskData.makaiRain) === 'MEDIUM' ? '#FF9500' : '#34C759') : '#8E8E93'
                 }]}> 
                   {riskData.makaiRain !== null ? `${riskData.makaiRain.toFixed(2)} in` : 'No data'}
                 </ThemedText>
@@ -454,8 +468,8 @@ function FloodRiskIndicator() {
                 <ThemedText style={styles.readingLabel}>Mauka Rainfall:</ThemedText>
                 <ThemedText style={[styles.readingValue, {
                   color: riskData.maukaRain !== null ?
-                    (riskData.maukaRain <= 3.11 ? '#34C759' :
-                      riskData.maukaRain <= 4.54 ? '#FF9500' : '#FF3B30') : '#8E8E93'
+                    (assessMaukaRainRisk(riskData.maukaRain) === 'HIGH' ? '#FF3B30' :
+                      assessMaukaRainRisk(riskData.maukaRain) === 'MEDIUM' ? '#FF9500' : '#34C759') : '#8E8E93'
                 }]}> 
                   {riskData.maukaRain !== null ? `${riskData.maukaRain.toFixed(2)} in` : 'No data'}
                 </ThemedText>
