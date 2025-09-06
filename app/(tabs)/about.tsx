@@ -74,11 +74,22 @@ export default function AboutScreen() {
           </ThemedView>
           <ThemedView style={styles.row}>
             <Ionicons name="water-outline" size={18} color="#007AFF" style={styles.icon} />
-            <ThemedText>Stream monitoring: Real-time data when available</ThemedText>
+            <ThemedText>Stream monitoring: Real-time data from USGS</ThemedText>
           </ThemedView>
           <ThemedView style={styles.row}>
             <Ionicons name="time-outline" size={18} color="#007AFF" style={styles.icon} />
             <ThemedText>Tide information: Current NOAA predictions</ThemedText>
+          </ThemedView>
+          <ThemedText style={styles.thinText}>
+            For detailed information on data sources and methodology used in this app, please see the linked documentation below
+          </ThemedText>
+          <ThemedView style={styles.row}>
+            <Ionicons name="document-attach-outline" size={18} color="#007AFF" style={styles.icon} />
+            <ExternalLink href="https://drive.google.com/file/d/1XxqdHgw4vJnn4HDAJypEXkAB__A6UEih/view?usp=sharing">
+              <ThemedText style={{ textDecorationLine: 'underline', color: '#007AFF' }}>
+                View full Data & Methods documentation (Google Drive)
+              </ThemedText>
+            </ExternalLink>
           </ThemedView>
         </ThemedView>
       </ThemedView>
@@ -114,7 +125,7 @@ export default function AboutScreen() {
       <ThemedView style={styles.section}>
         <ThemedText type="subtitle" style={styles.sectionTitle}>Contact & Feedback</ThemedText>
         <ThemedText style={styles.thinText}>
-          For questions, support, or feedback about app accuracy:
+          For questions, support, or feedback about app accuracy and features, please reach out via email or the feedback form below
           {'\n\n'}
           <Ionicons name="send-outline" size={16} color="#007AFF" />{' '}
           <ExternalLink href="mailto:windwardfloodapp@gmail.com">
@@ -126,9 +137,6 @@ export default function AboutScreen() {
             <ThemedText type="link" style={styles.thinText}>Submit Feedback Form</ThemedText>
           </ExternalLink>
           {'\n'}
-          <ThemedText style={[styles.thinText, {fontSize: 12, color: '#666', fontStyle: 'italic'}]}>
-            Share comments about app accuracy and general feedback
-          </ThemedText>
         </ThemedText>
       </ThemedView>
 
