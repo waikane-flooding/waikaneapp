@@ -92,7 +92,10 @@ export default function HomeScreen() {
           source={require('@/assets/images/windward-header.jpg')}
           style={styles.headerImage}
         />
-      }>
+      }
+      style={{ backgroundColor: '#0a223a' }} // set to blue
+      contentContainerStyle={{ backgroundColor: '#0a223a' }} // set to blue
+    >
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title" style={styles.thinText}>Waikāne Flood Tracker</ThemedText>
       </ThemedView>
@@ -130,16 +133,17 @@ export default function HomeScreen() {
         </ThemedView>
       </ThemedView>
 
-      <ThemedView style={styles.section}>
-        <ThemedText type="subtitle" style={styles.sectionTitle}>
+      <ThemedView style={[styles.section, { backgroundColor: 'transparent', paddingHorizontal: 0, paddingVertical: 0 }]}>
+        <ThemedText type="subtitle" style={[styles.sectionTitle, { color: '#fff' }]}>
           <Ionicons name="shield" size={18} color="#FF3B30" /> Emergency Contacts
         </ThemedText>
-        
         {emergencyContacts.map((contact, index) => (
-          <ThemedView key={index} style={styles.contactCard}>
+          <ThemedView key={index} style={{ marginTop: 8, paddingHorizontal: 16, paddingVertical: 8 }}>
             <ThemedView style={styles.contactHeaderColumn}>
               <ExternalLink href={contact.website as any}>
-                <ThemedText style={styles.contactName} type="link">{contact.name}</ThemedText>
+                <ThemedText style={[styles.contactName, { color: '#4EA1FF' }]} type="link">
+                  {contact.name}
+                </ThemedText>
               </ExternalLink>
               <ThemedText 
                 style={styles.contactNumberBelow}
@@ -149,6 +153,9 @@ export default function HomeScreen() {
               </ThemedText>
             </ThemedView>
             <ThemedText style={styles.contactDescription}>{contact.description}</ThemedText>
+            {index < emergencyContacts.length - 1 && (
+              <ThemedView style={{ height: 2, backgroundColor: '#09305a', marginVertical: 8 }} />
+            )}
           </ThemedView>
         ))}
       </ThemedView>
