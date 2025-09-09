@@ -1,5 +1,4 @@
 //home screen
-import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { StyleSheet } from 'react-native';
 
