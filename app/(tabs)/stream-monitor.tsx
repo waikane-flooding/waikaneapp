@@ -218,11 +218,10 @@ export default function StreamMonitorScreen() {
       </ThemedView>
 
       <ThemedView style={styles.chartsContainer}>
-        {/* Title OUTSIDE the dark container */}
+        {/* Title OUTSIDE any container */}
         <ThemedText style={styles.chartTitle}>Waikāne Stream Height Gauge</ThemedText>
-        <ThemedView style={styles.gaugeContainer}>
-          <WaikaneStreamHeight />
-        </ThemedView>
+        {/* Remove the dark blue/gray container */}
+        <WaikaneStreamHeight />
       </ThemedView>
       
       <ThemedView style={styles.chartSection}>

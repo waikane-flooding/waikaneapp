@@ -1,11 +1,50 @@
 import { Ionicons } from '@expo/vector-icons';
-import { StyleSheet } from 'react-native';
+import { Linking, StyleSheet } from 'react-native';
 
-import { ExternalLink } from '@/components/ExternalLink';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
+import { ExternalLink } from '@/components/ExternalLink';
+
+const emergencyContacts = [
+  {
+    name: "Honolulu Emergency Services",
+    number: "911",
+    description: "For immediate emergency response",
+    website: "https://emergencyservices.honolulu.gov"
+  },
+  {
+    name: "Windward Police Station",
+    number: "(808) 723-8640",
+    description: "Kāne'ohe Police Department",
+    website: "https://www.honolulupd.org/d4/"
+  },
+  {
+    name: "Honolulu Police Department",
+    number: "(808) 723-8488",
+    description: "General number for non-emergencies",
+    website: "https://www.honolulupd.org/"
+  },
+  {
+    name: "Board of Water Supply",
+    number: "(808) 748-5000",
+    description: "Water emergency & main breaks",
+    website: "https://www.boardofwatersupply.com/"
+  },
+  {
+    name: "State of Hawai'i, DLNR",
+    number: "(808) 587-0230",
+    description: "Engineering & flood control",
+    website: "https://dlnreng.hawaii.gov"
+  },
+  {
+    name: "Hawaiian Electric",
+    number: "855-304-1212",
+    description: "Power outages & emergencies",
+    website: "https://www.hawaiianelectric.com/"
+  }
+];
 
 export default function AboutScreen() {
   return (
@@ -140,7 +179,7 @@ export default function AboutScreen() {
         </ThemedText>
       </ThemedView>
 
-      <ThemedView style={styles.disclaimerSection}>
+      <ThemedView style={[styles.disclaimerSection, { backgroundColor: '#111' }]}>
         <ThemedText style={styles.disclaimerTitle}>
           <Ionicons name="alert-circle-outline" size={18} color="#FF3B30" />{' '}
           Important Disclaimer
@@ -148,6 +187,34 @@ export default function AboutScreen() {
         <ThemedText style={styles.disclaimerText}>
           This app is for informational and educational use only. It combines flooding data to raise awareness in Waikāne and Waiāhole, but is not intended for emergency response, evacuation planning, or real-time decision-making. Information is experimental and may not reflect current conditions. Do not rely on this app for safety decisions. For official guidance, consult agencies like the Hawai&apos;i Emergency Management Agency and the National Weather Service
         </ThemedText>
+      </ThemedView>
+
+      {/* Emergency Contacts section moved here */}
+      <ThemedView style={[styles.section, { backgroundColor: '#0a223a', marginTop: 24 }]}>
+        <ThemedText type="subtitle" style={[styles.sectionTitle, { color: '#fff' }]}>
+          <Ionicons name="shield" size={18} color="#FF3B30" /> Emergency Contacts
+        </ThemedText>
+        {emergencyContacts.map((contact, index) => (
+          <ThemedView key={index} style={{ marginTop: 8, paddingHorizontal: 16, paddingVertical: 8 }}>
+            <ThemedView style={styles.contactHeaderColumn}>
+              <ExternalLink href={contact.website as any}>
+                <ThemedText style={[styles.contactName, { color: '#4EA1FF' }]} type="link">
+                  {contact.name}
+                </ThemedText>
+              </ExternalLink>
+              <ThemedText 
+                style={styles.contactNumberBelow}
+                onPress={() => Linking.openURL(`tel:${contact.number}`)}
+              >
+                {contact.number}
+              </ThemedText>
+            </ThemedView>
+            <ThemedText style={styles.contactDescription}>{contact.description}</ThemedText>
+            {index < emergencyContacts.length - 1 && (
+              <ThemedView style={{ height: 2, backgroundColor: '#09305a', marginVertical: 8 }} />
+            )}
+          </ThemedView>
+        ))}
       </ThemedView>
     </ParallaxScrollView>
   );
@@ -216,5 +283,25 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     lineHeight: 20,
     color: '#666666',
+  },
+  contactHeaderColumn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  contactName: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  contactNumberBelow: {
+    fontSize: 14,
+    fontWeight: '400',
+    color: '#007AFF',
+  },
+  contactDescription: {
+    fontSize: 14,
+    fontWeight: '400',
+    color: '#B0BEC5',
+    marginTop: 4,
   },
 });
