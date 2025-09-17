@@ -408,11 +408,14 @@ function FloodRiskIndicator() {
             </ThemedText>
             
             <View style={styles.detailsList}>
-              {risk.details.map((detail: string, index: number) => (
-                <ThemedText key={index} style={styles.detailItem}>
-                  {detail}
-                </ThemedText>
-              ))}
+              {Array.isArray(risk.details) && risk.details.map((detail: any, index: number) => {
+                if (typeof detail !== 'string') return null;
+                return (
+                  <ThemedText key={index} style={styles.detailItem}>
+                    {detail}
+                  </ThemedText>
+                );
+              })}
             </View>
 
             {/* Current Readings Section */}
@@ -422,55 +425,55 @@ function FloodRiskIndicator() {
               <View style={styles.readingItem}>
                 <ThemedText style={styles.readingLabel}>Waikane Stream:</ThemedText>
                 <ThemedText style={[styles.readingValue, {
-                  color: riskData.waikaneStream ?
+                  color: riskData.waikaneStream && typeof riskData.waikaneStream === 'number' ?
                     (assessWaikaneStreamRisk(riskData.waikaneStream) === 'HIGH' ? '#FF3B30' :
                       assessWaikaneStreamRisk(riskData.waikaneStream) === 'MEDIUM' ? '#FF9500' : '#34C759') : '#8E8E93'
                 }]}> 
-                  {riskData.waikaneStream ? `${riskData.waikaneStream.toFixed(2)} ft` : 'No data'}
+                  {riskData.waikaneStream && typeof riskData.waikaneStream === 'number' ? `${riskData.waikaneStream.toFixed(2)} ft` : 'No data'}
                 </ThemedText>
               </View>
 
               <View style={styles.readingItem}>
                 <ThemedText style={styles.readingLabel}>Waiahole Stream:</ThemedText>
                 <ThemedText style={[styles.readingValue, {
-                  color: riskData.waiaholeStream ?
+                  color: riskData.waiaholeStream && typeof riskData.waiaholeStream === 'number' ?
                     (assessWaiaholeStreamRisk(riskData.waiaholeStream) === 'HIGH' ? '#FF3B30' :
                       assessWaiaholeStreamRisk(riskData.waiaholeStream) === 'MEDIUM' ? '#FF9500' : '#34C759') : '#8E8E93'
                 }]}> 
-                  {riskData.waiaholeStream ? `${riskData.waiaholeStream.toFixed(2)} ft` : 'No data'}
+                  {riskData.waiaholeStream && typeof riskData.waiaholeStream === 'number' ? `${riskData.waiaholeStream.toFixed(2)} ft` : 'No data'}
                 </ThemedText>
               </View>
 
               <View style={styles.readingItem}>
                 <ThemedText style={styles.readingLabel}>Waikane Tide:</ThemedText>
                 <ThemedText style={[styles.readingValue, {
-                  color: riskData.tide ?
+                  color: riskData.tide && typeof riskData.tide === 'number' ?
                     (assessTideRisk(riskData.tide) === 'HIGH' ? '#FF3B30' :
                       assessTideRisk(riskData.tide) === 'MEDIUM' ? '#FF9500' : '#34C759') : '#8E8E93'
                 }]}> 
-                  {riskData.tide ? `${riskData.tide.toFixed(2)} ft` : 'No data'}
+                  {riskData.tide && typeof riskData.tide === 'number' ? `${riskData.tide.toFixed(2)} ft` : 'No data'}
                 </ThemedText>
               </View>
 
               <View style={styles.readingItem}>
                 <ThemedText style={styles.readingLabel}>Makai Rainfall:</ThemedText>
                 <ThemedText style={[styles.readingValue, {
-                  color: riskData.makaiRain !== null ?
+                  color: riskData.makaiRain !== null && typeof riskData.makaiRain === 'number' ?
                     (assessMakaiRainRisk(riskData.makaiRain) === 'HIGH' ? '#FF3B30' :
                       assessMakaiRainRisk(riskData.makaiRain) === 'MEDIUM' ? '#FF9500' : '#34C759') : '#8E8E93'
                 }]}> 
-                  {riskData.makaiRain !== null ? `${riskData.makaiRain.toFixed(2)} in` : 'No data'}
+                  {riskData.makaiRain !== null && typeof riskData.makaiRain === 'number' ? `${riskData.makaiRain.toFixed(2)} in` : 'No data'}
                 </ThemedText>
               </View>
 
               <View style={styles.readingItem}>
                 <ThemedText style={styles.readingLabel}>Mauka Rainfall:</ThemedText>
                 <ThemedText style={[styles.readingValue, {
-                  color: riskData.maukaRain !== null ?
+                  color: riskData.maukaRain !== null && typeof riskData.maukaRain === 'number' ?
                     (assessMaukaRainRisk(riskData.maukaRain) === 'HIGH' ? '#FF3B30' :
                       assessMaukaRainRisk(riskData.maukaRain) === 'MEDIUM' ? '#FF9500' : '#34C759') : '#8E8E93'
                 }]}> 
-                  {riskData.maukaRain !== null ? `${riskData.maukaRain.toFixed(2)} in` : 'No data'}
+                  {riskData.maukaRain !== null && typeof riskData.maukaRain === 'number' ? `${riskData.maukaRain.toFixed(2)} in` : 'No data'}
                 </ThemedText>
               </View>
             </View>
@@ -494,8 +497,9 @@ export default function RootLayout() {
     return null;
   }
 
+  // Always use DarkTheme
   return (
-    <ThemeProvider value={DarkTheme}> {/* Always use DarkTheme */}
+    <ThemeProvider value={DarkTheme}>
       <View style={styles.container}>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
