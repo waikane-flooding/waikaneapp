@@ -5,6 +5,7 @@ import Svg, { Path, Text as SvgText } from 'react-native-svg';
 const WaikaneTideLevel = () => {
   const [tideLevel, setTideLevel] = useState(null);
   const [tideTime, setTideTime] = useState(null);
+  const [tideDirection, setTideDirection] = useState(null);
   const [animatedValue] = useState(new Animated.Value(0));
 
   const minLevel = -2;
@@ -35,16 +36,19 @@ const WaikaneTideLevel = () => {
           return new Date(Date.UTC(year, month - 1, day, Number(hour) + 10, Number(minute), Number(second)));
         }
 
-        const pastTides = data
+        // Sort all data points by time ascending
+        const allTides = data
           .map(item => ({
             time: parseHSTTimestamp(item["Datetime"]),
             height: item["Predicted_ft_MSL"]
           }))
-          .filter(d => d.time <= nowUTC && !isNaN(d.time.getTime()) && d.height != null)
-          .sort((a, b) => b.time - a.time);
+          .filter(d => !isNaN(d.time.getTime()) && d.height != null)
+          .sort((a, b) => a.time - b.time);
 
+        // Find the latest reading at or before now
+        const pastTides = allTides.filter(d => d.time <= nowUTC);
         if (pastTides.length > 0) {
-          const latest = pastTides[0]; // Most recent PAST reading
+          const latest = pastTides[pastTides.length - 1]; // Most recent PAST reading
           setTideLevel(latest.height);
           setTideTime(latest.time);
           // Animate to new tide level
@@ -54,13 +58,28 @@ const WaikaneTideLevel = () => {
             duration: 2000,
             useNativeDriver: false,
           }).start();
+
+          // Find the next data point after the latest reading
+          const nextIdx = allTides.findIndex(d => d.time.getTime() === latest.time.getTime()) + 1;
+          if (nextIdx > 0 && nextIdx < allTides.length) {
+            const next = allTides[nextIdx];
+            if (next.height > latest.height) {
+              setTideDirection('Rising');
+            } else if (next.height < latest.height) {
+              setTideDirection('Falling');
+            } else {
+              setTideDirection('Stable');
+            }
+          } else {
+            setTideDirection('N/A');
+          }
         }
       })
       .catch(err => console.error("Failed to load tide data", err));
   }, [animatedValue, minLevel, maxLevel]);
 
-  const greenEnd = 2.12;
-  const yellowEnd = 2.92;
+  const greenEnd = 2.92;
+  const yellowEnd = 3.42;
 
   // Get color based on tide level
   const getColorForLevel = (level) => {
@@ -74,7 +93,6 @@ const WaikaneTideLevel = () => {
         timeZone: 'Pacific/Honolulu',
         month: 'short',
         day: 'numeric',
-        year: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
         hour12: true
@@ -95,14 +113,12 @@ const WaikaneTideLevel = () => {
             fill="none"
             strokeLinecap="round"
           />
-          
           {/* Animated colored arc based on tide level */}
           {tideLevel !== null && (() => {
             const percent = Math.min((tideLevel - minLevel) / (maxLevel - minLevel), 0.98); // Cap at 98%
             const angle = percent * Math.PI;
             const endX = 350 + 250 * Math.cos(Math.PI - angle);
             const endY = 280 - 250 * Math.sin(Math.PI - angle);
-            
             // Always use small arc flag to prevent wrapping
             return (
               <Path
@@ -114,7 +130,6 @@ const WaikaneTideLevel = () => {
               />
             );
           })()}
-          
           {/* Tick labels */}
           {customTicks.map((tick) => {
             const tickPercent = (tick - minLevel) / (maxLevel - minLevel);
@@ -137,7 +152,7 @@ const WaikaneTideLevel = () => {
             );
           })}
           {/* Threshold tick marks and labels */}
-          {[{ value: minLevel, color: '#4CAF50', label: '-2.00 ft' },{ value: greenEnd, color: '#FFC107', label: '2.12 ft' }, { value: yellowEnd, color: '#F44336', label: '2.92 ft' }].map((threshold, idx) => {
+          {[{ value: minLevel, color: '#4CAF50', label: '-2.00 ft' },{ value: greenEnd, color: '#FFC107', label: '2.92 ft' }, { value: yellowEnd, color: '#F44336', label: '3.42 ft' }].map((threshold, idx) => {
             const percent = (threshold.value - minLevel) / (maxLevel - minLevel);
             const angle = Math.PI - percent * Math.PI;
             const tickRadius = 250;
@@ -181,19 +196,23 @@ const WaikaneTideLevel = () => {
           {tideLevel !== null ? `${tideLevel.toFixed(2)} ft` : 'Loading...'}
         </Text>
         <Text style={styles.datetime}>{formattedDateTime}</Text>
+        {/* Tide Direction */}
+        <Text style={{ color: 'white', fontSize: 16, marginTop: 8, textAlign: 'center' }}>
+          Tide Direction: {tideDirection ? tideDirection : 'Loading...'}
+        </Text>
       </View>
       <View style={styles.legendContainer}>
         <View style={styles.legendItem}>
           <View style={[styles.legendColor, { backgroundColor: '#4CAF50' }]} />
-          <Text style={styles.legendText}>No Flooding</Text>
+          <Text style={styles.legendText}>Normal Tide</Text>
         </View>
         <View style={styles.legendItem}>
           <View style={[styles.legendColor, { backgroundColor: '#FFC107' }]} />
-          <Text style={styles.legendText}>Minor Flooding</Text>
+          <Text style={styles.legendText}>Elevated Tide</Text>
         </View>
         <View style={styles.legendItem}>
           <View style={[styles.legendColor, { backgroundColor: '#F44336' }]} />
-          <Text style={styles.legendText}>Major Flooding</Text>
+          <Text style={styles.legendText}>Extreme Tide</Text>
         </View>
       </View>
     </View>

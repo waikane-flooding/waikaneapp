@@ -6,6 +6,7 @@ const WaiaholeStreamHeight = () => {
   const [streamLevel, setStreamLevel] = useState(null);
   const [streamTime, setStreamTime] = useState(null);
   const [animatedValue] = useState(new Animated.Value(0));
+  const [streamDirection, setStreamDirection] = useState(null);
 
   const minLevel = 6;
   const maxLevel = 18;
@@ -22,9 +23,12 @@ const WaiaholeStreamHeight = () => {
   const customTicks = [6, 8, 10, 12, 14, 16, 18];
 
   useEffect(() => {
-    fetch('http://149.165.159.169:5000/api/waiahole_stream')
-      .then(res => res.json())
-      .then(data => {
+    // Fetch stream data and trend in parallel
+    Promise.all([
+      fetch('http://149.165.159.169:5000/api/waiahole_stream').then(res => res.json()),
+      fetch('http://149.165.159.169:5000/api/stream_trend').then(res => res.json())
+    ])
+      .then(([data, trendData]) => {
         const now = new Date();
         const latest = data
           .filter(d => d.ft != null && d.DateTime)
@@ -35,10 +39,17 @@ const WaiaholeStreamHeight = () => {
           .filter(d => d.time <= now)
           .sort((a, b) => b.time - a.time)[0];
 
+        // Find Waiahole trend
+        let direction = null;
+        if (trendData && Array.isArray(trendData)) {
+          const waiaholeTrend = trendData.find(t => t.Name && t.Name.toLowerCase().includes('waiahole'));
+          direction = waiaholeTrend && waiaholeTrend.Trend ? waiaholeTrend.Trend : null;
+        }
+        setStreamDirection(direction);
+
         if (latest) {
           setStreamLevel(latest.value);
           setStreamTime(latest.time);
-          
           // Animate to new stream level
           const targetPercent = (latest.value - minLevel) / (maxLevel - minLevel);
           Animated.timing(animatedValue, {
@@ -55,7 +66,6 @@ const WaiaholeStreamHeight = () => {
     ? 'Last Reading: ' + new Date(streamTime).toLocaleString('en-US', {
         month: 'short',
         day: 'numeric',
-        year: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
         hour12: true
@@ -160,19 +170,23 @@ const WaiaholeStreamHeight = () => {
           {streamLevel !== null ? `${streamLevel.toFixed(2)} ft` : 'Loading...'}
         </Text>
         <Text style={styles.datetime}>{formattedDateTime}</Text>
+        {/* Stream Direction */}
+        <Text style={{ color: 'white', fontSize: 16, marginTop: 8, textAlign: 'center' }}>
+          Stream Direction: {streamDirection ? streamDirection : 'Loading...'}
+        </Text>
       </View>
       <View style={styles.legendContainer}>
         <View style={styles.legendItem}>
           <View style={[styles.legendColor, { backgroundColor: '#4CAF50' }]} />
-          <Text style={styles.legendText}>No Flooding</Text>
+          <Text style={styles.legendText}>Normal Height</Text>
         </View>
         <View style={styles.legendItem}>
           <View style={[styles.legendColor, { backgroundColor: '#FFC107' }]} />
-          <Text style={styles.legendText}>Minor Flooding</Text>
+          <Text style={styles.legendText}>Elevated Height</Text>
         </View>
         <View style={styles.legendItem}>
           <View style={[styles.legendColor, { backgroundColor: '#F44336' }]} />
-          <Text style={styles.legendText}>Major Flooding</Text>
+          <Text style={styles.legendText}>Extreme Height</Text>
         </View>
       </View>
     </View>

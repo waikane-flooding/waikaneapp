@@ -29,9 +29,9 @@ const WaikaneTideGraph = () => {
   }, []);
 
   // Chart dimensions - fill the container
-  const chartWidth = 650; // Add small padding to prevent extending to edge
+  const chartWidth = 650;
   const chartHeight = 300;
-  const padding = 50; // Increased padding to give more space for Y-axis labels
+  const padding = 50;
   const graphWidth = chartWidth - 2 * padding;
   const graphHeight = chartHeight - 2 * padding;
 
@@ -240,13 +240,37 @@ const WaikaneTideGraph = () => {
   }
   
   // Threshold lines
-  const threshold1Y = padding + ((yMax - 2.12) / yRange) * graphHeight;
-  const threshold2Y = padding + ((yMax - 2.92) / yRange) * graphHeight;
+  const threshold1Y = padding + ((yMax - 2.92) / yRange) * graphHeight;
+  const threshold2Y = padding + ((yMax - 3.42) / yRange) * graphHeight;
 
   return (
     <View style={styles.container}>
       <View style={styles.chartContainer}>
         <Svg width={chartWidth} height={chartHeight}>
+          {/* Y-axis title */}
+          <SvgText
+            x={padding - 25}
+            y={padding + graphHeight / 2}
+            fontSize="14"
+            fill="#333"
+            textAnchor="middle"
+            transform={`rotate(-90, ${padding - 25}, ${padding + graphHeight / 2})`}
+            fontWeight="bold"
+          >
+            Tide Height (ft)
+          </SvgText>
+          {/* X-axis title */}
+          <SvgText
+            x={padding + graphWidth / 2}
+            y={padding + graphHeight + 50}
+            fontSize="14"
+            fill="#333"
+            textAnchor="middle"
+            fontWeight="bold"
+          >
+            Date and Time
+          </SvgText>
+          
           <Defs>
             <LinearGradient id="tideGradient" x1="0%" y1="0%" x2="0%" y2="100%">
               <Stop offset="0%" stopColor="rgba(54, 162, 235, 0.3)" />
@@ -387,11 +411,11 @@ const WaikaneTideGraph = () => {
                 fill="#666"
                 textAnchor="end"
               >
-                {tick + " ft"}
+                {tick}
               </SvgText>
             );
           })}
-          
+  
           {/* X-axis labels */}
           {xTicks.map((tick, index) => (
             <SvgText
@@ -437,18 +461,18 @@ const WaikaneTideGraph = () => {
           <SvgText
             x={padding + 5}
             y={threshold1Y - 5}
-            fontSize="10"
+            fontSize="12"
             fill="#FFC107"
           >
-            2.12 ft
+            Elevated Tide: 2.92 ft
           </SvgText>
           <SvgText
             x={padding + 5}
             y={threshold2Y - 5}
-            fontSize="10"
+            fontSize="12"
             fill="#F44336"
           >
-            2.92 ft
+            Extreme Tide: 3.42 ft
           </SvgText>
         </Svg>
         

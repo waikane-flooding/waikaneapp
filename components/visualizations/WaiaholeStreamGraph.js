@@ -27,7 +27,7 @@ const WaiaholeStreamGraph = () => {
   // Chart dimensions - same as WaikaneTideGraph
   const chartWidth = 650;
   const chartHeight = 300;
-  const padding = 40;
+  const padding = 50;
   const graphWidth = chartWidth - 2 * padding;
   const graphHeight = chartHeight - 2 * padding;
 
@@ -192,6 +192,29 @@ const WaiaholeStreamGraph = () => {
     <View style={styles.container}>
       <View style={styles.chartContainer}>
         <Svg width={chartWidth} height={chartHeight}>
+          {/* Y-axis title */}
+          <SvgText
+            x={padding - 30}
+            y={padding + graphHeight / 2}
+            fontSize="14"
+            fill="#333"
+            textAnchor="middle"
+            transform={`rotate(-90, ${padding - 30}, ${padding + graphHeight / 2})`}
+            fontWeight="bold"
+          >
+            Observed Gauge Height (ft)
+          </SvgText>
+          {/* X-axis title */}
+          <SvgText
+            x={padding + graphWidth / 2}
+            y={padding + graphHeight + 50}
+            fontSize="14"
+            fill="#333"
+            textAnchor="middle"
+            fontWeight="bold"
+          >
+            Date and Time
+          </SvgText>
           <Defs>
             <LinearGradient id="waiaholeStreamGradient" x1="0%" y1="0%" x2="0%" y2="100%">
               <Stop offset="0%" stopColor="rgba(0, 122, 255, 0.3)" />
@@ -306,7 +329,7 @@ const WaiaholeStreamGraph = () => {
                 fill="#666"
                 textAnchor="end"
               >
-                {tick + " ft"}
+                {tick}
               </SvgText>
             );
           })}
@@ -359,7 +382,7 @@ const WaiaholeStreamGraph = () => {
             fontSize="12"
             fill="#FFC107"
           >
-            12.00 ft
+            Elevated Height: 12.00 ft
           </SvgText>
           <SvgText
             x={padding + 8}
@@ -367,7 +390,7 @@ const WaiaholeStreamGraph = () => {
             fontSize="12"
             fill="#F44336"
           >
-            16.40 ft
+            Extreme Height: 16.40 ft
           </SvgText>
         </Svg>
         

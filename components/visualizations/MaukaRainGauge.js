@@ -54,7 +54,6 @@ const MaukaRainGauge = () => {
     ? 'Latest Reading: ' + new Date(rainTime).toLocaleString('en-US', {
         month: 'short',
         day: 'numeric',
-        year: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
         hour12: true
@@ -176,15 +175,15 @@ const MaukaRainGauge = () => {
       <View style={styles.legendContainer}>
         <View style={styles.legendItem}>
           <View style={[styles.legendColor, { backgroundColor: '#4CAF50' }]} />
-          <Text style={styles.legendText}>No Flooding</Text>
+          <Text style={styles.legendText}>Minor Rain</Text>
         </View>
         <View style={styles.legendItem}>
           <View style={[styles.legendColor, { backgroundColor: '#FFC107' }]} />
-          <Text style={styles.legendText}>Minor Flooding</Text>
+          <Text style={styles.legendText}>Moderate Rain</Text>
         </View>
         <View style={styles.legendItem}>
           <View style={[styles.legendColor, { backgroundColor: '#F44336' }]} />
-          <Text style={styles.legendText}>Major Flooding</Text>
+          <Text style={styles.legendText}>Extreme Rain</Text>
         </View>
       </View>
     </View>
