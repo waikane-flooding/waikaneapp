@@ -38,15 +38,6 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="stream-monitor"
-        options={{
-          title: 'Stream',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="water" color={color} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="tide-conditions"
         options={{
           title: 'Tide',
