@@ -218,18 +218,16 @@ export default function StreamMonitorScreen() {
       </ThemedView>
 
       <ThemedView style={styles.chartsContainer}>
-        <ThemedView style={styles.chartSection}>
-          <ThemedText style={styles.chartTitle}>Waikāne Stream Height Gauge</ThemedText>
-          <ThemedView style={styles.chartWrapper}>
-            <WaikaneStreamHeight />
-          </ThemedView>
-        </ThemedView>
-        
-        <ThemedView style={styles.chartSection}>
-          <ThemedText style={styles.chartTitle}>Stream Height Trend</ThemedText>
-          <ThemedView style={styles.chartWrapper}>
-            <WaikaneStreamGraph />
-          </ThemedView>
+        {/* Title OUTSIDE any container */}
+        <ThemedText style={styles.chartTitle}>Waikāne Stream Height Gauge</ThemedText>
+        {/* Remove the dark blue/gray container */}
+        <WaikaneStreamHeight />
+      </ThemedView>
+      
+      <ThemedView style={styles.chartSection}>
+        <ThemedText style={styles.chartTitle}>Stream Height Trend</ThemedText>
+        <ThemedView style={styles.chartWrapper}>
+          <WaikaneStreamGraph />
         </ThemedView>
       </ThemedView>
 
@@ -598,5 +596,27 @@ const styles = StyleSheet.create({
     elevation: 6,
     width: '100%', // expand overlay to match image width
     minHeight: 120,
+  },
+  gaugeContainer: {
+    backgroundColor: '#181f2a', // dark blue/gray for contrast
+    borderRadius: 18,
+    paddingVertical: 18,
+    paddingHorizontal: 8,
+    marginBottom: 12,
+    width: '100%',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.13,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  gaugeInnerBg: {
+    backgroundColor: '#181f2a', // match gaugeContainer
+    borderRadius: 12,
+    padding: 12,
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
