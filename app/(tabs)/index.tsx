@@ -231,7 +231,7 @@ export default function HomeScreen() {
                     {/* Waiahole Stream Section */}
                     <ThemedView style={styles.streamSection}>
                         <ThemedText type="subtitle" style={styles.thinText}>
-                            <Ionicons name="water" size={16} color="#007AFF" /> Waiahole Stream Monitor
+                            <Ionicons name="water" size={16} color="#007AFF" /> Waiāhole Stream Monitor
                         </ThemedText>
                         <ThemedView style={styles.monitorInfo}>
                             <ThemedView style={styles.infoItem}>
@@ -306,7 +306,7 @@ export default function HomeScreen() {
                     {/* Waiahole Stream Section */}
                     <ThemedView style={styles.streamSection}>
                         <ThemedText type="subtitle" style={styles.thinText}>
-                            <Ionicons name="water" size={16} color="#007AFF" /> Waiahole
+                            <Ionicons name="water" size={16} color="#007AFF" /> Waiāhole
                         </ThemedText>
                         <ThemedView style={styles.monitorInfo}>
                             <ThemedView style={styles.infoItem}>
