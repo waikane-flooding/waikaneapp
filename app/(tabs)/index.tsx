@@ -184,16 +184,20 @@ export default function HomeScreen() {
             }
         >
             <ThemedView style={styles.titleContainer}>
-                <ThemedText type="title" style={styles.thinText}>Flood App</ThemedText>
+                 <ThemedText type="title" style={[styles.thinText, { textAlign: 'center', width: '100%' }]}>Flood App</ThemedText>
             </ThemedView>
 
+            {/* Streams Section Header */}
+            <ThemedView style={styles.section}>
+                <ThemedText type="subtitle" style={[styles.thinText, { textAlign: 'center', width: '100%' }]}>Streams</ThemedText>
+            </ThemedView>
             {/* Stream Gauges and Graphs: horizontal scroll for mobile, side by side for web */}
             {Platform.OS === 'web' ? (
                 <ThemedView style={styles.streamsRow}>
                     {/* Waikāne Stream Section */}
                     <ThemedView style={styles.streamSection}>
                         <ThemedText type="subtitle" style={styles.thinText}>
-                            <Ionicons name="water" size={16} color="#007AFF" /> Waikāne Stream Monitor
+                            <Ionicons name="water" size={16} color="#007AFF" /> Waikāne
                         </ThemedText>
                         <ThemedView style={styles.monitorInfo}>
                             <ThemedView style={styles.infoItem}>
@@ -270,7 +274,7 @@ export default function HomeScreen() {
                     {/* Waikāne Stream Section */}
                     <ThemedView style={styles.streamSection}>
                         <ThemedText type="subtitle" style={styles.thinText}>
-                            <Ionicons name="water" size={16} color="#007AFF" /> Waikāne Stream Monitor
+                            <Ionicons name="water" size={16} color="#007AFF" /> Waikāne
                         </ThemedText>
                         <ThemedView style={styles.monitorInfo}>
                             <ThemedView style={styles.infoItem}>
@@ -292,7 +296,7 @@ export default function HomeScreen() {
                                 </ThemedView>
                             </ThemedView>
                         </ThemedView>
-                        <ThemedText style={styles.chartTitle}>Waikāne Stream Height Gauge</ThemedText>
+                        <ThemedText style={styles.chartTitle}>Stream Height Gauge</ThemedText>
                         <WaikaneStreamHeight />
                         <ThemedText style={styles.chartTitle}>Stream Height Trend</ThemedText>
                         <ThemedView style={styles.chartWrapper}>
@@ -302,7 +306,7 @@ export default function HomeScreen() {
                     {/* Waiahole Stream Section */}
                     <ThemedView style={styles.streamSection}>
                         <ThemedText type="subtitle" style={styles.thinText}>
-                            <Ionicons name="water" size={16} color="#007AFF" /> Waiahole Stream Monitor
+                            <Ionicons name="water" size={16} color="#007AFF" /> Waiahole
                         </ThemedText>
                         <ThemedView style={styles.monitorInfo}>
                             <ThemedView style={styles.infoItem}>
@@ -324,7 +328,7 @@ export default function HomeScreen() {
                                 </ThemedView>
                             </ThemedView>
                         </ThemedView>
-                        <ThemedText style={styles.chartTitle}>Waiahole Stream Height Gauge</ThemedText>
+                        <ThemedText style={styles.chartTitle}>Stream Height Gauge</ThemedText>
                         <WaiaholeStreamHeight />
                         <ThemedText style={styles.chartTitle}>Stream Height Trend</ThemedText>
                         <ThemedView style={styles.chartWrapper}>
@@ -333,6 +337,126 @@ export default function HomeScreen() {
                     </ThemedView>
                 </ScrollView>
             )}
+
+            {/* Tide Section Header */}
+            <ThemedView style={styles.section}>
+                <ThemedText type="subtitle" style={[styles.thinText, { textAlign: 'center', width: '100%' }]}>Tide</ThemedText>
+            </ThemedView>
+
+            {/* Kanehoe Tide Label */}
+            <ThemedText type="subtitle" style={styles.thinText}>
+                <Ionicons name="water" size={16} color="#007AFF" /> Waikāne
+            </ThemedText>
+
+            {/* Tide Info Chart */}
+            <ThemedView style={styles.monitorInfo}>
+                <ThemedView style={styles.infoItem}>
+                    <ThemedText style={styles.label}>Current Height:</ThemedText>
+                    <ThemedText style={styles.value}>Loading...</ThemedText>
+                </ThemedView>
+                <ThemedView style={styles.infoItem}>
+                    <ThemedText style={styles.label}>Last Reading:</ThemedText>
+                    <ThemedText style={styles.value}>Loading...</ThemedText>
+                </ThemedView>
+                <ThemedView style={styles.infoItem}>
+                    <ThemedText style={styles.label}>Tide Direction:</ThemedText>
+                    <ThemedText style={styles.value}>Loading...</ThemedText>
+                </ThemedView>
+                <ThemedView style={styles.infoItem}>
+                    <ThemedText style={styles.label}>Next Tide:</ThemedText>
+                    <ThemedText style={styles.value}>Loading...</ThemedText>
+                </ThemedView>
+                <ThemedView style={styles.statusContainer}>
+                    <ThemedText style={styles.label}>Status:</ThemedText>
+                    <ThemedView style={[styles.statusBar, { backgroundColor: '#34C759' }]}> 
+                        <ThemedText style={styles.statusText}>Loading...</ThemedText>
+                    </ThemedView>
+                </ThemedView>
+            </ThemedView>
+
+            {/* Tide Gauge and Trend Placeholders */}
+            <ThemedView style={styles.section}>
+                <ThemedText style={styles.chartTitle}>Tide Height Gauge</ThemedText>
+                <ThemedView style={styles.chartPlaceholder}>
+                    <Ionicons name="water" size={40} color="#007AFF" />
+                    <ThemedText style={styles.placeholderText}>Tide Gauge Coming Soon</ThemedText>
+                </ThemedView>
+                
+                <ThemedText style={styles.chartTitle}>Tide Trend Graph</ThemedText>
+                <ThemedView style={styles.chartPlaceholder}>
+                    <Ionicons name="trending-up" size={40} color="#007AFF" />
+                    <ThemedText style={styles.placeholderText}>Tide Trend Coming Soon</ThemedText>
+                </ThemedView>
+            </ThemedView>
+
+            {/* Rain Section Header */}
+            <ThemedView style={styles.section}>
+                <ThemedText type="subtitle" style={[styles.thinText, { textAlign: 'center', width: '100%' }]}>Rain</ThemedText>
+            </ThemedView>
+
+            {/* Makai Rain Label */}
+            <ThemedText type="subtitle" style={styles.thinText}>
+                <Ionicons name="rainy" size={16} color="#007AFF" /> Makai (towards the ocean)
+            </ThemedText>
+
+            {/* Rain Info Chart */}
+            <ThemedView style={styles.monitorInfo}>
+                <ThemedView style={styles.infoItem}>
+                    <ThemedText style={styles.label}>Current Rainfall:</ThemedText>
+                    <ThemedText style={styles.value}>Loading...</ThemedText>
+                </ThemedView>
+                <ThemedView style={styles.infoItem}>
+                    <ThemedText style={styles.label}>Last Reading:</ThemedText>
+                    <ThemedText style={styles.value}>Loading...</ThemedText>
+                </ThemedView>
+                <ThemedView style={styles.statusContainer}>
+                    <ThemedText style={styles.label}>Status:</ThemedText>
+                    <ThemedView style={[styles.statusBar, { backgroundColor: '#34C759' }]}> 
+                        <ThemedText style={styles.statusText}>Loading...</ThemedText>
+                    </ThemedView>
+                </ThemedView>
+            </ThemedView>
+
+            {/* Rain Gauge Placeholder */}
+            <ThemedView style={styles.section}>
+                <ThemedText style={styles.chartTitle}>Rain Gauge</ThemedText>
+                <ThemedView style={styles.chartPlaceholder}>
+                    <Ionicons name="rainy" size={40} color="#007AFF" />
+                    <ThemedText style={styles.placeholderText}>Rain Gauge Coming Soon</ThemedText>
+                </ThemedView>
+            </ThemedView>
+
+            {/* Mauka Rain Label */}
+            <ThemedText type="subtitle" style={styles.thinText}>
+                <Ionicons name="rainy" size={16} color="#007AFF" /> Mauka (towards the mountain)
+            </ThemedText>
+
+            {/* Mauka Rain Info Chart */}
+            <ThemedView style={styles.monitorInfo}>
+                <ThemedView style={styles.infoItem}>
+                    <ThemedText style={styles.label}>Current Rainfall:</ThemedText>
+                    <ThemedText style={styles.value}>Loading...</ThemedText>
+                </ThemedView>
+                <ThemedView style={styles.infoItem}>
+                    <ThemedText style={styles.label}>Last Reading:</ThemedText>
+                    <ThemedText style={styles.value}>Loading...</ThemedText>
+                </ThemedView>
+                <ThemedView style={styles.statusContainer}>
+                    <ThemedText style={styles.label}>Status:</ThemedText>
+                    <ThemedView style={[styles.statusBar, { backgroundColor: '#34C759' }]}> 
+                        <ThemedText style={styles.statusText}>Loading...</ThemedText>
+                    </ThemedView>
+                </ThemedView>
+            </ThemedView>
+
+            {/* Mauka Rain Gauge Placeholder */}
+            <ThemedView style={styles.section}>
+                <ThemedText style={styles.chartTitle}>Rain Gauge</ThemedText>
+                <ThemedView style={styles.chartPlaceholder}>
+                    <Ionicons name="rainy" size={40} color="#007AFF" />
+                    <ThemedText style={styles.placeholderText}>Rain Gauge Coming Soon</ThemedText>
+                </ThemedView>
+            </ThemedView>
 
             {/*
             <ThemedView style={styles.section}>
