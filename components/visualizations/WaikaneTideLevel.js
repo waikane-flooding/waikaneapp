@@ -223,8 +223,8 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 10,
-    marginBottom: 10,
+    marginTop: 2,
+    marginBottom: 2,
     position: 'relative',
   },
   gaugeContainer: {

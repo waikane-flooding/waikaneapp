@@ -13,6 +13,8 @@ import WaikaneStreamHeight from '@/components/visualizations/WaikaneStreamHeight
 import WaiaholeStreamHeight from '@/components/visualizations/WaiaholeStreamHeight';
 import WaikaneStreamGraph from '@/components/visualizations/WaikaneStreamGraph';
 import WaiaholeStreamGraph from '@/components/visualizations/WaiaholeStreamGraph';
+import WaikaneTideLevel from '@/components/visualizations/WaikaneTideLevel';
+import WaikaneTideGraph from '@/components/visualizations/WaikaneTideGraph';
 
 export default function HomeScreen() {
     const [refreshing, setRefreshing] = useState(false);
@@ -374,19 +376,12 @@ export default function HomeScreen() {
                 </ThemedView>
             </ThemedView>
 
-            {/* Tide Gauge and Trend Placeholders */}
+            {/* Tide Gauge and Trend */}
             <ThemedView style={styles.section}>
                 <ThemedText style={styles.chartTitle}>Tide Height Gauge</ThemedText>
-                <ThemedView style={styles.chartPlaceholder}>
-                    <Ionicons name="water" size={40} color="#007AFF" />
-                    <ThemedText style={styles.placeholderText}>Tide Gauge Coming Soon</ThemedText>
-                </ThemedView>
-                
+                <WaikaneTideLevel />
                 <ThemedText style={styles.chartTitle}>Tide Trend Graph</ThemedText>
-                <ThemedView style={styles.chartPlaceholder}>
-                    <Ionicons name="trending-up" size={40} color="#007AFF" />
-                    <ThemedText style={styles.placeholderText}>Tide Trend Coming Soon</ThemedText>
-                </ThemedView>
+                <WaikaneTideGraph />
             </ThemedView>
 
             {/* Rain Section Header */}

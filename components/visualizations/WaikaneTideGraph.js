@@ -502,17 +502,23 @@ const WaikaneTideGraph = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: 'white',
-    paddingHorizontal: 10,
     borderRadius: 8,
-    overflow: 'hidden',
+    padding: 10,
+    margin: 2,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   chartContainer: {
-    flex: 1,
-    width: '100%',
-    backgroundColor: 'white',
-    borderRadius: 8,
+    position: 'relative',
   },
   loadingContainer: {
     width: 650,
