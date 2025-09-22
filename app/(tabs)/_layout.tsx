@@ -38,33 +38,6 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="tide-conditions"
-        options={{
-          title: 'Tide',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="time" color={color} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="rain-conditions"
-        options={{
-          title: 'Rain',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="rainy" color={color} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="wave-weather"
-        options={{
-          title: 'Weather',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="cloudy" color={color} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="about"
         options={{
           title: 'About',
