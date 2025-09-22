@@ -201,26 +201,6 @@ export default function HomeScreen() {
                         <ThemedText type="subtitle" style={styles.thinText}>
                             <Ionicons name="water" size={16} color="#007AFF" /> Waikāne
                         </ThemedText>
-                        <ThemedView style={styles.monitorInfo}>
-                            <ThemedView style={styles.infoItem}>
-                                <ThemedText style={styles.label}>Current Height:</ThemedText>
-                                <ThemedText style={styles.value}>{waikaneData.height || 'Loading...'}</ThemedText>
-                            </ThemedView>
-                            <ThemedView style={styles.infoItem}>
-                                <ThemedText style={styles.label}>Last Reading:</ThemedText>
-                                <ThemedText style={styles.value}>{waikaneData.lastReading || 'Loading...'}</ThemedText>
-                            </ThemedView>
-                            <ThemedView style={styles.infoItem}>
-                                <ThemedText style={styles.label}>Stream Direction:</ThemedText>
-                                <ThemedText style={styles.value}>{waikaneData.direction || 'Loading...'}</ThemedText>
-                            </ThemedView>
-                            <ThemedView style={styles.statusContainer}>
-                                <ThemedText style={styles.label}>Status:</ThemedText>
-                                <ThemedView style={[styles.statusBar, { backgroundColor: waikaneData.statusColor || (waikaneData.status === 'Loading...' ? '#999999' : '#34C759') }]}> 
-                                    <ThemedText style={styles.statusText}>{waikaneData.status}</ThemedText>
-                                </ThemedView>
-                            </ThemedView>
-                        </ThemedView>
                         <ThemedText style={styles.chartTitle}>Waikāne Stream Height Gauge</ThemedText>
                         <ThemedView style={styles.gaugeWrapper}>
                             <WaikaneStreamHeight />
@@ -233,35 +213,35 @@ export default function HomeScreen() {
                     {/* Waiahole Stream Section */}
                     <ThemedView style={styles.streamSection}>
                         <ThemedText type="subtitle" style={styles.thinText}>
-                            <Ionicons name="water" size={16} color="#007AFF" /> Waiāhole Stream Monitor
+                            <Ionicons name="water" size={16} color="#007AFF" /> Waiāhole
                         </ThemedText>
-                        <ThemedView style={styles.monitorInfo}>
-                            <ThemedView style={styles.infoItem}>
-                                <ThemedText style={styles.label}>Current Height:</ThemedText>
-                                <ThemedText style={styles.value}>{waiaholeData.height || 'Loading...'}</ThemedText>
-                            </ThemedView>
-                            <ThemedView style={styles.infoItem}>
-                                <ThemedText style={styles.label}>Last Reading:</ThemedText>
-                                <ThemedText style={styles.value}>{waiaholeData.lastReading || 'Loading...'}</ThemedText>
-                            </ThemedView>
-                            <ThemedView style={styles.infoItem}>
-                                <ThemedText style={styles.label}>Stream Direction:</ThemedText>
-                                <ThemedText style={styles.value}>{waiaholeData.direction || 'Loading...'}</ThemedText>
-                            </ThemedView>
-                            <ThemedView style={styles.statusContainer}>
-                                <ThemedText style={styles.label}>Status:</ThemedText>
-                                <ThemedView style={[styles.statusBar, { backgroundColor: waiaholeData.statusColor || (waiaholeData.status === 'Loading...' ? '#999999' : '#34C759') }]}> 
-                                    <ThemedText style={styles.statusText}>{waiaholeData.status}</ThemedText>
-                                </ThemedView>
-                            </ThemedView>
-                        </ThemedView>
-                        <ThemedText style={styles.chartTitle}>Waiahole Stream Height Gauge</ThemedText>
+                        <ThemedText style={styles.chartTitle}>Stream Height Gauge</ThemedText>
                         <ThemedView style={styles.gaugeWrapper}>
                             <WaiaholeStreamHeight />
                         </ThemedView>
                         <ThemedText style={styles.chartTitle}>Stream Height Trend</ThemedText>
                         <ThemedView style={styles.chartWrapper}>
                             <WaiaholeStreamGraph />
+                        </ThemedView>
+                    </ThemedView>
+                    {/* Punaluʻu Stream Section */}
+                    <ThemedView style={styles.streamSection}>
+                        <ThemedText type="subtitle" style={styles.thinText}>
+                            <Ionicons name="water" size={16} color="#007AFF" /> Punaluʻu
+                        </ThemedText>
+                        <ThemedText style={styles.chartTitle}>Stream Height Gauge</ThemedText>
+                        <ThemedView style={styles.gaugeWrapper}>
+                            <ThemedView style={styles.chartPlaceholder}>
+                                <Ionicons name="water" size={40} color="#007AFF" />
+                                <ThemedText style={styles.placeholderText}>Stream Gauge Coming Soon</ThemedText>
+                            </ThemedView>
+                        </ThemedView>
+                        <ThemedText style={styles.chartTitle}>Stream Height Trend</ThemedText>
+                        <ThemedView style={styles.chartWrapper}>
+                            <ThemedView style={styles.chartPlaceholder}>
+                                <Ionicons name="trending-up" size={40} color="#007AFF" />
+                                <ThemedText style={styles.placeholderText}>Stream Trend Coming Soon</ThemedText>
+                            </ThemedView>
                         </ThemedView>
                     </ThemedView>
                 </ThemedView>
@@ -278,26 +258,6 @@ export default function HomeScreen() {
                         <ThemedText type="subtitle" style={styles.thinText}>
                             <Ionicons name="water" size={16} color="#007AFF" /> Waikāne
                         </ThemedText>
-                        <ThemedView style={styles.monitorInfo}>
-                            <ThemedView style={styles.infoItem}>
-                                <ThemedText style={styles.label}>Current Height:</ThemedText>
-                                <ThemedText style={styles.value}>{waikaneData.height || 'Loading...'}</ThemedText>
-                            </ThemedView>
-                            <ThemedView style={styles.infoItem}>
-                                <ThemedText style={styles.label}>Last Reading:</ThemedText>
-                                <ThemedText style={styles.value}>{waikaneData.lastReading || 'Loading...'}</ThemedText>
-                            </ThemedView>
-                            <ThemedView style={styles.infoItem}>
-                                <ThemedText style={styles.label}>Stream Direction:</ThemedText>
-                                <ThemedText style={styles.value}>{waikaneData.direction || 'Loading...'}</ThemedText>
-                            </ThemedView>
-                            <ThemedView style={styles.statusContainer}>
-                                <ThemedText style={styles.label}>Status:</ThemedText>
-                                <ThemedView style={[styles.statusBar, { backgroundColor: waikaneData.statusColor || (waikaneData.status === 'Loading...' ? '#999999' : '#34C759') }]}> 
-                                    <ThemedText style={styles.statusText}>{waikaneData.status}</ThemedText>
-                                </ThemedView>
-                            </ThemedView>
-                        </ThemedView>
                         <ThemedText style={styles.chartTitle}>Stream Height Gauge</ThemedText>
                         <WaikaneStreamHeight />
                         <ThemedText style={styles.chartTitle}>Stream Height Trend</ThemedText>
@@ -310,31 +270,31 @@ export default function HomeScreen() {
                         <ThemedText type="subtitle" style={styles.thinText}>
                             <Ionicons name="water" size={16} color="#007AFF" /> Waiāhole
                         </ThemedText>
-                        <ThemedView style={styles.monitorInfo}>
-                            <ThemedView style={styles.infoItem}>
-                                <ThemedText style={styles.label}>Current Height:</ThemedText>
-                                <ThemedText style={styles.value}>{waiaholeData.height || 'Loading...'}</ThemedText>
-                            </ThemedView>
-                            <ThemedView style={styles.infoItem}>
-                                <ThemedText style={styles.label}>Last Reading:</ThemedText>
-                                <ThemedText style={styles.value}>{waiaholeData.lastReading || 'Loading...'}</ThemedText>
-                            </ThemedView>
-                            <ThemedView style={styles.infoItem}>
-                                <ThemedText style={styles.label}>Stream Direction:</ThemedText>
-                                <ThemedText style={styles.value}>{waiaholeData.direction || 'Loading...'}</ThemedText>
-                            </ThemedView>
-                            <ThemedView style={styles.statusContainer}>
-                                <ThemedText style={styles.label}>Status:</ThemedText>
-                                <ThemedView style={[styles.statusBar, { backgroundColor: waiaholeData.statusColor || (waiaholeData.status === 'Loading...' ? '#999999' : '#34C759') }]}> 
-                                    <ThemedText style={styles.statusText}>{waiaholeData.status}</ThemedText>
-                                </ThemedView>
-                            </ThemedView>
-                        </ThemedView>
                         <ThemedText style={styles.chartTitle}>Stream Height Gauge</ThemedText>
                         <WaiaholeStreamHeight />
                         <ThemedText style={styles.chartTitle}>Stream Height Trend</ThemedText>
                         <ThemedView style={styles.chartWrapper}>
                             <WaiaholeStreamGraph />
+                        </ThemedView>
+                    </ThemedView>
+                    {/* Punaluʻu Stream Section */}
+                    <ThemedView style={styles.streamSection}>
+                        <ThemedText type="subtitle" style={styles.thinText}>
+                            <Ionicons name="water" size={16} color="#007AFF" /> Punaluʻu
+                        </ThemedText>
+                        <ThemedText style={styles.chartTitle}>Stream Height Gauge</ThemedText>
+                        <ThemedView style={styles.gaugeWrapper}>
+                            <ThemedView style={styles.chartPlaceholder}>
+                                <Ionicons name="water" size={40} color="#007AFF" />
+                                <ThemedText style={styles.placeholderText}>Stream Gauge Coming Soon</ThemedText>
+                            </ThemedView>
+                        </ThemedView>
+                        <ThemedText style={styles.chartTitle}>Stream Height Trend</ThemedText>
+                        <ThemedView style={styles.chartWrapper}>
+                            <ThemedView style={styles.chartPlaceholder}>
+                                <Ionicons name="trending-up" size={40} color="#007AFF" />
+                                <ThemedText style={styles.placeholderText}>Stream Trend Coming Soon</ThemedText>
+                            </ThemedView>
                         </ThemedView>
                     </ThemedView>
                 </ScrollView>
