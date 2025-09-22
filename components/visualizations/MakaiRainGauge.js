@@ -11,7 +11,7 @@ const MakaiRainGauge = () => {
   const maxLevel = 6;
 
   useEffect(() => {
-    fetch('http://149.165.159.169:5000/api/rain_data')
+    fetch('http://149.165.159.226:5000/api/rain_data')
       .then(res => res.json())
       .then(data => {
         // Find the first entry where Name === "Makai"

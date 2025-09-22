@@ -6,7 +6,7 @@ const PunaluuStreamGraph = () => {
   const [streamData, setStreamData] = useState([]);
 
   useEffect(() => {
-    fetch('http://149.165.159.169:5000/api/punaluu_stream')
+    fetch('http://149.165.159.226:5000/api/punaluu_stream')
       .then(res => res.json())
       .then(data => {
         setStreamData(data);

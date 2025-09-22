@@ -15,6 +15,8 @@ import WaikaneStreamGraph from '@/components/visualizations/WaikaneStreamGraph';
 import WaiaholeStreamGraph from '@/components/visualizations/WaiaholeStreamGraph';
 import WaikaneTideLevel from '@/components/visualizations/WaikaneTideLevel';
 import WaikaneTideGraph from '@/components/visualizations/WaikaneTideGraph';
+import PunaluuStreamHeight from '@/components/visualizations/PunaluuStreamHeight';
+import PunaluuStreamGraph from '@/components/visualizations/PunaluuStreamGraph';
 
 export default function HomeScreen() {
     const [refreshing, setRefreshing] = useState(false);
@@ -231,17 +233,11 @@ export default function HomeScreen() {
                         </ThemedText>
                         <ThemedText style={styles.chartTitle}>Stream Height Gauge</ThemedText>
                         <ThemedView style={styles.gaugeWrapper}>
-                            <ThemedView style={styles.chartPlaceholder}>
-                                <Ionicons name="water" size={40} color="#007AFF" />
-                                <ThemedText style={styles.placeholderText}>Stream Gauge Coming Soon</ThemedText>
-                            </ThemedView>
+                            <PunaluuStreamHeight />
                         </ThemedView>
                         <ThemedText style={styles.chartTitle}>Stream Height Trend</ThemedText>
                         <ThemedView style={styles.chartWrapper}>
-                            <ThemedView style={styles.chartPlaceholder}>
-                                <Ionicons name="trending-up" size={40} color="#007AFF" />
-                                <ThemedText style={styles.placeholderText}>Stream Trend Coming Soon</ThemedText>
-                            </ThemedView>
+                            <PunaluuStreamGraph />
                         </ThemedView>
                     </ThemedView>
                 </ThemedView>
@@ -284,17 +280,11 @@ export default function HomeScreen() {
                         </ThemedText>
                         <ThemedText style={styles.chartTitle}>Stream Height Gauge</ThemedText>
                         <ThemedView style={styles.gaugeWrapper}>
-                            <ThemedView style={styles.chartPlaceholder}>
-                                <Ionicons name="water" size={40} color="#007AFF" />
-                                <ThemedText style={styles.placeholderText}>Stream Gauge Coming Soon</ThemedText>
-                            </ThemedView>
+                            <PunaluuStreamHeight />
                         </ThemedView>
                         <ThemedText style={styles.chartTitle}>Stream Height Trend</ThemedText>
                         <ThemedView style={styles.chartWrapper}>
-                            <ThemedView style={styles.chartPlaceholder}>
-                                <Ionicons name="trending-up" size={40} color="#007AFF" />
-                                <ThemedText style={styles.placeholderText}>Stream Trend Coming Soon</ThemedText>
-                            </ThemedView>
+                            <PunaluuStreamGraph />
                         </ThemedView>
                     </ThemedView>
                 </ScrollView>

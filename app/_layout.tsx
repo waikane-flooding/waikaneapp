@@ -257,10 +257,10 @@ function FloodRiskIndicator() {
     const fetchAllData = async () => {
       try {
         const [waikaneRes, waiaholeRes, tideRes, rainRes] = await Promise.all([
-          fetch('http://149.165.159.169:5000/api/waikane_stream'),
-          fetch('http://149.165.159.169:5000/api/waiahole_stream'),
-          fetch('http://149.165.159.169:5000/api/waikane_tide_curve'),
-          fetch('http://149.165.159.169:5000/api/rain_data')
+          fetch('http://149.165.159.226:5000/api/waikane_stream'),
+          fetch('http://149.165.159.226:5000/api/waiahole_stream'),
+          fetch('http://149.165.159.226:5000/api/waikane_tide_curve'),
+          fetch('http://149.165.159.226:5000/api/rain_data')
         ]);
 
         const [waikaneData, waiaholeData, tideData, rainData] = await Promise.all([

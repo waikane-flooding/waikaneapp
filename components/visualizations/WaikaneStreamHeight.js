@@ -25,8 +25,8 @@ const WaikaneStreamHeight = () => {
   useEffect(() => {
     // Fetch stream data and trend in parallel
     Promise.all([
-      fetch('http://149.165.159.169:5000/api/waikane_stream').then(res => res.json()),
-      fetch('http://149.165.159.169:5000/api/stream_trend').then(res => res.json())
+      fetch('http://149.165.159.226:5000/api/waikane_stream').then(res => res.json()),
+      fetch('http://149.165.159.226:5000/api/stream_trend').then(res => res.json())
     ])
       .then(([data, trendData]) => {
         const now = new Date();
