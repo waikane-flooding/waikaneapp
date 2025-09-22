@@ -64,9 +64,19 @@ export default function AboutScreen() {
 
       <ThemedView>
         <ThemedText style={styles.thinText}>
-          <Ionicons name="warning-outline" size={16} color="#FF9500" />{' '}
-          This app helps residents and visitors in Waikāne and Waiāhole stay informed about flood risks, stream and tide conditions, and weather alerts
+          🌺{' '}
+          Aloha! We're here to help residents and visitors in Waikāne and Waiāhole stay connected with the land and sea by monitoring flood risks, stream conditions, tides, and weather patterns that shape our beautiful windward communities
           
+        </ThemedText>
+      </ThemedView>
+
+      <ThemedView style={[styles.disclaimerSection, { backgroundColor: '#111' }]}>
+        <ThemedText style={styles.disclaimerTitle}>
+          <Ionicons name="alert-circle-outline" size={18} color="#FF3B30" />{' '}
+          Important Disclaimer
+        </ThemedText>
+        <ThemedText style={styles.disclaimerText}>
+          This app is for informational and educational use only. It combines flooding data to raise awareness in Waikāne and Waiāhole, but is not intended for emergency response, evacuation planning, or real-time decision-making. Information is experimental and may not reflect current conditions. This app does not send push notifications, alerts, or any automated warnings to users. Do not rely on this app for safety decisions. For official guidance, consult agencies like the Hawai&apos;i Emergency Management Agency and the National Weather Service
         </ThemedText>
       </ThemedView>
 
@@ -165,34 +175,30 @@ export default function AboutScreen() {
         <ThemedText type="subtitle" style={styles.sectionTitle}>Contact & Feedback</ThemedText>
         <ThemedText style={styles.thinText}>
           For questions, support, or feedback about app accuracy and features, please reach out via email or the feedback form below
-          {'\n\n'}
+        </ThemedText>
+        
+        <ThemedView style={styles.contactContainer}>
           <Ionicons name="send-outline" size={16} color="#007AFF" />{' '}
           <ExternalLink href="mailto:windwardfloodapp@gmail.com">
             <ThemedText type="link" style={styles.thinText}>windwardfloodapp@gmail.com</ThemedText>
           </ExternalLink>
-          {'\n\n'}
+        </ThemedView>
+        
+        <ThemedView style={styles.contactContainer}>
           <Ionicons name="document-text-outline" size={16} color="#4CAF50" />{' '}
           <ExternalLink href="https://docs.google.com/forms/d/1DNHiR7vRSWIE4Wwi1eb7QwxUcjzsfUhyukAmjoJdjTw/edit">
             <ThemedText type="link" style={styles.thinText}>Submit Feedback Form</ThemedText>
           </ExternalLink>
-          {'\n'}
-        </ThemedText>
-      </ThemedView>
-
-      <ThemedView style={[styles.disclaimerSection, { backgroundColor: '#111' }]}>
-        <ThemedText style={styles.disclaimerTitle}>
-          <Ionicons name="alert-circle-outline" size={18} color="#FF3B30" />{' '}
-          Important Disclaimer
-        </ThemedText>
-        <ThemedText style={styles.disclaimerText}>
-          This app is for informational and educational use only. It combines flooding data to raise awareness in Waikāne and Waiāhole, but is not intended for emergency response, evacuation planning, or real-time decision-making. Information is experimental and may not reflect current conditions. Do not rely on this app for safety decisions. For official guidance, consult agencies like the Hawai&apos;i Emergency Management Agency and the National Weather Service
-        </ThemedText>
+        </ThemedView>
       </ThemedView>
 
       {/* Emergency Contacts section moved here */}
       <ThemedView style={[styles.section, { backgroundColor: '#0a223a', marginTop: 24 }]}>
         <ThemedText type="subtitle" style={[styles.sectionTitle, { color: '#fff' }]}>
           <Ionicons name="shield" size={18} color="#FF3B30" /> Emergency Contacts
+        </ThemedText>
+        <ThemedText style={[styles.thinText, { color: '#B0BEC5', fontSize: 14, marginBottom: 8, paddingHorizontal: 16 }]}>
+          Click on a contact name to visit their website or tap a phone number to call
         </ThemedText>
         {emergencyContacts.map((contact, index) => (
           <ThemedView key={index} style={{ marginTop: 8, paddingHorizontal: 16, paddingVertical: 8 }}>
@@ -210,9 +216,6 @@ export default function AboutScreen() {
               </ThemedText>
             </ThemedView>
             <ThemedText style={styles.contactDescription}>{contact.description}</ThemedText>
-            {index < emergencyContacts.length - 1 && (
-              <ThemedView style={{ height: 2, backgroundColor: '#09305a', marginVertical: 8 }} />
-            )}
           </ThemedView>
         ))}
       </ThemedView>
@@ -303,5 +306,15 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     color: '#B0BEC5',
     marginTop: 4,
+  },
+  contactContainer: {
+    backgroundColor: 'rgba(0, 122, 255, 0.05)',
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 122, 255, 0.1)',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 });
