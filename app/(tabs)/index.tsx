@@ -317,13 +317,19 @@ export default function HomeScreen() {
             <ThemedText type="subtitle" style={styles.thinText}>
                 <Ionicons name="rainy" size={16} color="#007AFF" /> Makai (towards the ocean)
             </ThemedText>
+            <ThemedText style={[styles.thinText, { fontSize: 13, color: '#666', marginBottom: 8, marginLeft: 2 }]}>
+                837.7 Waiahole RG at Kamehameha Hwy., Oahu, HI - USGS-212855157504501
+            </ThemedText>
 
-            {/* Rain Gauge Placeholder */}
-            <ThemedView style={styles.section}>
-                <ThemedText style={styles.chartTitle}>Rain Gauge</ThemedText>
-                <ThemedView style={styles.chartPlaceholder}>
-                    <Ionicons name="rainy" size={40} color="#007AFF" />
-                    <ThemedText style={styles.placeholderText}>Rain Gauge Coming Soon</ThemedText>
+            {/* Makai Rain Info Box */}
+            <ThemedView style={styles.monitorInfo}>
+                <ThemedView style={styles.infoItem}>
+                    <ThemedText style={styles.label}>Last Hour:</ThemedText>
+                    <ThemedText style={styles.value}>Loading...</ThemedText>
+                </ThemedView>
+                <ThemedView style={styles.infoItem}>
+                    <ThemedText style={styles.label}>Last Six Hours:</ThemedText>
+                    <ThemedText style={styles.value}>Loading...</ThemedText>
                 </ThemedView>
             </ThemedView>
 
@@ -331,13 +337,19 @@ export default function HomeScreen() {
             <ThemedText type="subtitle" style={styles.thinText}>
                 <Ionicons name="rainy" size={16} color="#007AFF" /> Mauka (towards the mountain)
             </ThemedText>
+            <ThemedText style={[styles.thinText, { fontSize: 13, color: '#666', marginBottom: 8, marginLeft: 2 }]}>
+                883.12 Poamoho Rain Gage No 1, nr Wahiawa, Oahu,HI - USGS-213215157552800
+            </ThemedText>
 
-            {/* Mauka Rain Gauge Placeholder */}
-            <ThemedView style={styles.section}>
-                <ThemedText style={styles.chartTitle}>Rain Gauge</ThemedText>
-                <ThemedView style={styles.chartPlaceholder}>
-                    <Ionicons name="rainy" size={40} color="#007AFF" />
-                    <ThemedText style={styles.placeholderText}>Rain Gauge Coming Soon</ThemedText>
+            {/* Mauka Rain Info Box */}
+            <ThemedView style={styles.monitorInfo}>
+                <ThemedView style={styles.infoItem}>
+                    <ThemedText style={styles.label}>Last Hour:</ThemedText>
+                    <ThemedText style={styles.value}>Loading...</ThemedText>
+                </ThemedView>
+                <ThemedView style={styles.infoItem}>
+                    <ThemedText style={styles.label}>Last Six Hours:</ThemedText>
+                    <ThemedText style={styles.value}>Loading...</ThemedText>
                 </ThemedView>
             </ThemedView>
 
