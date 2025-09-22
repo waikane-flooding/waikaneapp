@@ -63,6 +63,15 @@ const assessWaiaholeStreamRisk = (level: number | null): string => {
   return 'HIGH';
 };
 
+const assessPunaluuStreamRisk = (level: number | null): string => {
+  if (!level) return 'UNKNOWN';
+  const greenEnd = 10;
+  const yellowEnd = 14.7;
+  if (level < greenEnd) return 'LOW';
+  if (level < yellowEnd) return 'MEDIUM';
+  return 'HIGH';
+};
+
 const assessTideRisk = (level: number | null): string => {
   if (!level) return 'UNKNOWN';
   const greenEnd = 2.12;
@@ -94,6 +103,7 @@ const assessMaukaRainRisk = (level: number | null): string => {
 const assessOverallRisk = (
   waikaneStream: number | null,
   waiaholeStream: number | null,
+  punaluuStream: number | null,
   tide: number | null,
   makaiRain: number | null,
   maukaRain: number | null
@@ -101,6 +111,7 @@ const assessOverallRisk = (
   const risks = [
     assessWaikaneStreamRisk(waikaneStream),
     assessWaiaholeStreamRisk(waiaholeStream),
+    assessPunaluuStreamRisk(punaluuStream),
     assessTideRisk(tide),
     assessMakaiRainRisk(makaiRain),
     assessMaukaRainRisk(maukaRain)
@@ -238,6 +249,7 @@ function FloodRiskIndicator() {
   const [riskData, setRiskData] = useState<{
     waikaneStream: number | null;
     waiaholeStream: number | null;
+    punaluuStream: number | null;
     tide: number | null;
     makaiRain: number | null;
     maukaRain: number | null;
@@ -245,6 +257,7 @@ function FloodRiskIndicator() {
   }>({
     waikaneStream: null,
     waiaholeStream: null,
+    punaluuStream: null,
     tide: null,
     makaiRain: null,
     maukaRain: null,
@@ -256,16 +269,18 @@ function FloodRiskIndicator() {
 
     const fetchAllData = async () => {
       try {
-        const [waikaneRes, waiaholeRes, tideRes, rainRes] = await Promise.all([
+        const [waikaneRes, waiaholeRes, punaluuRes, tideRes, rainRes] = await Promise.all([
           fetch('http://149.165.159.226:5000/api/waikane_stream'),
           fetch('http://149.165.159.226:5000/api/waiahole_stream'),
+          fetch('http://149.165.159.226:5000/api/punaluu_stream'),
           fetch('http://149.165.159.226:5000/api/waikane_tide_curve'),
           fetch('http://149.165.159.226:5000/api/rain_data')
         ]);
 
-        const [waikaneData, waiaholeData, tideData, rainData] = await Promise.all([
+        const [waikaneData, waiaholeData, punaluuData, tideData, rainData] = await Promise.all([
           waikaneRes.json(),
           waiaholeRes.json(),
+          punaluuRes.json(),
           tideRes.json(),
           rainRes.json()
         ]);
@@ -283,6 +298,16 @@ function FloodRiskIndicator() {
 
         // Process Waiahole Stream data
         const waiaholeLatest = waiaholeData
+          .filter((d: any) => d.ft != null && d.DateTime)
+          .map((d: any) => ({
+            time: new Date(d.DateTime),
+            value: d.ft
+          }))
+          .filter((d: any) => d.time <= now)
+          .sort((a: any, b: any) => b.time - a.time)[0];
+
+        // Process Punaluu Stream data
+        const punaluuLatest = punaluuData
           .filter((d: any) => d.ft != null && d.DateTime)
           .map((d: any) => ({
             time: new Date(d.DateTime),
@@ -316,15 +341,16 @@ function FloodRiskIndicator() {
 
         // Process Rain data
         const rainRows = Array.isArray(rainData) ? rainData : [];
-        const makaiRain = rainRows.find((d: any) => d.Name && d.Rainfall != null && d.Name.toLowerCase().includes('makai'));
-        const maukaRain = rainRows.find((d: any) => d.Name && d.Rainfall != null && d.Name.toLowerCase().includes('mauka'));
+        const makaiRain = rainRows.find((d: any) => d.Name && d['1HrRainfall'] != null && d.Name.toLowerCase().includes('makai'));
+        const maukaRain = rainRows.find((d: any) => d.Name && d['1HrRainfall'] != null && d.Name.toLowerCase().includes('mauka'));
 
         setRiskData({
           waikaneStream: waikaneLatest?.value || null,
           waiaholeStream: waiaholeLatest?.value || null,
+          punaluuStream: punaluuLatest?.value || null,
           tide: tideLatest?.height || null,
-          makaiRain: makaiRain?.Rainfall ?? null,
-          maukaRain: maukaRain?.Rainfall ?? null,
+          makaiRain: makaiRain?.['1HrRainfall'] ?? null,
+          maukaRain: maukaRain?.['1HrRainfall'] ?? null,
           lastUpdated: new Date(),
         });
 
@@ -343,6 +369,7 @@ function FloodRiskIndicator() {
   const currentRiskLevel = assessOverallRisk(
     riskData.waikaneStream,
     riskData.waiaholeStream, 
+    riskData.punaluuStream,
     riskData.tide,
     riskData.makaiRain,
     riskData.maukaRain
@@ -441,6 +468,17 @@ function FloodRiskIndicator() {
                       assessWaiaholeStreamRisk(riskData.waiaholeStream) === 'MEDIUM' ? '#FF9500' : '#34C759') : '#8E8E93'
                 }]}> 
                   {riskData.waiaholeStream && typeof riskData.waiaholeStream === 'number' ? `${riskData.waiaholeStream.toFixed(2)} ft` : 'No data'}
+                </ThemedText>
+              </View>
+
+              <View style={styles.readingItem}>
+                <ThemedText style={styles.readingLabel}>Punaluu Stream:</ThemedText>
+                <ThemedText style={[styles.readingValue, {
+                  color: riskData.punaluuStream && typeof riskData.punaluuStream === 'number' ?
+                    (assessPunaluuStreamRisk(riskData.punaluuStream) === 'HIGH' ? '#FF3B30' :
+                      assessPunaluuStreamRisk(riskData.punaluuStream) === 'MEDIUM' ? '#FF9500' : '#34C759') : '#8E8E93'
+                }]}> 
+                  {riskData.punaluuStream && typeof riskData.punaluuStream === 'number' ? `${riskData.punaluuStream.toFixed(2)} ft` : 'No data'}
                 </ThemedText>
               </View>
 

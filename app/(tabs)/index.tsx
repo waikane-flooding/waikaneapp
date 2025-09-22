@@ -18,7 +18,60 @@ import WaikaneTideGraph from '@/components/visualizations/WaikaneTideGraph';
 import PunaluuStreamHeight from '@/components/visualizations/PunaluuStreamHeight';
 import PunaluuStreamGraph from '@/components/visualizations/PunaluuStreamGraph';
 
+// Types for rain data
+type RainData = {
+    '1HrRainfall': number;
+    '6HrRainfall': number;
+    'DateTime': string;
+    'Name': string;
+};
+
 export default function HomeScreen() {
+    // Rain data state
+    const [makaiRain, setMakaiRain] = useState<{
+        lastHour: string;
+        lastSixHours: string;
+        lastReading: string;
+    }>({ lastHour: 'Loading...', lastSixHours: 'Loading...', lastReading: 'Loading...' });
+    const [maukaRain, setMaukaRain] = useState<{
+        lastHour: string;
+        lastSixHours: string;
+        lastReading: string;
+    }>({ lastHour: 'Loading...', lastSixHours: 'Loading...', lastReading: 'Loading...' });
+    // Fetch Makai and Mauka rain data
+    const fetchRainData = useCallback(async () => {
+        try {
+            const res = await fetch('http://149.165.159.226:5000/api/rain_data');
+            const data: RainData[] = await res.json();
+            // Find latest Makai and Mauka
+            const makai = data.filter(d => d.Name && d.Name.toLowerCase().includes('makai'))
+                .sort((a, b) => new Date(b.DateTime).getTime() - new Date(a.DateTime).getTime())[0];
+            const mauka = data.filter(d => d.Name && d.Name.toLowerCase().includes('mauka'))
+                .sort((a, b) => new Date(b.DateTime).getTime() - new Date(a.DateTime).getTime())[0];
+
+            if (makai) {
+                setMakaiRain({
+                    lastHour: makai['1HrRainfall']?.toFixed(2) + ' in',
+                    lastSixHours: makai['6HrRainfall']?.toFixed(2) + ' in',
+                    lastReading: new Date(makai.DateTime).toLocaleString('en-US', {
+                        hour: '2-digit', minute: '2-digit', hour12: true, month: 'short', day: 'numeric'
+                    }) + ' HST',
+                });
+            }
+            if (mauka) {
+                setMaukaRain({
+                    lastHour: mauka['1HrRainfall']?.toFixed(2) + ' in',
+                    lastSixHours: mauka['6HrRainfall']?.toFixed(2) + ' in',
+                    lastReading: new Date(mauka.DateTime).toLocaleString('en-US', {
+                        hour: '2-digit', minute: '2-digit', hour12: true, month: 'short', day: 'numeric'
+                    }) + ' HST',
+                });
+            }
+        } catch (e) {
+            setMakaiRain({ lastHour: 'Error', lastSixHours: 'Error', lastReading: 'Error' });
+            setMaukaRain({ lastHour: 'Error', lastSixHours: 'Error', lastReading: 'Error' });
+        }
+    }, []);
     const [refreshing, setRefreshing] = useState(false);
     const [waikaneData, setWaikaneData] = useState<{ 
         height: string | null; 
@@ -154,16 +207,16 @@ export default function HomeScreen() {
     useEffect(() => {
         fetchWaikaneData();
         fetchWaiaholeData();
-    }, [fetchWaikaneData, fetchWaiaholeData]);
+        fetchRainData();
+    }, [fetchWaikaneData, fetchWaiaholeData, fetchRainData]);
 
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
-        await Promise.all([fetchWaikaneData(), fetchWaiaholeData()]);
-        // Add a small delay to show the refresh indicator
+        await Promise.all([fetchWaikaneData(), fetchWaiaholeData(), fetchRainData()]);
         setTimeout(() => {
             setRefreshing(false);
         }, 500);
-    }, [fetchWaikaneData, fetchWaiaholeData]);
+    }, [fetchWaikaneData, fetchWaiaholeData, fetchRainData]);
 
     const openMap = async () => {
         await WebBrowser.openBrowserAsync('https://experience.arcgis.com/experience/60260cda4f744186bbd9c67163b747d3');
@@ -325,15 +378,15 @@ export default function HomeScreen() {
             <ThemedView style={styles.monitorInfo}>
                 <ThemedView style={styles.infoItem}>
                     <ThemedText style={styles.label}>Last Hour:</ThemedText>
-                    <ThemedText style={styles.value}>Loading...</ThemedText>
+                    <ThemedText style={styles.value}>{makaiRain.lastHour}</ThemedText>
                 </ThemedView>
                 <ThemedView style={styles.infoItem}>
                     <ThemedText style={styles.label}>Last Six Hours:</ThemedText>
-                    <ThemedText style={styles.value}>Loading...</ThemedText>
+                    <ThemedText style={styles.value}>{makaiRain.lastSixHours}</ThemedText>
                 </ThemedView>
                 <ThemedView style={styles.infoItem}>
                     <ThemedText style={styles.label}>Last Reading:</ThemedText>
-                    <ThemedText style={styles.value}>Loading...</ThemedText>
+                    <ThemedText style={styles.value}>{makaiRain.lastReading}</ThemedText>
                 </ThemedView>
             </ThemedView>
 
@@ -349,15 +402,15 @@ export default function HomeScreen() {
             <ThemedView style={styles.monitorInfo}>
                 <ThemedView style={styles.infoItem}>
                     <ThemedText style={styles.label}>Last Hour:</ThemedText>
-                    <ThemedText style={styles.value}>Loading...</ThemedText>
+                    <ThemedText style={styles.value}>{maukaRain.lastHour}</ThemedText>
                 </ThemedView>
                 <ThemedView style={styles.infoItem}>
                     <ThemedText style={styles.label}>Last Six Hours:</ThemedText>
-                    <ThemedText style={styles.value}>Loading...</ThemedText>
+                    <ThemedText style={styles.value}>{maukaRain.lastSixHours}</ThemedText>
                 </ThemedView>
                 <ThemedView style={styles.infoItem}>
                     <ThemedText style={styles.label}>Last Reading:</ThemedText>
-                    <ThemedText style={styles.value}>Loading...</ThemedText>
+                    <ThemedText style={styles.value}>{maukaRain.lastReading}</ThemedText>
                 </ThemedView>
             </ThemedView>
 
