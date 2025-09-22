@@ -358,7 +358,9 @@ export default function HomeScreen() {
                 <ThemedText style={styles.chartTitle}>Tide Height Gauge</ThemedText>
                 <WaikaneTideLevel />
                 <ThemedText style={styles.chartTitle}>Tide Trend Graph</ThemedText>
-                <WaikaneTideGraph />
+                <ThemedView style={styles.chartWrapper}>
+                    <WaikaneTideGraph />
+                </ThemedView>
             </ThemedView>
 
             {/* Rain Section Header */}
