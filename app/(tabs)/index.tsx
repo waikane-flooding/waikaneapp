@@ -310,32 +310,6 @@ export default function HomeScreen() {
                 <Ionicons name="water" size={16} color="#007AFF" /> Waikāne
             </ThemedText>
 
-            {/* Tide Info Chart */}
-            <ThemedView style={styles.monitorInfo}>
-                <ThemedView style={styles.infoItem}>
-                    <ThemedText style={styles.label}>Current Height:</ThemedText>
-                    <ThemedText style={styles.value}>Loading...</ThemedText>
-                </ThemedView>
-                <ThemedView style={styles.infoItem}>
-                    <ThemedText style={styles.label}>Last Reading:</ThemedText>
-                    <ThemedText style={styles.value}>Loading...</ThemedText>
-                </ThemedView>
-                <ThemedView style={styles.infoItem}>
-                    <ThemedText style={styles.label}>Tide Direction:</ThemedText>
-                    <ThemedText style={styles.value}>Loading...</ThemedText>
-                </ThemedView>
-                <ThemedView style={styles.infoItem}>
-                    <ThemedText style={styles.label}>Next Tide:</ThemedText>
-                    <ThemedText style={styles.value}>Loading...</ThemedText>
-                </ThemedView>
-                <ThemedView style={styles.statusContainer}>
-                    <ThemedText style={styles.label}>Status:</ThemedText>
-                    <ThemedView style={[styles.statusBar, { backgroundColor: '#34C759' }]}> 
-                        <ThemedText style={styles.statusText}>Loading...</ThemedText>
-                    </ThemedView>
-                </ThemedView>
-            </ThemedView>
-
             {/* Tide Gauge and Trend */}
             <ThemedView style={styles.section}>
                 <ThemedText style={styles.chartTitle}>Tide Height Gauge</ThemedText>
@@ -354,24 +328,6 @@ export default function HomeScreen() {
                 <Ionicons name="rainy" size={16} color="#007AFF" /> Makai (towards the ocean)
             </ThemedText>
 
-            {/* Rain Info Chart */}
-            <ThemedView style={styles.monitorInfo}>
-                <ThemedView style={styles.infoItem}>
-                    <ThemedText style={styles.label}>Current Rainfall:</ThemedText>
-                    <ThemedText style={styles.value}>Loading...</ThemedText>
-                </ThemedView>
-                <ThemedView style={styles.infoItem}>
-                    <ThemedText style={styles.label}>Last Reading:</ThemedText>
-                    <ThemedText style={styles.value}>Loading...</ThemedText>
-                </ThemedView>
-                <ThemedView style={styles.statusContainer}>
-                    <ThemedText style={styles.label}>Status:</ThemedText>
-                    <ThemedView style={[styles.statusBar, { backgroundColor: '#34C759' }]}> 
-                        <ThemedText style={styles.statusText}>Loading...</ThemedText>
-                    </ThemedView>
-                </ThemedView>
-            </ThemedView>
-
             {/* Rain Gauge Placeholder */}
             <ThemedView style={styles.section}>
                 <ThemedText style={styles.chartTitle}>Rain Gauge</ThemedText>
@@ -385,24 +341,6 @@ export default function HomeScreen() {
             <ThemedText type="subtitle" style={styles.thinText}>
                 <Ionicons name="rainy" size={16} color="#007AFF" /> Mauka (towards the mountain)
             </ThemedText>
-
-            {/* Mauka Rain Info Chart */}
-            <ThemedView style={styles.monitorInfo}>
-                <ThemedView style={styles.infoItem}>
-                    <ThemedText style={styles.label}>Current Rainfall:</ThemedText>
-                    <ThemedText style={styles.value}>Loading...</ThemedText>
-                </ThemedView>
-                <ThemedView style={styles.infoItem}>
-                    <ThemedText style={styles.label}>Last Reading:</ThemedText>
-                    <ThemedText style={styles.value}>Loading...</ThemedText>
-                </ThemedView>
-                <ThemedView style={styles.statusContainer}>
-                    <ThemedText style={styles.label}>Status:</ThemedText>
-                    <ThemedView style={[styles.statusBar, { backgroundColor: '#34C759' }]}> 
-                        <ThemedText style={styles.statusText}>Loading...</ThemedText>
-                    </ThemedView>
-                </ThemedView>
-            </ThemedView>
 
             {/* Mauka Rain Gauge Placeholder */}
             <ThemedView style={styles.section}>
