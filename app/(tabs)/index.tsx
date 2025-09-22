@@ -331,6 +331,10 @@ export default function HomeScreen() {
                     <ThemedText style={styles.label}>Last Six Hours:</ThemedText>
                     <ThemedText style={styles.value}>Loading...</ThemedText>
                 </ThemedView>
+                <ThemedView style={styles.infoItem}>
+                    <ThemedText style={styles.label}>Last Reading:</ThemedText>
+                    <ThemedText style={styles.value}>Loading...</ThemedText>
+                </ThemedView>
             </ThemedView>
 
             {/* Mauka Rain Label */}
@@ -349,6 +353,10 @@ export default function HomeScreen() {
                 </ThemedView>
                 <ThemedView style={styles.infoItem}>
                     <ThemedText style={styles.label}>Last Six Hours:</ThemedText>
+                    <ThemedText style={styles.value}>Loading...</ThemedText>
+                </ThemedView>
+                <ThemedView style={styles.infoItem}>
+                    <ThemedText style={styles.label}>Last Reading:</ThemedText>
                     <ThemedText style={styles.value}>Loading...</ThemedText>
                 </ThemedView>
             </ThemedView>
