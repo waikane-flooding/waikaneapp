@@ -1,6 +1,6 @@
 //home screen
 import { Ionicons } from '@expo/vector-icons';
-import { StyleSheet, Pressable, Platform, RefreshControl, ScrollView, View, Dimensions } from 'react-native';
+import { StyleSheet, Pressable, Platform, RefreshControl, ScrollView, View, Dimensions, ActivityIndicator } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import { Image } from 'expo-image';
 import { useState, useCallback, useEffect, useMemo } from 'react';
@@ -25,6 +25,9 @@ type RainData = {
     'DateTime': string;
     'Name': string;
 };
+
+// Weather constants
+const KANEOHE_COORDS = { lat: 21.4181, lon: -157.8036 };
 
 export default function HomeScreen() {
     // Rain data state
@@ -72,6 +75,15 @@ export default function HomeScreen() {
             setMaukaRain({ lastHour: 'Error', lastSixHours: 'Error', lastReading: 'Error' });
         }
     }, []);
+    
+    // Weather data state
+    const [forecast, setForecast] = useState<any[]>([]);
+    const [forecastLoading, setForecastLoading] = useState(true);
+    const [forecastError, setForecastError] = useState<string | null>(null);
+    const [alerts, setAlerts] = useState<any[]>([]);
+    const [alertsLoading, setAlertsLoading] = useState(true);
+    const [alertsError, setAlertsError] = useState<string | null>(null);
+    
     const [refreshing, setRefreshing] = useState(false);
     const [waikaneData, setWaikaneData] = useState<{ 
         height: string | null; 
@@ -203,20 +215,77 @@ export default function HomeScreen() {
         }
     }, [getStreamStatus, waiaholeThresholds]);
 
+    // Fetch weather forecast
+    const fetchForecast = useCallback(async () => {
+        setForecastLoading(true);
+        setForecastError(null);
+        try {
+            const pointsResp = await fetch(`https://api.weather.gov/points/${KANEOHE_COORDS.lat},${KANEOHE_COORDS.lon}`);
+            const pointsData = await pointsResp.json();
+            const forecastUrl = pointsData.properties.forecast;
+            const forecastResp = await fetch(forecastUrl);
+            const forecastData = await forecastResp.json();
+            setForecast(forecastData.properties.periods.slice(0, 6));
+        } catch {
+            setForecastError('Unable to load forecast.');
+        } finally {
+            setForecastLoading(false);
+        }
+    }, []);
+
+    // Fetch weather alerts
+    const fetchAlerts = useCallback(async () => {
+        setAlertsLoading(true);
+        setAlertsError(null);
+        try {
+            const resp = await fetch('https://api.weather.gov/alerts/active?area=HI');
+            const data = await resp.json();
+            const eastOahuSpecificAreas = [
+                'Kāneʻohe', 'Kaneohe', 'Waikāne', 'Waikane', 'Waiahole', 'Kualoa', 'Waimanalo', 
+                'Heʻeia', 'Heeia', 'Windward Oahu', 'Koʻolaupoko', 'Koolaupoko', 'Oahu Windward'
+            ];
+            const excludeKeywords = ['Coastal', 'Marine', 'Winter'];
+            const excludeOtherIslands = [
+                'Maui', 'Big Island', 'Kauai', 'Molokai', 'Lanai', 'Kahoolawe', 'Kona', 'Hilo', 'Kohala'
+            ];
+            
+            const filtered = (data.features || []).filter((alert: any) => {
+                const event = alert.properties.event || '';
+                const headline = alert.properties.headline || '';
+                const desc = alert.properties.areaDesc || '';
+                
+                if (excludeKeywords.some(word => event.includes(word) || headline.includes(word))) return false;
+                if (excludeOtherIslands.some(island => desc.includes(island))) return false;
+                
+                const includeGeneralOahu = desc.includes('East Honolulu') || desc.includes('Honolulu Metro');
+                const includeSpecificEastOahu = eastOahuSpecificAreas.some(area => desc.includes(area));
+                
+                return includeGeneralOahu || includeSpecificEastOahu;
+            });
+            setAlerts(filtered);
+        } catch {
+            setAlertsError('Unable to load alerts.');
+        } finally {
+            setAlertsLoading(false);
+        }
+    }, []);
+
     // Load data on component mount
     useEffect(() => {
         fetchWaikaneData();
         fetchWaiaholeData();
         fetchRainData();
-    }, [fetchWaikaneData, fetchWaiaholeData, fetchRainData]);
+        fetchForecast();
+        fetchAlerts();
+    }, [fetchWaikaneData, fetchWaiaholeData, fetchRainData, fetchForecast, fetchAlerts]);
 
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
-        await Promise.all([fetchWaikaneData(), fetchWaiaholeData(), fetchRainData()]);
+        await Promise.all([fetchWaikaneData(), fetchWaiaholeData(), fetchRainData(), fetchForecast(), fetchAlerts()]);
         setTimeout(() => {
             setRefreshing(false);
         }, 500);
-    }, [fetchWaikaneData, fetchWaiaholeData, fetchRainData]);
+    }, [fetchWaikaneData, fetchWaiaholeData, fetchRainData, fetchForecast, fetchAlerts]);
 
     const openMap = async () => {
         await WebBrowser.openBrowserAsync('https://experience.arcgis.com/experience/60260cda4f744186bbd9c67163b747d3');
@@ -241,12 +310,14 @@ export default function HomeScreen() {
             }
         >
             <ThemedView style={styles.titleContainer}>
-                 <ThemedText type="title" style={[styles.thinText, { textAlign: 'center', width: '100%' }]}>Flood App</ThemedText>
+                <ThemedView style={styles.funTitleContainer}>
+                    <ThemedText type="title" style={[styles.thinText, styles.appTitle]}>Flood App</ThemedText>
+                </ThemedView>
             </ThemedView>
 
             {/* Streams Section Header */}
             <ThemedView style={styles.section}>
-                <ThemedText type="subtitle" style={[styles.thinText, { textAlign: 'center', width: '100%' }]}>Streams</ThemedText>
+                <ThemedText type="subtitle" style={[styles.thinText, styles.sectionHeaderText]}>Streams</ThemedText>
             </ThemedView>
             {/* Stream Gauges and Graphs: horizontal scroll for mobile, side by side for web */}
             {Platform.OS === 'web' ? (
@@ -256,7 +327,7 @@ export default function HomeScreen() {
                         <ThemedText type="subtitle" style={styles.thinText}>
                             <Ionicons name="water" size={16} color="#007AFF" /> Waikāne
                         </ThemedText>
-                        <ThemedText style={styles.chartTitle}>Waikāne Stream Height Gauge</ThemedText>
+                        <ThemedText style={styles.chartTitle}>Stream Height Gauge</ThemedText>
                         <ThemedView style={styles.gaugeWrapper}>
                             <WaikaneStreamHeight />
                         </ThemedView>
@@ -345,12 +416,15 @@ export default function HomeScreen() {
 
             {/* Tide Section Header */}
             <ThemedView style={styles.section}>
-                <ThemedText type="subtitle" style={[styles.thinText, { textAlign: 'center', width: '100%' }]}>Tide</ThemedText>
+                <ThemedText type="subtitle" style={[styles.thinText, styles.sectionHeaderText]}>Tide</ThemedText>
             </ThemedView>
 
             {/* Kanehoe Tide Label */}
             <ThemedText type="subtitle" style={styles.thinText}>
                 <Ionicons name="water" size={16} color="#007AFF" /> Waikāne
+            </ThemedText>
+            <ThemedText style={[styles.thinText, { fontSize: 13, color: '#666', marginBottom: 8, marginLeft: 2 }]}>
+                TPT2777 Waikane, Kaneohe Bay (MLLW)
             </ThemedText>
 
             {/* Tide Gauge and Trend */}
@@ -365,7 +439,7 @@ export default function HomeScreen() {
 
             {/* Rain Section Header */}
             <ThemedView style={styles.section}>
-                <ThemedText type="subtitle" style={[styles.thinText, { textAlign: 'center', width: '100%' }]}>Rain</ThemedText>
+                <ThemedText type="subtitle" style={[styles.thinText, styles.sectionHeaderText]}>Rain</ThemedText>
             </ThemedView>
 
             {/* Makai Rain Label */}
@@ -442,8 +516,149 @@ export default function HomeScreen() {
                 </ThemedView>
             </ThemedView>
             */}
+
+            {/* Weather Section Header */}
+            <ThemedView style={styles.section}>
+                <ThemedText type="subtitle" style={[styles.thinText, styles.sectionHeaderText]}>Weather</ThemedText>
+            </ThemedView>
+
+            {/* Weather Forecast */}
+            <ThemedView style={styles.section}>
+                <ThemedText type="subtitle" style={styles.thinText}>
+                    <Ionicons name="calendar" size={16} color="#4169E1" /> Waiāhole 3-Day Forecast
+                </ThemedText>
+                
+                <ThemedView style={styles.forecastCardHorizontal}>
+                    <ScrollView style={styles.forecastScroll} horizontal showsHorizontalScrollIndicator={false}>
+                        {forecastLoading ? (
+                            <ThemedText style={styles.placeholderText}>Loading forecast...</ThemedText>
+                        ) : forecastError ? (
+                            <ThemedText style={[styles.placeholderText, { color: 'red' }]}>{forecastError}</ThemedText>
+                        ) : forecast.length > 0 ? (
+                            forecast.map((period: any) => (
+                                <ThemedView key={period.number} style={styles.forecastCardItem}>
+                                    <Ionicons name={getForecastIcon(period.shortForecast)} size={32} color="#4169E1" style={{ marginBottom: 6 }} />
+                                    <ThemedText style={styles.forecastTitle}>{period.name}</ThemedText>
+                                    <ThemedText style={styles.forecastTemp}>{period.temperature}°{period.temperatureUnit}</ThemedText>
+                                    <ThemedText style={styles.forecastText}>{period.shortForecast}</ThemedText>
+                                </ThemedView>
+                            ))
+                        ) : (
+                            <ThemedText style={styles.placeholderText}>No forecast data available.</ThemedText>
+                        )}
+                    </ScrollView>
+                </ThemedView>
+            </ThemedView>
+
+            {/* Weather Alerts */}
+            <ThemedView style={styles.section}>
+                <ThemedText type="subtitle" style={[styles.thinText, { marginBottom: 18 }]}>
+                    National Weather Service Updates
+                </ThemedText>
+
+                {alertsLoading ? (
+                    <ThemedView style={styles.alertsCard}>
+                        <ActivityIndicator size="small" color="#d9534f" />
+                    </ThemedView>
+                ) : alertsError ? (
+                    <ThemedView style={styles.alertsCard}>
+                        <ThemedText style={[styles.placeholderText, { color: '#d9534f' }]}>{alertsError}</ThemedText>
+                    </ThemedView>
+                ) : alerts.length > 0 ? (
+                    <ThemedView style={styles.alertsCard}>
+                        {alerts.map((alert: any) => {
+                            const alertSeverity = getAlertSeverity(alert);
+                            return (
+                                <ThemedView 
+                                    key={alert.id} 
+                                    style={[
+                                        styles.alertItem,
+                                        { 
+                                            backgroundColor: alertSeverity.bgColor,
+                                            borderLeftWidth: 4,
+                                            borderLeftColor: alertSeverity.color
+                                        }
+                                    ]}
+                                >
+                                    <ThemedView style={styles.alertHeader}>
+                                        <ThemedText style={[styles.alertTitle, { color: alertSeverity.color }]}>
+                                            {alert.properties.event}
+                                        </ThemedText>
+                                        <ThemedView style={[styles.severityBadge, { backgroundColor: alertSeverity.color }]}>
+                                            <ThemedText style={styles.severityText}>
+                                                {alertSeverity.level.toUpperCase()}
+                                            </ThemedText>
+                                        </ThemedView>
+                                    </ThemedView>
+                                    <ThemedText style={styles.alertTime}>
+                                        {alert.properties.effective ? `From: ${new Date(alert.properties.effective).toLocaleString('en-US', {
+                                            month: 'short',
+                                            day: 'numeric',
+                                            year: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                            hour12: true
+                                        })} HST` : ''}
+                                        {alert.properties.ends ? `  To: ${new Date(alert.properties.ends).toLocaleString('en-US', {
+                                            month: 'short',
+                                            day: 'numeric',
+                                            year: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                            hour12: true
+                                        })} HST` : ''}
+                                    </ThemedText>
+                                    <ThemedText style={styles.alertArea}>{alert.properties.areaDesc}</ThemedText>
+                                    {alert.properties.headline && (
+                                        <ThemedText style={[styles.alertHeadline, { color: alertSeverity.color }]}>
+                                            {alert.properties.headline}
+                                        </ThemedText>
+                                    )}
+                                </ThemedView>
+                            );
+                        })}
+                    </ThemedView>
+                ) : (
+                    <ThemedText style={styles.noAlertsText}>No active updates for East Oʻahu/Windward side.</ThemedText>
+                )}
+            </ThemedView>
+
         </ParallaxScrollView>
     );
+}
+
+// Helper function for forecast icons
+function getForecastIcon(shortForecast: string) {
+    const text = shortForecast.toLowerCase();
+    if (text.includes('rain')) return 'rainy';
+    if (text.includes('showers')) return 'rainy-outline';
+    if (text.includes('cloud')) return 'cloudy';
+    if (text.includes('sun') || text.includes('clear')) return 'sunny';
+    if (text.includes('haze')) return 'partly-sunny';
+    if (text.includes('wind')) return 'flag';
+    return 'cloud-outline';
+}
+
+// Helper function to determine alert severity and color
+function getAlertSeverity(alert: any) {
+    const event = alert.properties.event?.toLowerCase() || '';
+    const severity = alert.properties.severity?.toLowerCase() || '';
+    
+    if (severity === 'extreme' || severity === 'severe' || 
+        event.includes('warning') || event.includes('watch') || 
+        event.includes('tornado') || event.includes('hurricane') || 
+        event.includes('flash flood') || event.includes('severe thunderstorm')) {
+        return { color: '#FF3B30', bgColor: 'rgba(255, 59, 48, 0.1)', level: 'high' };
+    }
+    
+    if (severity === 'moderate' || 
+        event.includes('advisory') || event.includes('statement') || 
+        event.includes('flood') || event.includes('wind') || 
+        event.includes('rain')) {
+        return { color: '#FF9500', bgColor: 'rgba(255, 149, 0, 0.1)', level: 'medium' };
+    }
+    
+    return { color: '#34C759', bgColor: 'rgba(52, 199, 89, 0.1)', level: 'low' };
 }
 
 const styles = StyleSheet.create({
@@ -471,6 +686,35 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         gap: 8,
         marginBottom: 12,
+    },
+    funTitleContainer: {
+        backgroundColor: 'rgba(0, 122, 255, 0.08)',
+        borderRadius: 20,
+        paddingVertical: 16,
+        paddingHorizontal: 24,
+        marginHorizontal: 16,
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: '#007AFF',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 3,
+        borderWidth: 2,
+        borderColor: 'rgba(0, 122, 255, 0.2)',
+        width: '100%',
+        alignSelf: 'center',
+    },
+    titleEmoji: {
+        fontSize: 28,
+        marginHorizontal: 12,
+    },
+    appTitle: {
+        textAlign: 'center',
+        fontSize: 28,
+        fontWeight: '600',
+        color: '#007AFF',
+        letterSpacing: 1,
     },
     section: {
         marginBottom: 16,
@@ -741,5 +985,129 @@ const styles = StyleSheet.create({
         width: '100%',
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    // Weather styles
+    alertsCard: {
+        backgroundColor: 'rgba(255, 255, 255, 0.02)',
+        borderRadius: 12,
+        padding: 16,
+        marginTop: 8,
+    },
+    alertItem: {
+        backgroundColor: 'rgba(255, 59, 48, 0.1)',
+        borderRadius: 8,
+        padding: 12,
+        marginBottom: 8,
+    },
+    alertHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
+    alertTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        flex: 1,
+    },
+    severityBadge: {
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+        borderRadius: 10,
+        marginLeft: 8,
+    },
+    severityText: {
+        color: 'white',
+        fontSize: 12,
+        fontWeight: '600',
+    },
+    alertTime: {
+        fontSize: 12,
+        fontWeight: '400',
+        color: '#666',
+        marginBottom: 4,
+    },
+    alertArea: {
+        fontSize: 12,
+        fontWeight: '400',
+        color: '#888',
+        marginBottom: 6,
+    },
+    alertHeadline: {
+        fontSize: 14,
+        fontWeight: '500',
+        lineHeight: 18,
+    },
+    noAlertsText: {
+        fontSize: 14,
+        fontWeight: '400',
+        color: '#34C759',
+        textAlign: 'center',
+        padding: 16,
+    },
+    description: {
+        fontSize: 14,
+        fontWeight: '300',
+        color: '#666',
+        marginBottom: 12,
+        textAlign: 'center',
+    },
+    forecastCardHorizontal: {
+        backgroundColor: 'rgba(65, 105, 225, 0.05)',
+        borderRadius: 12,
+        padding: 12,
+        marginTop: 8,
+    },
+    forecastScroll: {
+        flexDirection: 'row',
+    },
+    forecastCardItem: {
+        backgroundColor: 'rgba(65, 105, 225, 0.1)',
+        borderRadius: 8,
+        padding: 12,
+        marginRight: 8,
+        minWidth: 120,
+        alignItems: 'center',
+    },
+    forecastTitle: {
+        fontSize: 14,
+        fontWeight: '600',
+        marginBottom: 4,
+        textAlign: 'center',
+    },
+    forecastTemp: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: '#4169E1',
+        marginBottom: 4,
+    },
+    forecastText: {
+        fontSize: 12,
+        fontWeight: '400',
+        color: '#666',
+        textAlign: 'center',
+        lineHeight: 16,
+    },
+    sectionHeaderContainer: {
+        backgroundColor: 'rgba(0, 122, 255, 0.1)',
+        borderLeftWidth: 4,
+        borderLeftColor: '#007AFF',
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        marginVertical: 8,
+        borderRadius: 8,
+        marginBottom: 16,
+        shadowColor: '#007AFF',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
+    },
+    sectionHeaderText: {
+        textAlign: 'center',
+        width: '100%',
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#007AFF',
     },
 });
