@@ -358,8 +358,8 @@ export default function HomeScreen() {
                 <ThemedText type="subtitle" style={[styles.thinText, styles.sectionHeaderText]}>Streams</ThemedText>
             </ThemedView>
             {/* Single stream chart container with navigation arrows */}
-            <ThemedView style={[styles.streamSection, { alignItems: 'center', justifyContent: 'center', width: '100%' }]}>
-                <ThemedView style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+            <ThemedView style={styles.streamSection}>
+                <ThemedView style={styles.streamNavigation}>
                     <Pressable
                         onPress={() => setStreamIdx(i => Math.max(0, i - 1))}
                         disabled={streamIdx === 0}
@@ -744,12 +744,18 @@ const styles = StyleSheet.create({
         width: '100%',
     },
     streamSection: {
-        flex: 1,
-        minWidth: 0,
-        maxWidth: '90%',
+        width: '100%',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingHorizontal: 8,
+        paddingHorizontal: 16,
+        alignSelf: 'center',
+    },
+    streamNavigation: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        marginBottom: 12,
     },
     // ...existing code...
         chartWrapper: {
