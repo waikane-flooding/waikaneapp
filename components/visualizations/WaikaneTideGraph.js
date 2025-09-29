@@ -464,7 +464,7 @@ const WaikaneTideGraph = () => {
             fontSize="12"
             fill="#FFC107"
           >
-            Elevated Tide: 2.92 ft
+            Elevated: 2.92 ft
           </SvgText>
           <SvgText
             x={padding + 5}
@@ -472,7 +472,7 @@ const WaikaneTideGraph = () => {
             fontSize="12"
             fill="#F44336"
           >
-            Extreme Tide: 3.42 ft
+            Extreme: 3.42 ft
           </SvgText>
         </Svg>
         

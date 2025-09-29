@@ -373,7 +373,7 @@ const WaikaneStreamGraph = () => {
             fontSize="12"
             fill="#FFC107"
           >
-            Elevated Height: 7.00 ft
+            Elevated: 7.00 ft
           </SvgText>
           <SvgText
             x={padding + 5}
@@ -381,7 +381,7 @@ const WaikaneStreamGraph = () => {
             fontSize="12"
             fill="#F44336"
           >
-            Extreme Height: 10.80 ft
+            Extreme: 10.80 ft
           </SvgText>
         </Svg>
         

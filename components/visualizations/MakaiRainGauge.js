@@ -117,16 +117,18 @@ const MakaiRainGauge = () => {
             );
           })}
           {/* Threshold tick marks and labels */}
-          {[{ value: minLevel, color: '#4CAF50', label: '0.00 in' }, { value: greenEnd, color: '#FFC107', label: '2.80 in' }, { value: yellowEnd, color: '#F44336', label: '4.10 in' }].map((threshold, idx) => {
+          {[{ value: greenEnd, color: '#FFC107', label: '2.80 in' }, { value: yellowEnd, color: '#F44336', label: '4.10 in' }].map((threshold, idx) => {
             const percent = (threshold.value - minLevel) / (maxLevel - minLevel);
             const angle = Math.PI - percent * Math.PI;
             const tickRadius = 250;
             const tickLength = 20;
-            const x1 = 350 + tickRadius * Math.cos(angle);
-            const y1 = 280 - tickRadius * Math.sin(angle);
-            const x2 = 350 + (tickRadius - tickLength) * Math.cos(angle);
-            const y2 = 280 - (tickRadius - tickLength) * Math.sin(angle);
-            // Increase labelRadius for more space between tick and label
+            const tickCenter = tickRadius;
+            const halfLength = tickLength / 2;
+            const x1 = 350 + (tickCenter - halfLength) * Math.cos(angle);
+            const y1 = 280 - (tickCenter - halfLength) * Math.sin(angle);
+            const x2 = 350 + (tickCenter + halfLength) * Math.cos(angle);
+            const y2 = 280 - (tickCenter + halfLength) * Math.sin(angle);
+            
             const labelRadius = 200;
             const lx = 350 + labelRadius * Math.cos(angle);
             const ly = 280 - labelRadius * Math.sin(angle);
@@ -143,7 +145,7 @@ const MakaiRainGauge = () => {
                 <SvgText
                   x={lx}
                   y={ly}
-                  fontSize="14"
+                  fontSize="20"
                   fill={threshold.color}
                   textAnchor="middle"
                   alignmentBaseline="middle"

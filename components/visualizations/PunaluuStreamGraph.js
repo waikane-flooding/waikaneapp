@@ -373,7 +373,7 @@ const PunaluuStreamGraph = () => {
             fontSize="12"
             fill="#FFC107"
           >
-            Elevated Height: 10.00 ft
+            Elevated: 10.00 ft
           </SvgText>
           <SvgText
             x={padding + 5}
@@ -381,7 +381,7 @@ const PunaluuStreamGraph = () => {
             fontSize="12"
             fill="#F44336"
           >
-            Extreme Height: 14.70 ft
+            Extreme: 14.70 ft
           </SvgText>
         </Svg>
         

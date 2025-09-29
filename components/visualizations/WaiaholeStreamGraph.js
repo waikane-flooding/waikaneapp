@@ -382,7 +382,7 @@ const WaiaholeStreamGraph = () => {
             fontSize="12"
             fill="#FFC107"
           >
-            Elevated Height: 12.00 ft
+            Elevated: 12.00 ft
           </SvgText>
           <SvgText
             x={padding + 8}
@@ -390,7 +390,7 @@ const WaiaholeStreamGraph = () => {
             fontSize="12"
             fill="#F44336"
           >
-            Extreme Height: 16.40 ft
+            Extreme: 16.40 ft
           </SvgText>
         </Svg>
         

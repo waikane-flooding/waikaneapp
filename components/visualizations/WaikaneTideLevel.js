@@ -89,14 +89,14 @@ const WaikaneTideLevel = () => {
   };
 
   const formattedDateTime = tideTime
-    ? 'Last Reading: ' + new Date(tideTime).toLocaleString('en-US', {
+    ? new Date(tideTime).toLocaleString('en-US', {
         timeZone: 'Pacific/Honolulu',
         month: 'short',
         day: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
         hour12: true
-      }) + ' HST'
+      })
     : 'Loading...';
 
   const customTicks = [-2, -1, 0, 1, 2, 3, 4];
@@ -152,16 +152,18 @@ const WaikaneTideLevel = () => {
             );
           })}
           {/* Threshold tick marks and labels */}
-          {[{ value: minLevel, color: '#4CAF50', label: '-2.00 ft' },{ value: greenEnd, color: '#FFC107', label: '2.92 ft' }, { value: yellowEnd, color: '#F44336', label: '3.42 ft' }].map((threshold, idx) => {
+          {[{ value: greenEnd, color: '#FFC107', label: '2.92 ft' }, { value: yellowEnd, color: '#F44336', label: '3.42 ft' }].map((threshold, idx) => {
             const percent = (threshold.value - minLevel) / (maxLevel - minLevel);
             const angle = Math.PI - percent * Math.PI;
             const tickRadius = 250;
             const tickLength = 20;
-            const x1 = 350 + tickRadius * Math.cos(angle);
-            const y1 = 280 - tickRadius * Math.sin(angle);
-            const x2 = 350 + (tickRadius - tickLength) * Math.cos(angle);
-            const y2 = 280 - (tickRadius - tickLength) * Math.sin(angle);
-            // Increase labelRadius for more space between tick and label
+            const tickCenter = tickRadius;
+            const halfLength = tickLength / 2;
+            const x1 = 350 + (tickCenter - halfLength) * Math.cos(angle);
+            const y1 = 280 - (tickCenter - halfLength) * Math.sin(angle);
+            const x2 = 350 + (tickCenter + halfLength) * Math.cos(angle);
+            const y2 = 280 - (tickCenter + halfLength) * Math.sin(angle);
+            
             const labelRadius = 200;
             const lx = 350 + labelRadius * Math.cos(angle);
             const ly = 280 - labelRadius * Math.sin(angle);
@@ -178,7 +180,7 @@ const WaikaneTideLevel = () => {
                 <SvgText
                   x={lx}
                   y={ly}
-                  fontSize="14"
+                  fontSize="20"
                   fill={threshold.color}
                   textAnchor="middle"
                   alignmentBaseline="middle"
@@ -198,21 +200,21 @@ const WaikaneTideLevel = () => {
         <Text style={styles.datetime}>{formattedDateTime}</Text>
         {/* Tide Direction */}
         <Text style={{ color: 'white', fontSize: 16, marginTop: 8, textAlign: 'center' }}>
-          Tide Direction: {tideDirection ? tideDirection : 'Loading...'}
+          Tide is {tideDirection ? tideDirection : 'Loading...'}
         </Text>
       </View>
       <View style={styles.legendContainer}>
         <View style={styles.legendItem}>
           <View style={[styles.legendColor, { backgroundColor: '#4CAF50' }]} />
-          <Text style={styles.legendText}>Normal Tide</Text>
+          <Text style={styles.legendText}>Normal</Text>
         </View>
         <View style={styles.legendItem}>
           <View style={[styles.legendColor, { backgroundColor: '#FFC107' }]} />
-          <Text style={styles.legendText}>Elevated Tide</Text>
+          <Text style={styles.legendText}>Elevated</Text>
         </View>
         <View style={styles.legendItem}>
           <View style={[styles.legendColor, { backgroundColor: '#F44336' }]} />
-          <Text style={styles.legendText}>Extreme Tide</Text>
+          <Text style={styles.legendText}>Extreme</Text>
         </View>
       </View>
     </View>

@@ -30,6 +30,23 @@ type RainData = {
 const KANEOHE_COORDS = { lat: 21.4181, lon: -157.8036 };
 
 export default function HomeScreen() {
+    // Helper to get color for rainfall value
+    function getMakaiRainColor(val: string) {
+        const num = parseFloat(val);
+        if (isNaN(num)) return '#007AFF';
+        if (num < 2.8) return '#34C759'; // green
+        if (num < 4.1) return '#FFC107'; // yellow
+        if (num <= 6) return '#F44336'; // red
+        return '#007AFF';
+    }
+    function getMaukaRainColor(val: string) {
+        const num = parseFloat(val);
+        if (isNaN(num)) return '#007AFF';
+        if (num < 3.11) return '#34C759'; // green
+        if (num < 4.54) return '#FFC107'; // yellow
+        if (num <= 7) return '#F44336'; // red
+        return '#007AFF';
+    }
     // Rain data state
     const [makaiRain, setMakaiRain] = useState<{
         lastHour: string;
@@ -58,7 +75,7 @@ export default function HomeScreen() {
                     lastSixHours: makai['6HrRainfall']?.toFixed(2) + ' in',
                     lastReading: new Date(makai.DateTime).toLocaleString('en-US', {
                         hour: '2-digit', minute: '2-digit', hour12: true, month: 'short', day: 'numeric'
-                    }) + ' HST',
+                    }),
                 });
             }
             if (mauka) {
@@ -67,7 +84,7 @@ export default function HomeScreen() {
                     lastSixHours: mauka['6HrRainfall']?.toFixed(2) + ' in',
                     lastReading: new Date(mauka.DateTime).toLocaleString('en-US', {
                         hour: '2-digit', minute: '2-digit', hour12: true, month: 'short', day: 'numeric'
-                    }) + ' HST',
+                    }),
                 });
             }
         } catch (e) {
@@ -151,7 +168,7 @@ export default function HomeScreen() {
                     hour: '2-digit',
                     minute: '2-digit',
                     hour12: true
-                }) + ' HST';
+                });
 
                 setWaikaneData({
                     height: `${latest.value.toFixed(2)} ft`,
@@ -199,7 +216,7 @@ export default function HomeScreen() {
                     hour: '2-digit',
                     minute: '2-digit',
                     hour12: true
-                }) + ' HST';
+                });
 
                 setWaiaholeData({
                     height: `${latest.value.toFixed(2)} ft`,
@@ -454,11 +471,11 @@ export default function HomeScreen() {
             <ThemedView style={styles.monitorInfo}>
                 <ThemedView style={styles.infoItem}>
                     <ThemedText style={styles.label}>Last Hour:</ThemedText>
-                    <ThemedText style={styles.value}>{makaiRain.lastHour}</ThemedText>
+                    <ThemedText style={[styles.value, { color: getMakaiRainColor(makaiRain.lastHour) }]}>{makaiRain.lastHour}</ThemedText>
                 </ThemedView>
                 <ThemedView style={styles.infoItem}>
                     <ThemedText style={styles.label}>Last Six Hours:</ThemedText>
-                    <ThemedText style={styles.value}>{makaiRain.lastSixHours}</ThemedText>
+                    <ThemedText style={[styles.value, { color: getMakaiRainColor(makaiRain.lastSixHours) }]}>{makaiRain.lastSixHours}</ThemedText>
                 </ThemedView>
                 <ThemedView style={styles.infoItem}>
                     <ThemedText style={styles.label}>Last Reading:</ThemedText>
@@ -478,11 +495,11 @@ export default function HomeScreen() {
             <ThemedView style={styles.monitorInfo}>
                 <ThemedView style={styles.infoItem}>
                     <ThemedText style={styles.label}>Last Hour:</ThemedText>
-                    <ThemedText style={styles.value}>{maukaRain.lastHour}</ThemedText>
+                    <ThemedText style={[styles.value, { color: getMaukaRainColor(maukaRain.lastHour) }]}>{maukaRain.lastHour}</ThemedText>
                 </ThemedView>
                 <ThemedView style={styles.infoItem}>
                     <ThemedText style={styles.label}>Last Six Hours:</ThemedText>
-                    <ThemedText style={styles.value}>{maukaRain.lastSixHours}</ThemedText>
+                    <ThemedText style={[styles.value, { color: getMaukaRainColor(maukaRain.lastSixHours) }]}>{maukaRain.lastSixHours}</ThemedText>
                 </ThemedView>
                 <ThemedView style={styles.infoItem}>
                     <ThemedText style={styles.label}>Last Reading:</ThemedText>
@@ -598,7 +615,7 @@ export default function HomeScreen() {
                                             hour: '2-digit',
                                             minute: '2-digit',
                                             hour12: true
-                                        })} HST` : ''}
+                                        })}` : ''}
                                         {alert.properties.ends ? `  To: ${new Date(alert.properties.ends).toLocaleString('en-US', {
                                             month: 'short',
                                             day: 'numeric',
@@ -606,7 +623,7 @@ export default function HomeScreen() {
                                             hour: '2-digit',
                                             minute: '2-digit',
                                             hour12: true
-                                        })} HST` : ''}
+                                        })}` : ''}
                                     </ThemedText>
                                     <ThemedText style={styles.alertArea}>{alert.properties.areaDesc}</ThemedText>
                                     {alert.properties.headline && (
