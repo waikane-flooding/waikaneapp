@@ -308,6 +308,27 @@ export default function HomeScreen() {
         await WebBrowser.openBrowserAsync('https://experience.arcgis.com/experience/60260cda4f744186bbd9c67163b747d3');
     };
 
+    // Stream chart navigation logic
+    const streamCharts = [
+        {
+            name: 'Waikāne',
+            gauge: <WaikaneStreamHeight />,
+            graph: <WaikaneStreamGraph />,
+        },
+        {
+            name: 'Waiāhole',
+            gauge: <WaiaholeStreamHeight />,
+            graph: <WaiaholeStreamGraph />,
+        },
+        {
+            name: 'Punaluʻu',
+            gauge: <PunaluuStreamHeight />,
+            graph: <PunaluuStreamGraph />,
+        },
+    ];
+    const [streamIdx, setStreamIdx] = useState(0);
+    const currentStream = streamCharts[streamIdx];
+
     return (
         <ParallaxScrollView
             headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
@@ -336,100 +357,36 @@ export default function HomeScreen() {
             <ThemedView style={styles.section}>
                 <ThemedText type="subtitle" style={[styles.thinText, styles.sectionHeaderText]}>Streams</ThemedText>
             </ThemedView>
-            {/* Stream Gauges and Graphs: horizontal scroll for mobile, side by side for web */}
-            {Platform.OS === 'web' ? (
-                <ThemedView style={styles.streamsRow}>
-                    {/* Waikāne Stream Section */}
-                    <ThemedView style={styles.streamSection}>
-                        <ThemedText type="subtitle" style={styles.thinText}>
-                            <Ionicons name="water" size={16} color="#007AFF" /> Waikāne
-                        </ThemedText>
-                        <ThemedText style={styles.chartTitle}>Stream Height Gauge</ThemedText>
-                        <ThemedView style={styles.gaugeWrapper}>
-                            <WaikaneStreamHeight />
-                        </ThemedView>
-                        <ThemedText style={styles.chartTitle}>Stream Height Trend</ThemedText>
-                        <ThemedView style={styles.chartWrapper}>
-                            <WaikaneStreamGraph />
-                        </ThemedView>
-                    </ThemedView>
-                    {/* Waiahole Stream Section */}
-                    <ThemedView style={styles.streamSection}>
-                        <ThemedText type="subtitle" style={styles.thinText}>
-                            <Ionicons name="water" size={16} color="#007AFF" /> Waiāhole
-                        </ThemedText>
-                        <ThemedText style={styles.chartTitle}>Stream Height Gauge</ThemedText>
-                        <ThemedView style={styles.gaugeWrapper}>
-                            <WaiaholeStreamHeight />
-                        </ThemedView>
-                        <ThemedText style={styles.chartTitle}>Stream Height Trend</ThemedText>
-                        <ThemedView style={styles.chartWrapper}>
-                            <WaiaholeStreamGraph />
-                        </ThemedView>
-                    </ThemedView>
-                    {/* Punaluʻu Stream Section */}
-                    <ThemedView style={styles.streamSection}>
-                        <ThemedText type="subtitle" style={styles.thinText}>
-                            <Ionicons name="water" size={16} color="#007AFF" /> Punaluʻu
-                        </ThemedText>
-                        <ThemedText style={styles.chartTitle}>Stream Height Gauge</ThemedText>
-                        <ThemedView style={styles.gaugeWrapper}>
-                            <PunaluuStreamHeight />
-                        </ThemedView>
-                        <ThemedText style={styles.chartTitle}>Stream Height Trend</ThemedText>
-                        <ThemedView style={styles.chartWrapper}>
-                            <PunaluuStreamGraph />
-                        </ThemedView>
-                    </ThemedView>
+            {/* Single stream chart container with navigation arrows */}
+            <ThemedView style={[styles.streamSection, { alignItems: 'center', justifyContent: 'center', width: '100%' }]}>
+                <ThemedView style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+                    <Pressable
+                        onPress={() => setStreamIdx(i => Math.max(0, i - 1))}
+                        disabled={streamIdx === 0}
+                        style={({ pressed }) => ({ opacity: streamIdx === 0 ? 0.3 : pressed ? 0.6 : 1, marginRight: 12 })}
+                        accessibilityLabel="Previous stream"
+                    >
+                        <Ionicons name="arrow-back-circle" size={36} color="#007AFF" />
+                    </Pressable>
+                    <ThemedText type="subtitle" style={styles.thinText}>
+                        <Ionicons name="water" size={16} color="#007AFF" /> {currentStream.name}
+                    </ThemedText>
+                    <Pressable
+                        onPress={() => setStreamIdx(i => Math.min(streamCharts.length - 1, i + 1))}
+                        disabled={streamIdx === streamCharts.length - 1}
+                        style={({ pressed }) => ({ opacity: streamIdx === streamCharts.length - 1 ? 0.3 : pressed ? 0.6 : 1, marginLeft: 12 })}
+                        accessibilityLabel="Next stream"
+                    >
+                        <Ionicons name="arrow-forward-circle" size={36} color="#007AFF" />
+                    </Pressable>
                 </ThemedView>
-            ) : (
-                <ScrollView
-                    horizontal
-                    pagingEnabled
-                    showsHorizontalScrollIndicator={false}
-                    style={styles.horizontalScroll}
-                    contentContainerStyle={styles.horizontalScrollContent}
-                >
-                    {/* Waikāne Stream Section */}
-                    <ThemedView style={styles.streamSection}>
-                        <ThemedText type="subtitle" style={styles.thinText}>
-                            <Ionicons name="water" size={16} color="#007AFF" /> Waikāne
-                        </ThemedText>
-                        <ThemedText style={styles.chartTitle}>Stream Height Gauge</ThemedText>
-                        <WaikaneStreamHeight />
-                        <ThemedText style={styles.chartTitle}>Stream Height Trend</ThemedText>
-                        <ThemedView style={styles.chartWrapper}>
-                            <WaikaneStreamGraph />
-                        </ThemedView>
-                    </ThemedView>
-                    {/* Waiahole Stream Section */}
-                    <ThemedView style={styles.streamSection}>
-                        <ThemedText type="subtitle" style={styles.thinText}>
-                            <Ionicons name="water" size={16} color="#007AFF" /> Waiāhole
-                        </ThemedText>
-                        <ThemedText style={styles.chartTitle}>Stream Height Gauge</ThemedText>
-                        <WaiaholeStreamHeight />
-                        <ThemedText style={styles.chartTitle}>Stream Height Trend</ThemedText>
-                        <ThemedView style={styles.chartWrapper}>
-                            <WaiaholeStreamGraph />
-                        </ThemedView>
-                    </ThemedView>
-                    {/* Punaluʻu Stream Section */}
-                    <ThemedView style={styles.streamSection}>
-                        <ThemedText type="subtitle" style={styles.thinText}>
-                            <Ionicons name="water" size={16} color="#007AFF" /> Punaluʻu
-                        </ThemedText>
-                        <ThemedText style={styles.chartTitle}>Stream Height Gauge</ThemedText>
-                        <ThemedView style={styles.gaugeWrapper}>
-                            <PunaluuStreamHeight />
-                        </ThemedView>
-                        <ThemedText style={styles.chartTitle}>Stream Height Trend</ThemedText>
-                        <ThemedView style={styles.chartWrapper}>
-                            <PunaluuStreamGraph />
-                        </ThemedView>
-                    </ThemedView>
-                </ScrollView>
-            )}
+                <ThemedText style={styles.chartTitle}>Stream Height Gauge</ThemedText>
+                <ThemedView style={styles.gaugeWrapper}>{currentStream.gauge}</ThemedView>
+                <ThemedText style={styles.chartTitle}>Stream Height Trend</ThemedText>
+                <ThemedView style={styles.chartWrapper}>{currentStream.graph}</ThemedView>
+            </ThemedView>
+
+            {/* ...existing code... */}
 
             {/* Tide Section Header */}
             <ThemedView style={styles.section}>
