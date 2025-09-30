@@ -58,14 +58,9 @@ export default function AboutScreen() {
           style={styles.headerImage}
         />
       }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText style={styles.titleText}>App Information</ThemedText>
-      </ThemedView>
-
       <ThemedView>
         <ThemedText style={styles.thinText}>
-          🌺{' '}
-          Aloha! We're here to help residents and visitors in Waikāne and Waiāhole stay connected with the land and sea by monitoring flood risks, stream conditions, tides, and weather patterns that shape our beautiful windward communities
+          Aloha! Monitor real time stream levels, rainfall data, tide conditions, and weather forecasts to stay informed about flood risks and environmental conditions on the windward side.
           
         </ThemedText>
       </ThemedView>
@@ -76,7 +71,7 @@ export default function AboutScreen() {
           Important Disclaimer
         </ThemedText>
         <ThemedText style={styles.disclaimerText}>
-          This app is for informational and educational use only. It combines flooding data to raise awareness in Waikāne and Waiāhole, but is not intended for emergency response, evacuation planning, or real-time decision-making. Information is experimental and may not reflect current conditions. This app does not send push notifications, alerts, or any automated warnings to users. Do not rely on this app for safety decisions. For official guidance, consult agencies like the Hawai&apos;i Emergency Management Agency and the National Weather Service
+          For informational and educational use only. Combines flooding data to raise awareness in Waikāne and Waiāhole, but not intended for emergency response, evacuation planning, or real-time decision-making. Information is experimental and may not reflect current conditions. Does not send push notifications, alerts, or automated warnings. Do not rely on this app for safety decisions. For official guidance, consult Hawai&apos;i Emergency Management Agency and National Weather Service.
         </ThemedText>
       </ThemedView>
 
@@ -84,53 +79,36 @@ export default function AboutScreen() {
         <ThemedText style={styles.sectionTitle}>Features</ThemedText>
         <ThemedView style={styles.sectionContent}>
           <ThemedView style={styles.row}>
-            <Ionicons name="home" size={18} color="#007AFF" style={styles.icon} />
-            <ThemedText>
-              Home: App overview & emergency contacts
-            </ThemedText>
-          </ThemedView>
-          <ThemedView style={styles.row}>
             <Ionicons name="water" size={18} color="#007AFF" style={styles.icon} />
             <ThemedText>
-              Stream Monitor: Real-time Waikāne/Waiahole stream levels, status, graphs, and ArcGIS map
+              Stream: Monitor stream water levels. Watch for dangerous thresholds that could cause road and bridge closures.
             </ThemedText>
           </ThemedView>
           <ThemedView style={styles.row}>
             <Ionicons name="time" size={18} color="#007AFF" style={styles.icon} />
             <ThemedText>
-              Tide Conditions: Kāneʻohe Bay tide height, direction, times, and graphs
+              Tide: Track the bay's tide heights to understand how ocean conditions may impact flooding risks.
+            </ThemedText>
+          </ThemedView>
+          <ThemedView style={styles.row}>
+            <Ionicons name="rainy" size={18} color="#007AFF" style={styles.icon} />
+            <ThemedText>
+              Rainfall: Monitor recent rainfall amounts. Heavy rainfall in short periods can increase stream levels and flood risk at rapid rates.
             </ThemedText>
           </ThemedView>
           <ThemedView style={styles.row}>
             <Ionicons name="cloudy" size={18} color="#007AFF" style={styles.icon} />
             <ThemedText>
-              Wave & Weather: National weather alerts & 3-day forecasts
+              Weather: Stay informed with 3 day weather forecasts and updates from the National Weather Service.
             </ThemedText>
           </ThemedView>
         </ThemedView>
       </ThemedView>
 
       <ThemedView style={styles.section}>
-        <ThemedText style={styles.sectionTitle}>How It Works</ThemedText>
         <ThemedView style={styles.sectionContent}>
-          <ThemedView style={styles.row}>
-            <Ionicons name="refresh" size={18} color="#4CAF50" style={styles.icon} />
-            <ThemedText>Data updates automatically when you open the app or refresh it</ThemedText>
-          </ThemedView>
-          <ThemedView style={styles.row}>
-            <Ionicons name="cloud-outline" size={18} color="#007AFF" style={styles.icon} />
-            <ThemedText>Weather forecasts and alerts: Live from National Weather Service</ThemedText>
-          </ThemedView>
-          <ThemedView style={styles.row}>
-            <Ionicons name="water-outline" size={18} color="#007AFF" style={styles.icon} />
-            <ThemedText>Stream monitoring: Real-time data from USGS</ThemedText>
-          </ThemedView>
-          <ThemedView style={styles.row}>
-            <Ionicons name="time-outline" size={18} color="#007AFF" style={styles.icon} />
-            <ThemedText>Tide information: Current NOAA predictions</ThemedText>
-          </ThemedView>
           <ThemedText style={styles.thinText}>
-            For detailed information on data sources and methodology used in this app, please see the linked documentation below
+            For detailed information on data sources and methodology used in this app, please see the linked documentation.
           </ThemedText>
           <ThemedView style={styles.row}>
             <Ionicons name="document-attach-outline" size={18} color="#007AFF" style={styles.icon} />
@@ -174,7 +152,7 @@ export default function AboutScreen() {
       <ThemedView style={styles.section}>
         <ThemedText type="subtitle" style={styles.sectionTitle}>Contact & Feedback</ThemedText>
         <ThemedText style={styles.thinText}>
-          For questions, support, or feedback about app accuracy and features, please reach out via email or the feedback form below
+          For questions, support, or feedback about the app, please reach out via email or the form.
         </ThemedText>
         
         <ThemedView style={styles.contactContainer}>
@@ -187,35 +165,33 @@ export default function AboutScreen() {
         <ThemedView style={styles.contactContainer}>
           <Ionicons name="document-text-outline" size={16} color="#4CAF50" />{' '}
           <ExternalLink href="https://docs.google.com/forms/d/1DNHiR7vRSWIE4Wwi1eb7QwxUcjzsfUhyukAmjoJdjTw/edit">
-            <ThemedText type="link" style={styles.thinText}>Submit Feedback Form</ThemedText>
+            <ThemedText type="link" style={styles.thinText}>Feedback Form</ThemedText>
           </ExternalLink>
         </ThemedView>
       </ThemedView>
 
       {/* Emergency Contacts section moved here */}
-      <ThemedView style={[styles.section, { backgroundColor: '#0a223a', marginTop: 24 }]}>
-        <ThemedText type="subtitle" style={[styles.sectionTitle, { color: '#fff' }]}>
+      <ThemedView style={styles.section}>
+        <ThemedText type="subtitle" style={styles.sectionTitle}>
           <Ionicons name="shield" size={18} color="#FF3B30" /> Emergency Contacts
         </ThemedText>
-        <ThemedText style={[styles.thinText, { color: '#B0BEC5', fontSize: 14, marginBottom: 8, paddingHorizontal: 16 }]}>
+        <ThemedText style={[styles.thinText, { fontSize: 14, marginBottom: 8 }]}>
           Click on a contact name to visit their website or tap a phone number to call
         </ThemedText>
         {emergencyContacts.map((contact, index) => (
-          <ThemedView key={index} style={{ marginTop: 8, paddingHorizontal: 16, paddingVertical: 8 }}>
-            <ThemedView style={styles.contactHeaderColumn}>
-              <ExternalLink href={contact.website as any}>
-                <ThemedText style={[styles.contactName, { color: '#4EA1FF' }]} type="link">
-                  {contact.name}
-                </ThemedText>
-              </ExternalLink>
-              <ThemedText 
-                style={styles.contactNumberBelow}
-                onPress={() => Linking.openURL(`tel:${contact.number}`)}
-              >
-                {contact.number}
+          <ThemedView key={index} style={{ marginTop: 12, marginBottom: 16 }}>
+            <ExternalLink href={contact.website as any}>
+              <ThemedText style={styles.contactName} type="link">
+                {contact.name}
               </ThemedText>
-            </ThemedView>
-            <ThemedText style={styles.contactDescription}>{contact.description}</ThemedText>
+            </ExternalLink>
+            <ThemedText style={[styles.contactDescription, { color: '#666', marginTop: 4, marginBottom: 6 }]}>{contact.description}</ThemedText>
+            <ThemedText 
+              style={[styles.contactNumberBelow, { fontSize: 16, fontWeight: '500' }]}
+              onPress={() => Linking.openURL(`tel:${contact.number}`)}
+            >
+              {contact.number}
+            </ThemedText>
           </ThemedView>
         ))}
       </ThemedView>
