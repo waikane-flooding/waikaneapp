@@ -404,7 +404,9 @@ export default function HomeScreen() {
             {/* Tide Gauge and Trend */}
             <ThemedView style={styles.section}>
                 <ThemedText style={styles.chartTitle}>Tide Height Gauge</ThemedText>
-                <WaikaneTideLevel />
+                <ThemedView style={styles.gaugeWrapper}>
+                    <WaikaneTideLevel />
+                </ThemedView>
                 <ThemedText style={styles.chartTitle}>Tide Trend Graph</ThemedText>
                 <ThemedView style={styles.chartWrapper}>
                     <WaikaneTideGraph />
@@ -640,8 +642,8 @@ const styles = StyleSheet.create({
         width: '100%',
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 4,
-        transform: [{ scale: 0.48 }],
+        marginBottom: 8,
+        transform: Platform.OS === 'web' ? [{ scale: 0.85 }] : [{ scale: 0.68 }],
     },
     horizontalScroll: {
         width: '100%',
