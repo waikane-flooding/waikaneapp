@@ -68,7 +68,7 @@ export default function AboutScreen() {
       <ThemedView style={[styles.disclaimerSection, { backgroundColor: '#111' }]}>
         <ThemedText style={styles.disclaimerTitle}>
           <Ionicons name="alert-circle-outline" size={18} color="#FF3B30" />{' '}
-          Important Disclaimer
+          Disclaimer
         </ThemedText>
         <ThemedText style={styles.disclaimerText}>
           For informational and educational use only. Combines flooding data to raise awareness in Waikāne and Waiāhole, but not intended for emergency response, evacuation planning, or real-time decision-making. Information is experimental and may not reflect current conditions. Does not send push notifications, alerts, or automated warnings. Do not rely on this app for safety decisions. For official guidance, consult Hawai&apos;i Emergency Management Agency and National Weather Service.
@@ -110,11 +110,11 @@ export default function AboutScreen() {
           <ThemedText style={styles.thinText}>
             For detailed information on data sources and methodology used in this app, please see the linked documentation.
           </ThemedText>
-          <ThemedView style={styles.row}>
-            <Ionicons name="document-attach-outline" size={18} color="#007AFF" style={styles.icon} />
+          <ThemedView style={styles.contactContainer}>
+            <Ionicons name="document-attach-outline" size={16} color="#007AFF" />{' '}
             <ExternalLink href="https://drive.google.com/file/d/1XxqdHgw4vJnn4HDAJypEXkAB__A6UEih/view?usp=sharing">
-              <ThemedText style={{ textDecorationLine: 'underline', color: '#007AFF' }}>
-                View full Data & Methods documentation (Google Drive)
+              <ThemedText type="link" style={styles.thinText}>
+                 Data & Methods documentation (Google Drive)
               </ThemedText>
             </ExternalLink>
           </ThemedView>
@@ -175,8 +175,8 @@ export default function AboutScreen() {
         <ThemedText type="subtitle" style={styles.sectionTitle}>
           <Ionicons name="shield" size={18} color="#FF3B30" /> Emergency Contacts
         </ThemedText>
-        <ThemedText style={[styles.thinText, { fontSize: 14, marginBottom: 8 }]}>
-          Click on a contact name to visit their website or tap a phone number to call
+        <ThemedText style={[styles.thinText, { marginBottom: 8 }]}>
+          Click on a contact name to visit their website or tap a phone number to call.
         </ThemedText>
         {emergencyContacts.map((contact, index) => (
           <ThemedView key={index} style={{ marginTop: 12, marginBottom: 16 }}>
@@ -252,15 +252,15 @@ const styles = StyleSheet.create({
     borderLeftColor: '#FF3B30',
   },
   disclaimerTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
     color: '#FF3B30',
     marginBottom: 8,
   },
   disclaimerText: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '400',
-    lineHeight: 20,
+    lineHeight: 18,
     color: '#666666',
   },
   contactHeaderColumn: {
