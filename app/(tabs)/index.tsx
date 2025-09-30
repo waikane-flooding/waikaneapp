@@ -362,6 +362,21 @@ export default function HomeScreen() {
                         <Ionicons name="arrow-forward-circle" size={36} color="#007AFF" />
                     </Pressable>
                 </ThemedView>
+                {currentStream.name === 'Waikāne' && (
+                    <ThemedText style={[styles.thinText, { fontSize: 13, color: '#666', marginBottom: 8, textAlign: 'center' }]}>
+                        Waikane Stream at Waikane, Oahu, HI - USGS-16295200
+                    </ThemedText>
+                )}
+                {currentStream.name === 'Waiāhole' && (
+                    <ThemedText style={[styles.thinText, { fontSize: 13, color: '#666', marginBottom: 8, textAlign: 'center' }]}>
+                        Waiahole Stream above Kamehameha Hwy, Oahu, HI - USGS-16294100
+                    </ThemedText>
+                )}
+                {currentStream.name === 'Punaluʻu' && (
+                    <ThemedText style={[styles.thinText, { fontSize: 13, color: '#666', marginBottom: 8, textAlign: 'center' }]}>
+                        Punaluu Str above Punaluu Ditch Intake, Oahu, HI - USGS-16301050
+                    </ThemedText>
+                )}
                 <ThemedView style={styles.gaugeWrapper}>{currentStream.gauge}</ThemedView>
                 <ThemedView style={styles.chartWrapper}>{currentStream.graph}</ThemedView>
             </ThemedView>
@@ -374,10 +389,10 @@ export default function HomeScreen() {
             </ThemedView>
 
             {/* Kanehoe Tide Label */}
-            <ThemedText style={[styles.thinText, { fontSize: 20 }]}>
+            <ThemedText style={[styles.thinText, { fontSize: 20, textAlign: 'center' }]}>
                 <Ionicons name="water" size={16} color="#007AFF" /> Waikāne
             </ThemedText>
-            <ThemedText style={[styles.thinText, { fontSize: 13, color: '#666', marginBottom: 8, marginLeft: 2 }]}>
+            <ThemedText style={[styles.thinText, { fontSize: 13, color: '#666', marginBottom: 8, textAlign: 'center' }]}>
                 TPT2777 Waikane, Kaneohe Bay (MLLW)
             </ThemedText>
 
@@ -620,7 +635,7 @@ const styles = StyleSheet.create({
         width: '100%',
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 8,
+        marginBottom: 0,
         transform: Platform.OS === 'web' ? [{ scale: 0.85 }] : [{ scale: 0.68 }],
     },
     horizontalScroll: {
@@ -670,7 +685,8 @@ const styles = StyleSheet.create({
         letterSpacing: 0.5,
     },
     section: {
-        marginBottom: 16,
+        marginBottom: 8,
+        marginTop: 8,
         gap: 4,
     },
     thinText: {
@@ -743,6 +759,7 @@ const styles = StyleSheet.create({
             transform: Platform.OS === 'web' ? [] : [{ scale: 0.58 }],
             transformOrigin: 'center',
             marginBottom: 12,
+            marginTop: -30,
         },
     chartTitle: {
         fontWeight: '600',
@@ -1068,6 +1085,7 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: '600',
         color: '#007AFF',
+        marginBottom: 8,
     },
     headerContainer: {
         position: 'relative',
