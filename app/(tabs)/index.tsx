@@ -316,10 +316,15 @@ export default function HomeScreen() {
         <ParallaxScrollView
             headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
             headerImage={
-                <Image
-                    source={require('@/assets/images/windward-header.jpg')}
-                    style={styles.headerImage}
-                />
+                <ThemedView style={styles.headerContainer}>
+                    <Image
+                        source={require('@/assets/images/windward-header.jpg')}
+                        style={styles.headerImage}
+                    />
+                    <ThemedView style={styles.headerTitleOverlay}>
+                        <ThemedText style={styles.headerTitle}>Windward Stream Watch</ThemedText>
+                    </ThemedView>
+                </ThemedView>
             }
             refreshControl={
                 <RefreshControl
@@ -330,12 +335,6 @@ export default function HomeScreen() {
                 />
             }
         >
-            <ThemedView style={styles.titleContainer}>
-                <ThemedView style={styles.funTitleContainer}>
-                    <ThemedText type="title" style={[styles.thinText, styles.appTitle]}>Flood App</ThemedText>
-                </ThemedView>
-            </ThemedView>
-
             {/* Streams Section Header */}
             <ThemedView style={styles.section}>
                 <ThemedText type="subtitle" style={[styles.thinText, styles.sectionHeaderText]}>Streams</ThemedText>
@@ -363,9 +362,7 @@ export default function HomeScreen() {
                         <Ionicons name="arrow-forward-circle" size={36} color="#007AFF" />
                     </Pressable>
                 </ThemedView>
-                <ThemedText style={styles.chartTitle}>Stream Height Gauge</ThemedText>
                 <ThemedView style={styles.gaugeWrapper}>{currentStream.gauge}</ThemedView>
-                <ThemedText style={styles.chartTitle}>Stream Height Trend</ThemedText>
                 <ThemedView style={styles.chartWrapper}>{currentStream.graph}</ThemedView>
             </ThemedView>
 
@@ -377,7 +374,7 @@ export default function HomeScreen() {
             </ThemedView>
 
             {/* Kanehoe Tide Label */}
-            <ThemedText type="subtitle" style={styles.thinText}>
+            <ThemedText style={[styles.thinText, { fontSize: 20 }]}>
                 <Ionicons name="water" size={16} color="#007AFF" /> Waikāne
             </ThemedText>
             <ThemedText style={[styles.thinText, { fontSize: 13, color: '#666', marginBottom: 8, marginLeft: 2 }]}>
@@ -386,11 +383,9 @@ export default function HomeScreen() {
 
             {/* Tide Gauge and Trend */}
             <ThemedView style={styles.section}>
-                <ThemedText style={styles.chartTitle}>Tide Height Gauge</ThemedText>
                 <ThemedView style={styles.gaugeWrapper}>
                     <WaikaneTideLevel />
                 </ThemedView>
-                <ThemedText style={styles.chartTitle}>Tide Trend Graph</ThemedText>
                 <ThemedView style={styles.chartWrapper}>
                     <WaikaneTideGraph />
                 </ThemedView>
@@ -398,7 +393,7 @@ export default function HomeScreen() {
 
             {/* Rain Section Header */}
             <ThemedView style={styles.section}>
-                <ThemedText type="subtitle" style={[styles.thinText, styles.sectionHeaderText]}>Rain</ThemedText>
+                <ThemedText type="subtitle" style={[styles.thinText, styles.sectionHeaderText]}>Rainfall</ThemedText>
             </ThemedView>
 
             {/* Makai Rain Label */}
@@ -477,7 +472,7 @@ export default function HomeScreen() {
             */}
 
             {/* Weather Section Header */}
-            <ThemedView style={styles.section}>
+            <ThemedView style={[styles.section, { marginTop: 32 }]}>
                 <ThemedText type="subtitle" style={[styles.thinText, styles.sectionHeaderText]}>Weather</ThemedText>
             </ThemedView>
 
@@ -647,21 +642,20 @@ const styles = StyleSheet.create({
         marginBottom: 12,
     },
     funTitleContainer: {
-        backgroundColor: 'rgba(0, 122, 255, 0.08)',
-        borderRadius: 20,
-        paddingVertical: 16,
-        paddingHorizontal: 24,
-        marginHorizontal: 16,
+        backgroundColor: 'rgba(0, 122, 255, 0.06)',
+        borderRadius: 12,
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        marginHorizontal: 20,
         alignItems: 'center',
         justifyContent: 'center',
         shadowColor: '#007AFF',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 3,
-        borderWidth: 2,
-        borderColor: 'rgba(0, 122, 255, 0.2)',
-        width: '100%',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.08,
+        shadowRadius: 4,
+        elevation: 2,
+        borderWidth: 1,
+        borderColor: 'rgba(0, 122, 255, 0.15)',
         alignSelf: 'center',
     },
     titleEmoji: {
@@ -670,10 +664,10 @@ const styles = StyleSheet.create({
     },
     appTitle: {
         textAlign: 'center',
-        fontSize: 28,
-        fontWeight: '600',
+        fontSize: 18,
+        fontWeight: '500',
         color: '#007AFF',
-        letterSpacing: 1,
+        letterSpacing: 0.5,
     },
     section: {
         marginBottom: 16,
@@ -1071,8 +1065,32 @@ const styles = StyleSheet.create({
     sectionHeaderText: {
         textAlign: 'center',
         width: '100%',
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: '600',
         color: '#007AFF',
+    },
+    headerContainer: {
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+    },
+    headerTitleOverlay: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        bottom: 40,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'transparent',
+    },
+    headerTitle: {
+        fontSize: 20,
+        fontWeight: '300',
+        color: '#FFFFFF',
+        textAlign: 'center',
+        textShadowColor: 'rgba(0, 0, 0, 0.6)',
+        textShadowOffset: { width: 0, height: 1 },
+        textShadowRadius: 2,
+        letterSpacing: 0.5,
     },
 });
