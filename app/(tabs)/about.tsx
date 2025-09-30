@@ -76,7 +76,6 @@ export default function AboutScreen() {
       </ThemedView>
 
       <ThemedView style={styles.section}>
-        <ThemedText style={styles.sectionTitle}>Features</ThemedText>
         <ThemedView style={styles.sectionContent}>
           <ThemedView style={styles.row}>
             <Ionicons name="water" size={18} color="#007AFF" style={styles.icon} />
