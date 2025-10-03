@@ -522,9 +522,8 @@ export default function HomeScreen() {
             {/* Weather Alerts */}
             <ThemedView style={styles.section}>
                 <ThemedText type="subtitle" style={[styles.thinText, { marginBottom: 18 }]}>
-                    National Weather Service Updates
+                    <Ionicons name="warning" size={18} color="#d9534f" /> National Weather Service Updates
                 </ThemedText>
-
                 {alertsLoading ? (
                     <ThemedView style={styles.alertsCard}>
                         <ActivityIndicator size="small" color="#d9534f" />
