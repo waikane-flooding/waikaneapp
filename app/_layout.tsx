@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import { View, StyleSheet, TouchableOpacity, Modal, Linking, ScrollView, TouchableWithoutFeedback } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useState, useEffect } from 'react';
+import * as WebBrowser from 'expo-web-browser';
 import 'react-native-reanimated';
 
 import { ThemedText } from '@/components/ThemedText';
@@ -246,6 +247,10 @@ function ContactsModal({ visible, onClose }: { visible: boolean; onClose: () => 
 function FloodRiskIndicator() {
   const [modalVisible, setModalVisible] = useState(false);
   const [contactsModalVisible, setContactsModalVisible] = useState(false);
+  
+  const openMap = async () => {
+    await WebBrowser.openBrowserAsync('https://experience.arcgis.com/experience/60260cda4f744186bbd9c67163b747d3');
+  };
   const [riskData, setRiskData] = useState<{
     waikaneStream: number | null;
     waiaholeStream: number | null;
@@ -396,6 +401,14 @@ function FloodRiskIndicator() {
           activeOpacity={0.8}
         >
           <Ionicons name="call" size={20} color="#FF3B30" />
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.mapButton}
+          onPress={openMap}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="map" size={20} color="#007AFF" />
         </TouchableOpacity>
       </View>
 
@@ -581,6 +594,19 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   contactsButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    padding: 8,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  mapButton: {
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
     padding: 8,
     borderRadius: 20,

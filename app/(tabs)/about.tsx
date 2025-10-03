@@ -65,7 +65,7 @@ export default function AboutScreen() {
         </ThemedText>
       </ThemedView>
 
-      <ThemedView style={[styles.disclaimerSection, { backgroundColor: '#111' }]}>
+      <ThemedView style={styles.disclaimerSection}>
         <ThemedText style={styles.disclaimerTitle}>
           <Ionicons name="alert-circle-outline" size={18} color="#FF3B30" />{' '}
           Disclaimer
