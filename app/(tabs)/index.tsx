@@ -30,6 +30,23 @@ type RainData = {
 const KANEOHE_COORDS = { lat: 21.4181, lon: -157.8036 };
 
 export default function HomeScreen() {
+    // Helper to get color for rainfall value
+    function getMakaiRainColor(val: string) {
+        const num = parseFloat(val);
+        if (isNaN(num)) return '#007AFF';
+        if (num < 2.8) return '#34C759'; // green
+        if (num < 4.1) return '#FFC107'; // yellow
+        if (num <= 6) return '#F44336'; // red
+        return '#007AFF';
+    }
+    function getMaukaRainColor(val: string) {
+        const num = parseFloat(val);
+        if (isNaN(num)) return '#007AFF';
+        if (num < 3.11) return '#34C759'; // green
+        if (num < 4.54) return '#FFC107'; // yellow
+        if (num <= 7) return '#F44336'; // red
+        return '#007AFF';
+    }
     // Rain data state
     const [makaiRain, setMakaiRain] = useState<{
         lastHour: string;
@@ -58,7 +75,7 @@ export default function HomeScreen() {
                     lastSixHours: makai['6HrRainfall']?.toFixed(2) + ' in',
                     lastReading: new Date(makai.DateTime).toLocaleString('en-US', {
                         hour: '2-digit', minute: '2-digit', hour12: true, month: 'short', day: 'numeric'
-                    }) + ' HST',
+                    }),
                 });
             }
             if (mauka) {
@@ -67,7 +84,7 @@ export default function HomeScreen() {
                     lastSixHours: mauka['6HrRainfall']?.toFixed(2) + ' in',
                     lastReading: new Date(mauka.DateTime).toLocaleString('en-US', {
                         hour: '2-digit', minute: '2-digit', hour12: true, month: 'short', day: 'numeric'
-                    }) + ' HST',
+                    }),
                 });
             }
         } catch (e) {
@@ -151,7 +168,7 @@ export default function HomeScreen() {
                     hour: '2-digit',
                     minute: '2-digit',
                     hour12: true
-                }) + ' HST';
+                });
 
                 setWaikaneData({
                     height: `${latest.value.toFixed(2)} ft`,
@@ -199,7 +216,7 @@ export default function HomeScreen() {
                     hour: '2-digit',
                     minute: '2-digit',
                     hour12: true
-                }) + ' HST';
+                });
 
                 setWaiaholeData({
                     height: `${latest.value.toFixed(2)} ft`,
@@ -316,15 +333,10 @@ export default function HomeScreen() {
         <ParallaxScrollView
             headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
             headerImage={
-                <ThemedView style={styles.headerContainer}>
-                    <Image
-                        source={require('@/assets/images/windward-header.jpg')}
-                        style={styles.headerImage}
-                    />
-                    <ThemedView style={styles.headerTitleOverlay}>
-                        <ThemedText style={styles.headerTitle}>Windward Stream Watch</ThemedText>
-                    </ThemedView>
-                </ThemedView>
+                <Image
+                    source={require('@/assets/images/windward-header.jpg')}
+                    style={styles.headerImage}
+                />
             }
             refreshControl={
                 <RefreshControl
@@ -335,6 +347,12 @@ export default function HomeScreen() {
                 />
             }
         >
+            <ThemedView style={styles.titleContainer}>
+                <ThemedView style={styles.funTitleContainer}>
+                    <ThemedText type="title" style={[styles.thinText, styles.appTitle]}>Flood App</ThemedText>
+                </ThemedView>
+            </ThemedView>
+
             {/* Streams Section Header */}
             <ThemedView style={styles.section}>
                 <ThemedText type="subtitle" style={[styles.thinText, styles.sectionHeaderText]}>Streams</ThemedText>
@@ -362,22 +380,9 @@ export default function HomeScreen() {
                         <Ionicons name="arrow-forward-circle" size={36} color="#007AFF" />
                     </Pressable>
                 </ThemedView>
-                {currentStream.name === 'Waikāne' && (
-                    <ThemedText style={[styles.thinText, { fontSize: 13, color: '#666', marginBottom: 8, textAlign: 'center' }]}>
-                        Waikane Stream at Waikane, Oahu, HI - USGS-16295200
-                    </ThemedText>
-                )}
-                {currentStream.name === 'Waiāhole' && (
-                    <ThemedText style={[styles.thinText, { fontSize: 13, color: '#666', marginBottom: 8, textAlign: 'center' }]}>
-                        Waiahole Stream above Kamehameha Hwy, Oahu, HI - USGS-16294100
-                    </ThemedText>
-                )}
-                {currentStream.name === 'Punaluʻu' && (
-                    <ThemedText style={[styles.thinText, { fontSize: 13, color: '#666', marginBottom: 8, textAlign: 'center' }]}>
-                        Punaluu Str above Punaluu Ditch Intake, Oahu, HI - USGS-16301050
-                    </ThemedText>
-                )}
+                <ThemedText style={styles.chartTitle}>Stream Height Gauge</ThemedText>
                 <ThemedView style={styles.gaugeWrapper}>{currentStream.gauge}</ThemedView>
+                <ThemedText style={styles.chartTitle}>Stream Height Trend</ThemedText>
                 <ThemedView style={styles.chartWrapper}>{currentStream.graph}</ThemedView>
             </ThemedView>
 
@@ -389,18 +394,20 @@ export default function HomeScreen() {
             </ThemedView>
 
             {/* Kanehoe Tide Label */}
-            <ThemedText style={[styles.thinText, { fontSize: 20, textAlign: 'center' }]}>
+            <ThemedText type="subtitle" style={styles.thinText}>
                 <Ionicons name="water" size={16} color="#007AFF" /> Waikāne
             </ThemedText>
-            <ThemedText style={[styles.thinText, { fontSize: 13, color: '#666', marginBottom: 8, textAlign: 'center' }]}>
+            <ThemedText style={[styles.thinText, { fontSize: 13, color: '#666', marginBottom: 8, marginLeft: 2 }]}>
                 TPT2777 Waikane, Kaneohe Bay (MLLW)
             </ThemedText>
 
             {/* Tide Gauge and Trend */}
             <ThemedView style={styles.section}>
+                <ThemedText style={styles.chartTitle}>Tide Height Gauge</ThemedText>
                 <ThemedView style={styles.gaugeWrapper}>
                     <WaikaneTideLevel />
                 </ThemedView>
+                <ThemedText style={styles.chartTitle}>Tide Trend Graph</ThemedText>
                 <ThemedView style={styles.chartWrapper}>
                     <WaikaneTideGraph />
                 </ThemedView>
@@ -408,7 +415,7 @@ export default function HomeScreen() {
 
             {/* Rain Section Header */}
             <ThemedView style={styles.section}>
-                <ThemedText type="subtitle" style={[styles.thinText, styles.sectionHeaderText]}>Rainfall</ThemedText>
+                <ThemedText type="subtitle" style={[styles.thinText, styles.sectionHeaderText]}>Rain</ThemedText>
             </ThemedView>
 
             {/* Makai Rain Label */}
@@ -423,11 +430,11 @@ export default function HomeScreen() {
             <ThemedView style={styles.monitorInfo}>
                 <ThemedView style={styles.infoItem}>
                     <ThemedText style={styles.label}>Last Hour:</ThemedText>
-                    <ThemedText style={styles.value}>{makaiRain.lastHour}</ThemedText>
+                    <ThemedText style={[styles.value, { color: getMakaiRainColor(makaiRain.lastHour) }]}>{makaiRain.lastHour}</ThemedText>
                 </ThemedView>
                 <ThemedView style={styles.infoItem}>
                     <ThemedText style={styles.label}>Last Six Hours:</ThemedText>
-                    <ThemedText style={styles.value}>{makaiRain.lastSixHours}</ThemedText>
+                    <ThemedText style={[styles.value, { color: getMakaiRainColor(makaiRain.lastSixHours) }]}>{makaiRain.lastSixHours}</ThemedText>
                 </ThemedView>
                 <ThemedView style={styles.infoItem}>
                     <ThemedText style={styles.label}>Last Reading:</ThemedText>
@@ -447,11 +454,11 @@ export default function HomeScreen() {
             <ThemedView style={styles.monitorInfo}>
                 <ThemedView style={styles.infoItem}>
                     <ThemedText style={styles.label}>Last Hour:</ThemedText>
-                    <ThemedText style={styles.value}>{maukaRain.lastHour}</ThemedText>
+                    <ThemedText style={[styles.value, { color: getMaukaRainColor(maukaRain.lastHour) }]}>{maukaRain.lastHour}</ThemedText>
                 </ThemedView>
                 <ThemedView style={styles.infoItem}>
                     <ThemedText style={styles.label}>Last Six Hours:</ThemedText>
-                    <ThemedText style={styles.value}>{maukaRain.lastSixHours}</ThemedText>
+                    <ThemedText style={[styles.value, { color: getMaukaRainColor(maukaRain.lastSixHours) }]}>{maukaRain.lastSixHours}</ThemedText>
                 </ThemedView>
                 <ThemedView style={styles.infoItem}>
                     <ThemedText style={styles.label}>Last Reading:</ThemedText>
@@ -487,7 +494,7 @@ export default function HomeScreen() {
             */}
 
             {/* Weather Section Header */}
-            <ThemedView style={[styles.section, { marginTop: 32 }]}>
+            <ThemedView style={styles.section}>
                 <ThemedText type="subtitle" style={[styles.thinText, styles.sectionHeaderText]}>Weather</ThemedText>
             </ThemedView>
 
@@ -522,8 +529,9 @@ export default function HomeScreen() {
             {/* Weather Alerts */}
             <ThemedView style={styles.section}>
                 <ThemedText type="subtitle" style={[styles.thinText, { marginBottom: 18 }]}>
-                    <Ionicons name="warning" size={18} color="#d9534f" /> National Weather Service Updates
+                    National Weather Service Updates
                 </ThemedText>
+
                 {alertsLoading ? (
                     <ThemedView style={styles.alertsCard}>
                         <ActivityIndicator size="small" color="#d9534f" />
@@ -566,7 +574,7 @@ export default function HomeScreen() {
                                             hour: '2-digit',
                                             minute: '2-digit',
                                             hour12: true
-                                        })} HST` : ''}
+                                        })}` : ''}
                                         {alert.properties.ends ? `  To: ${new Date(alert.properties.ends).toLocaleString('en-US', {
                                             month: 'short',
                                             day: 'numeric',
@@ -574,7 +582,7 @@ export default function HomeScreen() {
                                             hour: '2-digit',
                                             minute: '2-digit',
                                             hour12: true
-                                        })} HST` : ''}
+                                        })}` : ''}
                                     </ThemedText>
                                     <ThemedText style={styles.alertArea}>{alert.properties.areaDesc}</ThemedText>
                                     {alert.properties.headline && (
@@ -634,7 +642,7 @@ const styles = StyleSheet.create({
         width: '100%',
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 0,
+        marginBottom: 8,
         transform: Platform.OS === 'web' ? [{ scale: 0.85 }] : [{ scale: 0.68 }],
     },
     horizontalScroll: {
@@ -656,20 +664,21 @@ const styles = StyleSheet.create({
         marginBottom: 12,
     },
     funTitleContainer: {
-        backgroundColor: 'rgba(0, 122, 255, 0.06)',
-        borderRadius: 12,
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-        marginHorizontal: 20,
+        backgroundColor: 'rgba(0, 122, 255, 0.08)',
+        borderRadius: 20,
+        paddingVertical: 16,
+        paddingHorizontal: 24,
+        marginHorizontal: 16,
         alignItems: 'center',
         justifyContent: 'center',
         shadowColor: '#007AFF',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.08,
-        shadowRadius: 4,
-        elevation: 2,
-        borderWidth: 1,
-        borderColor: 'rgba(0, 122, 255, 0.15)',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 3,
+        borderWidth: 2,
+        borderColor: 'rgba(0, 122, 255, 0.2)',
+        width: '100%',
         alignSelf: 'center',
     },
     titleEmoji: {
@@ -678,14 +687,13 @@ const styles = StyleSheet.create({
     },
     appTitle: {
         textAlign: 'center',
-        fontSize: 18,
-        fontWeight: '500',
+        fontSize: 28,
+        fontWeight: '600',
         color: '#007AFF',
-        letterSpacing: 0.5,
+        letterSpacing: 1,
     },
     section: {
-        marginBottom: 8,
-        marginTop: 8,
+        marginBottom: 16,
         gap: 4,
     },
     thinText: {
@@ -758,7 +766,6 @@ const styles = StyleSheet.create({
             transform: Platform.OS === 'web' ? [] : [{ scale: 0.58 }],
             transformOrigin: 'center',
             marginBottom: 12,
-            marginTop: -30,
         },
     chartTitle: {
         fontWeight: '600',
@@ -1081,33 +1088,8 @@ const styles = StyleSheet.create({
     sectionHeaderText: {
         textAlign: 'center',
         width: '100%',
-        fontSize: 20,
+        fontSize: 18,
         fontWeight: '600',
         color: '#007AFF',
-        marginBottom: 8,
-    },
-    headerContainer: {
-        position: 'relative',
-        width: '100%',
-        height: '100%',
-    },
-    headerTitleOverlay: {
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        bottom: 40,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'transparent',
-    },
-    headerTitle: {
-        fontSize: 20,
-        fontWeight: '300',
-        color: '#FFFFFF',
-        textAlign: 'center',
-        textShadowColor: 'rgba(0, 0, 0, 0.6)',
-        textShadowOffset: { width: 0, height: 1 },
-        textShadowRadius: 2,
-        letterSpacing: 0.5,
     },
 });
