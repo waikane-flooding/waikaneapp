@@ -156,8 +156,8 @@ export default function AboutScreen() {
         
         <ThemedView style={styles.contactContainer}>
           <Ionicons name="send-outline" size={16} color="#007AFF" />{' '}
-          <ExternalLink href="mailto:windwardfloodapp@gmail.com">
-            <ThemedText type="link" style={styles.thinText}>windwardfloodapp@gmail.com</ThemedText>
+          <ExternalLink href="mailto:infowrrc@hawaii.edu">
+            <ThemedText type="link" style={styles.thinText}>infowrrc@hawaii.edu</ThemedText>
           </ExternalLink>
         </ThemedView>
         
