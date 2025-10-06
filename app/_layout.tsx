@@ -2,7 +2,7 @@ import { DarkTheme, ThemeProvider } from '@react-navigation/native'; // Remove D
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { View, StyleSheet, TouchableOpacity, Modal, Linking, ScrollView, TouchableWithoutFeedback } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useState, useEffect } from 'react';
 import * as WebBrowser from 'expo-web-browser';
@@ -11,39 +11,6 @@ import 'react-native-reanimated';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
-// Emergency contacts data
-const emergencyContacts = [
-  {
-    name: "Honolulu Emergency Services",
-    number: "911",
-    description: "For immediate emergency response",
-  },
-  {
-    name: "Windward Police Station",
-    number: "(808) 723-8640",
-    description: "Kāne'ohe Police Department",
-  },
-  {
-    name: "Honolulu Police Department",
-    number: "(808) 723-8488",
-    description: "General number for non-emergencies",
-  },
-  {
-    name: "Board of Water Supply",
-    number: "(808) 748-5000",
-    description: "Water emergency & main breaks",
-  },
-  {
-    name: "State of Hawai'i, DLNR",
-    number: "(808) 587-0230",
-    description: "Engineering & flood control",
-  },
-  {
-    name: "Hawaiian Electric",
-    number: "855-304-1212",
-    description: "Power outages & emergencies",
-  }
-];
 
 // Risk assessment functions for each data source
 const assessWaikaneStreamRisk = (level: number | null): string => {
@@ -180,73 +147,9 @@ const FLOOD_RISK_LEVELS = {
   }
 };
 
-function ContactsModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
-  return (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={visible}
-      onRequestClose={onClose}
-    >
-      <TouchableWithoutFeedback onPress={onClose}>
-        <View style={styles.modalOverlay}>
-          <TouchableWithoutFeedback onPress={() => {}}>
-            <View style={styles.contactsModalContent}>
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={onClose}
-              >
-                <Ionicons name="close" size={24} color="#666" />
-              </TouchableOpacity>
-              
-              <View style={styles.contactsModalHeader}>
-                <Ionicons name="call" size={28} color="#FF3B30" />
-                <ThemedText style={styles.contactsModalTitle}>
-                  Emergency Contacts
-                </ThemedText>
-              </View>
-              
-              <ScrollView 
-                style={styles.contactsList}
-                contentContainerStyle={styles.contactsListContent}
-                showsVerticalScrollIndicator={true}
-                scrollEnabled={true}
-                keyboardShouldPersistTaps="handled"
-              >
-                {emergencyContacts.map((contact, index) => (
-                  <TouchableOpacity 
-                    key={index} 
-                    style={styles.contactItem}
-                    activeOpacity={0.7}
-                  >
-                    <ThemedText style={styles.contactName}>
-                      {contact.name}
-                    </ThemedText>
-                    <TouchableOpacity
-                      onPress={() => Linking.openURL(`tel:${contact.number}`)}
-                      activeOpacity={0.7}
-                    >
-                      <ThemedText style={styles.contactNumber}>
-                        {contact.number}
-                      </ThemedText>
-                    </TouchableOpacity>
-                    <ThemedText style={styles.contactDescription}>
-                      {contact.description}
-                    </ThemedText>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
-          </TouchableWithoutFeedback>
-        </View>
-      </TouchableWithoutFeedback>
-    </Modal>
-  );
-}
 
 function FloodRiskIndicator() {
   const [modalVisible, setModalVisible] = useState(false);
-  const [contactsModalVisible, setContactsModalVisible] = useState(false);
   
   const openMap = async () => {
     await WebBrowser.openBrowserAsync('https://experience.arcgis.com/experience/60260cda4f744186bbd9c67163b747d3');
@@ -396,14 +299,6 @@ function FloodRiskIndicator() {
         </TouchableOpacity>
 
         <TouchableOpacity 
-          style={styles.contactsButton}
-          onPress={() => setContactsModalVisible(true)}
-          activeOpacity={0.8}
-        >
-    <Ionicons name="call" size={16} color="#FF3B30" />
-        </TouchableOpacity>
-
-        <TouchableOpacity 
           style={styles.mapButton}
           onPress={openMap}
           activeOpacity={0.8}
@@ -411,11 +306,6 @@ function FloodRiskIndicator() {
     <Ionicons name="map" size={16} color="#007AFF" />
         </TouchableOpacity>
       </View>
-
-      <ContactsModal 
-        visible={contactsModalVisible} 
-        onClose={() => setContactsModalVisible(false)} 
-      />
 
       <Modal
         animationType="fade"
@@ -569,7 +459,7 @@ const styles = StyleSheet.create({
   },
   indicatorContainer: {
     position: 'absolute',
-    bottom: 60, // Slightly lower after shrinking; sits in dark bar area
+    top: 60,
     right: 14,
     flexDirection: 'row',
     alignItems: 'center',
@@ -593,107 +483,31 @@ const styles = StyleSheet.create({
     elevation: 5,
     gap: 4,
   },
-  contactsButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    padding: 6,
-    borderRadius: 18,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  mapButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    padding: 6,
-    borderRadius: 18,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
   riskText: {
     fontSize: 11,
     fontWeight: '700',
   },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  mapButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    alignItems: 'center',
     justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  modalContent: {
-    backgroundColor: 'white',
-    borderRadius: 16,
-    padding: 24,
-    width: '90%',
-    maxWidth: 400,
+    borderRadius: 18,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
-  contactsModalContent: {
-    backgroundColor: 'white',
-    borderRadius: 16,
-    padding: 24,
-    width: '95%',
-    maxWidth: 450,
-    maxHeight: '80%',
-    minHeight: 300,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 8,
-    flexDirection: 'column',
-  },
-  closeButton: {
-    position: 'absolute',
-    top: 16,
-    right: 16,
-    padding: 4,
-    zIndex: 1,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-    gap: 12,
-  },
-  contactsModalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-    gap: 12,
-    paddingTop: 8,
-  },
+  // Removed contacts styles (legacy cleanup)
+  // contactsModalHeader: {},
   modalTitle: {
     fontSize: 20,
     fontWeight: '700',
     flex: 1,
   },
-  contactsModalTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    flex: 1,
-    color: '#FF3B30',
-  },
+  // contactsModalTitle: {},
   modalDescription: {
     fontSize: 16,
     lineHeight: 22,
@@ -718,37 +532,41 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 8,
   },
-  contactsList: {
+  // Removed contacts list styles
+  modalOverlay: {
     flex: 1,
-    marginBottom: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
   },
-  contactsListContent: {
-    paddingBottom: 20,
-    flexGrow: 1,
+  modalContent: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 24,
+    width: '90%',
+    maxWidth: 400,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 8,
   },
-  contactItem: {
-    marginBottom: 20,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0, 0, 0, 0.1)',
+  closeButton: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    padding: 4,
+    zIndex: 1,
   },
-  contactName: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 4,
-    color: '#333333',
-  },
-  contactNumber: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#007AFF',
-    textDecorationLine: 'underline',
-    marginBottom: 4,
-  },
-  contactDescription: {
-    fontSize: 14,
-    color: '#666666',
-    fontWeight: '400',
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    gap: 12,
   },
   readingsSection: {
     marginTop: 16,
