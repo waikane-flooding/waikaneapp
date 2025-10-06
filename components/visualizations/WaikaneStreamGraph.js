@@ -2,19 +2,26 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Svg, Path, Line, Circle, Defs, LinearGradient, Stop, Text as SvgText } from 'react-native-svg';
 
-const WaikaneStreamGraph = () => {
+const WaikaneStreamGraph = ({ streamData: propStreamData }) => {
   const [streamData, setStreamData] = useState([]);
 
   useEffect(() => {
-    fetch('http://149.165.159.226:5000/api/waikane_stream')
-      .then(res => res.json())
-      .then(data => {
-        setStreamData(data);
-      })
-      .catch(error => {
-        console.error('Error fetching stream data:', error);
-      });
-  }, []);
+    // Use prop data instead of fetching
+    if (propStreamData && propStreamData.length > 0) {
+      setStreamData(propStreamData);
+    }
+  }, [propStreamData]);
+
+  // Show loading state if no prop data is available yet
+  if (!propStreamData || propStreamData.length === 0) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Loading...</Text>
+        </View>
+      </View>
+    );
+  }
 
   // Chart dimensions - responsive but maintain aspect ratio
   const chartWidth = 650;
@@ -32,16 +39,6 @@ const WaikaneStreamGraph = () => {
   const sortedStreamData = [...streamData]
     .filter(d => d.ft != null && d.DateTime)
     .sort((a, b) => new Date(a.DateTime) - new Date(b.DateTime));
-  
-  if (sortedStreamData.length === 0) {
-    return (
-      <View style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading...</Text>
-        </View>
-      </View>
-    );
-  }
 
   // Find the latest reading's date
   let latestDate = null;

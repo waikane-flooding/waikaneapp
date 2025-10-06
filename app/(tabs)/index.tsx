@@ -17,6 +17,7 @@ import WaikaneTideLevel from '@/components/visualizations/WaikaneTideLevel';
 import WaikaneTideGraph from '@/components/visualizations/WaikaneTideGraph';
 import PunaluuStreamHeight from '@/components/visualizations/PunaluuStreamHeight';
 import PunaluuStreamGraph from '@/components/visualizations/PunaluuStreamGraph';
+import { useStreamDataCache } from '@/hooks/useStreamDataCache';
 
 // Types for rain data
 type RainData = {
@@ -30,6 +31,14 @@ type RainData = {
 const KANEOHE_COORDS = { lat: 21.4181, lon: -157.8036 };
 
 export default function HomeScreen() {
+    // Stream data caching
+    const { fetchStreamData, clearCache } = useStreamDataCache();
+    const [streamDataCache, setStreamDataCache] = useState<{
+        waikane?: { data: any[]; trends: any[] };
+        waiahole?: { data: any[]; trends: any[] };
+        punaluu?: { data: any[]; trends: any[] };
+    }>({});
+
     // Helper to get color for rainfall value
     function getMakaiRainColor(val: string) {
         const num = parseFloat(val);
@@ -287,6 +296,17 @@ export default function HomeScreen() {
         }
     }, []);
 
+    // Load stream data for a specific stream type
+    const loadStreamData = useCallback(async (streamType: 'waikane' | 'waiahole' | 'punaluu') => {
+        const cachedData = await fetchStreamData(streamType);
+        if (cachedData) {
+            setStreamDataCache(prev => ({
+                ...prev,
+                [streamType]: cachedData
+            }));
+        }
+    }, [fetchStreamData]);
+
     // Load data on component mount
     useEffect(() => {
         fetchWaikaneData();
@@ -294,15 +314,28 @@ export default function HomeScreen() {
         fetchRainData();
         fetchForecast();
         fetchAlerts();
-    }, [fetchWaikaneData, fetchWaiaholeData, fetchRainData, fetchForecast, fetchAlerts]);
+        // Load stream data for caching
+        loadStreamData('waikane');
+        loadStreamData('waiahole');
+        loadStreamData('punaluu');
+    }, [fetchWaikaneData, fetchWaiaholeData, fetchRainData, fetchForecast, fetchAlerts, loadStreamData]);
 
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
-        await Promise.all([fetchWaikaneData(), fetchWaiaholeData(), fetchRainData(), fetchForecast(), fetchAlerts()]);
+        await Promise.all([
+            fetchWaikaneData(), 
+            fetchWaiaholeData(), 
+            fetchRainData(), 
+            fetchForecast(), 
+            fetchAlerts(),
+            loadStreamData('waikane'),
+            loadStreamData('waiahole'),
+            loadStreamData('punaluu')
+        ]);
         setTimeout(() => {
             setRefreshing(false);
         }, 500);
-    }, [fetchWaikaneData, fetchWaiaholeData, fetchRainData, fetchForecast, fetchAlerts]);
+    }, [fetchWaikaneData, fetchWaiaholeData, fetchRainData, fetchForecast, fetchAlerts, loadStreamData]);
 
     const openMap = async () => {
         await WebBrowser.openBrowserAsync('https://experience.arcgis.com/experience/60260cda4f744186bbd9c67163b747d3');
@@ -312,18 +345,33 @@ export default function HomeScreen() {
     const streamCharts = [
         {
             name: 'Waikāne',
-            gauge: <WaikaneStreamHeight />,
-            graph: <WaikaneStreamGraph />,
+            gauge: <WaikaneStreamHeight 
+                streamData={streamDataCache.waikane?.data || []} 
+                trendData={streamDataCache.waikane?.trends || []} 
+            />,
+            graph: <WaikaneStreamGraph 
+                streamData={streamDataCache.waikane?.data || []} 
+            />,
         },
         {
             name: 'Waiāhole',
-            gauge: <WaiaholeStreamHeight />,
-            graph: <WaiaholeStreamGraph />,
+            gauge: <WaiaholeStreamHeight 
+                streamData={streamDataCache.waiahole?.data || []} 
+                trendData={streamDataCache.waiahole?.trends || []} 
+            />,
+            graph: <WaiaholeStreamGraph 
+                streamData={streamDataCache.waiahole?.data || []} 
+            />,
         },
         {
             name: 'Punaluʻu',
-            gauge: <PunaluuStreamHeight />,
-            graph: <PunaluuStreamGraph />,
+            gauge: <PunaluuStreamHeight 
+                streamData={streamDataCache.punaluu?.data || []} 
+                trendData={streamDataCache.punaluu?.trends || []} 
+            />,
+            graph: <PunaluuStreamGraph 
+                streamData={streamDataCache.punaluu?.data || []} 
+            />,
         },
     ];
     const [streamIdx, setStreamIdx] = useState(0);

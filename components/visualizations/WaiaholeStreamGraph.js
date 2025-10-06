@@ -10,19 +10,26 @@ import Svg, {
   Stop 
 } from 'react-native-svg';
 
-const WaiaholeStreamGraph = () => {
+const WaiaholeStreamGraph = ({ streamData: propStreamData }) => {
   const [streamData, setStreamData] = useState([]);
 
   useEffect(() => {
-    fetch('http://149.165.159.226:5000/api/waiahole_stream')
-      .then(res => res.json())
-      .then(data => {
-        setStreamData(data);
-      })
-      .catch(error => {
-        console.error('Error fetching stream data:', error);
-      });
-  }, []);
+    // Use prop data instead of fetching
+    if (propStreamData && propStreamData.length > 0) {
+      setStreamData(propStreamData);
+    }
+  }, [propStreamData]);
+
+  // Show loading state if no prop data is available yet
+  if (!propStreamData || propStreamData.length === 0) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Loading...</Text>
+        </View>
+      </View>
+    );
+  }
 
   // Chart dimensions - same as WaikaneTideGraph
   const chartWidth = 650;
@@ -40,16 +47,6 @@ const WaiaholeStreamGraph = () => {
   const sortedStreamData = [...streamData]
     .filter(d => d.ft != null && d.DateTime)
     .sort((a, b) => new Date(a.DateTime) - new Date(b.DateTime));
-  
-  if (sortedStreamData.length === 0) {
-    return (
-      <View style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading...</Text>
-        </View>
-      </View>
-    );
-  }
 
   // Robust cross-platform date handling for time window
   let latestDate = null;

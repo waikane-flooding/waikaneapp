@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import Svg, { Path, Text as SvgText } from 'react-native-svg';
 
-const WaiaholeStreamHeight = () => {
+const WaiaholeStreamHeight = ({ streamData, trendData }) => {
   const [streamLevel, setStreamLevel] = useState(null);
   const [streamTime, setStreamTime] = useState(null);
   const [animatedValue] = useState(new Animated.Value(0));
@@ -23,44 +23,39 @@ const WaiaholeStreamHeight = () => {
   const customTicks = [6, 8, 10, 12, 14, 16, 18];
 
   useEffect(() => {
-    // Fetch stream data and trend in parallel
-    Promise.all([
-      fetch('http://149.165.159.226:5000/api/waiahole_stream').then(res => res.json()),
-      fetch('http://149.165.159.226:5000/api/stream_trend').then(res => res.json())
-    ])
-      .then(([data, trendData]) => {
-        const now = new Date();
-        const latest = data
-          .filter(d => d.ft != null && d.DateTime)
-          .map(d => ({
-            time: new Date(d.DateTime),
-            value: d.ft
-          }))
-          .filter(d => d.time <= now)
-          .sort((a, b) => b.time - a.time)[0];
+    // Process cached data instead of fetching
+    if (streamData && streamData.length > 0) {
+      const now = new Date();
+      const latest = streamData
+        .filter(d => d.ft != null && d.DateTime)
+        .map(d => ({
+          time: new Date(d.DateTime),
+          value: d.ft
+        }))
+        .filter(d => d.time <= now)
+        .sort((a, b) => b.time - a.time)[0];
 
-        // Find Waiahole trend
-        let direction = null;
-        if (trendData && Array.isArray(trendData)) {
-          const waiaholeTrend = trendData.find(t => t.Name && t.Name.toLowerCase().includes('waiahole'));
-          direction = waiaholeTrend && waiaholeTrend.Trend ? waiaholeTrend.Trend : null;
-        }
-        setStreamDirection(direction);
+      // Find Waiahole trend
+      let direction = null;
+      if (trendData && Array.isArray(trendData)) {
+        const waiaholeTrend = trendData.find(t => t.Name && t.Name.toLowerCase().includes('waiahole'));
+        direction = waiaholeTrend && waiaholeTrend.Trend ? waiaholeTrend.Trend : null;
+      }
+      setStreamDirection(direction);
 
-        if (latest) {
-          setStreamLevel(latest.value);
-          setStreamTime(latest.time);
-          // Animate to new stream level
-          const targetPercent = (latest.value - minLevel) / (maxLevel - minLevel);
-          Animated.timing(animatedValue, {
-            toValue: targetPercent,
-            duration: 2000,
-            useNativeDriver: false,
-          }).start();
-        }
-      })
-      .catch(err => console.error("Failed to load stream data", err));
-  }, [animatedValue, maxLevel, minLevel]);
+      if (latest) {
+        setStreamLevel(latest.value);
+        setStreamTime(latest.time);
+        // Animate to new stream level
+        const targetPercent = (latest.value - minLevel) / (maxLevel - minLevel);
+        Animated.timing(animatedValue, {
+          toValue: targetPercent,
+          duration: 2000,
+          useNativeDriver: false,
+        }).start();
+      }
+    }
+  }, [streamData, trendData, animatedValue, maxLevel, minLevel]);
 
   const formattedDateTime = streamTime
     ? new Date(streamTime).toLocaleString('en-US', {
