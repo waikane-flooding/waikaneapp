@@ -428,9 +428,7 @@ export default function HomeScreen() {
                         <Ionicons name="arrow-forward-circle" size={36} color="#007AFF" />
                     </Pressable>
                 </ThemedView>
-                <ThemedText style={styles.chartTitle}>Stream Height Gauge</ThemedText>
                 <ThemedView style={styles.gaugeWrapper}>{currentStream.gauge}</ThemedView>
-                <ThemedText style={styles.chartTitle}>Stream Height Trend</ThemedText>
                 <ThemedView style={styles.chartWrapper}>{currentStream.graph}</ThemedView>
             </ThemedView>
 
@@ -451,11 +449,9 @@ export default function HomeScreen() {
 
             {/* Tide Gauge and Trend */}
             <ThemedView style={styles.section}>
-                <ThemedText style={styles.chartTitle}>Tide Height Gauge</ThemedText>
                 <ThemedView style={styles.gaugeWrapper}>
                     <WaikaneTideLevel />
                 </ThemedView>
-                <ThemedText style={styles.chartTitle}>Tide Trend Graph</ThemedText>
                 <ThemedView style={styles.chartWrapper}>
                     <WaikaneTideGraph />
                 </ThemedView>
