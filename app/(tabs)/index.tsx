@@ -381,10 +381,15 @@ export default function HomeScreen() {
         <ParallaxScrollView
             headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
             headerImage={
-                <Image
-                    source={require('@/assets/images/windward-header.jpg')}
-                    style={styles.headerImage}
-                />
+                <ThemedView style={styles.headerImageWrapper}>
+                    <Image
+                        source={require('@/assets/images/windward-header.jpg')}
+                        style={styles.headerImage}
+                    />
+                    <ThemedView style={styles.headerOverlay} pointerEvents="none">
+                        <ThemedText type="title" style={[styles.thinText, styles.appTitleOverlay]}>Windward Stream Watch</ThemedText>
+                    </ThemedView>
+                </ThemedView>
             }
             refreshControl={
                 <RefreshControl
@@ -395,11 +400,7 @@ export default function HomeScreen() {
                 />
             }
         >
-            <ThemedView style={styles.titleContainer}>
-                <ThemedView style={styles.funTitleContainer}>
-                    <ThemedText type="title" style={[styles.thinText, styles.appTitle]}>Flood App</ThemedText>
-                </ThemedView>
-            </ThemedView>
+            {/* Title now overlaid on header image */}
 
             {/* Streams Section Header */}
             <ThemedView style={styles.section}>
@@ -459,7 +460,7 @@ export default function HomeScreen() {
 
             {/* Rain Section Header */}
             <ThemedView style={styles.section}>
-                <ThemedText type="subtitle" style={[styles.thinText, styles.sectionHeaderText]}>Rain</ThemedText>
+                <ThemedText type="subtitle" style={[styles.thinText, styles.sectionHeaderText]}>Rainfall</ThemedText>
             </ThemedView>
 
             {/* Makai Rain Label */}
@@ -702,39 +703,47 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
     },
-    titleContainer: {
-        flexDirection: 'row',
-        gap: 8,
-        marginBottom: 12,
-    },
-    funTitleContainer: {
-        backgroundColor: 'rgba(0, 122, 255, 0.08)',
-        borderRadius: 20,
-        paddingVertical: 16,
-        paddingHorizontal: 24,
-        marginHorizontal: 16,
-        alignItems: 'center',
-        justifyContent: 'center',
-        shadowColor: '#007AFF',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 3,
-        borderWidth: 2,
-        borderColor: 'rgba(0, 122, 255, 0.2)',
+    headerImageWrapper: {
         width: '100%',
-        alignSelf: 'center',
+        height: '100%',
+    },
+    headerOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        paddingHorizontal: 20,
+        paddingTop: 40,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.15)',
+    },
+    appTitleOverlay: {
+        fontSize: 22,
+        color: '#fff',
+        textAlign: 'center',
+        textShadowColor: 'rgba(0,0,0,0.5)',
+        textShadowOffset: { width: 0, height: 1 },
+        textShadowRadius: 4,
+        letterSpacing: 0.5,
+        transform: [{ translateY: 48 }],
+    },
+    titleContainer: {
+        paddingHorizontal: 16,
+        paddingTop: 8,
+        paddingBottom: 4,
+        marginBottom: 4,
     },
     titleEmoji: {
         fontSize: 28,
         marginHorizontal: 12,
     },
     appTitle: {
-        textAlign: 'center',
-        fontSize: 28,
-        fontWeight: '600',
-        color: '#007AFF',
-        letterSpacing: 1,
+        textAlign: 'left',
+        fontSize: 26,
+        fontWeight: '400',
+        letterSpacing: 0.5,
     },
     section: {
         marginBottom: 16,
@@ -1132,8 +1141,8 @@ const styles = StyleSheet.create({
     sectionHeaderText: {
         textAlign: 'center',
         width: '100%',
-        fontSize: 18,
-        fontWeight: '600',
+        fontSize: 22,
         color: '#007AFF',
+        letterSpacing: 0.5,
     },
 });

@@ -389,7 +389,7 @@ function FloodRiskIndicator() {
           onPress={() => setModalVisible(true)}
           activeOpacity={0.8}
         >
-          <Ionicons name={risk.icon as any} size={20} color={risk.color} />
+    <Ionicons name={risk.icon as any} size={16} color={risk.color} />
           <ThemedText style={[styles.riskText, { color: risk.color }]}>
             {risk.text}
           </ThemedText>
@@ -400,7 +400,7 @@ function FloodRiskIndicator() {
           onPress={() => setContactsModalVisible(true)}
           activeOpacity={0.8}
         >
-          <Ionicons name="call" size={20} color="#FF3B30" />
+    <Ionicons name="call" size={16} color="#FF3B30" />
         </TouchableOpacity>
 
         <TouchableOpacity 
@@ -408,7 +408,7 @@ function FloodRiskIndicator() {
           onPress={openMap}
           activeOpacity={0.8}
         >
-          <Ionicons name="map" size={20} color="#007AFF" />
+    <Ionicons name="map" size={16} color="#007AFF" />
         </TouchableOpacity>
       </View>
 
@@ -569,20 +569,20 @@ const styles = StyleSheet.create({
   },
   indicatorContainer: {
     position: 'absolute',
-    top: 60, // Adjust based on status bar height
-    right: 16,
+    bottom: 60, // Slightly lower after shrinking; sits in dark bar area
+    right: 14,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
     zIndex: 1000,
   },
   floodIndicator: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 16,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -595,8 +595,8 @@ const styles = StyleSheet.create({
   },
   contactsButton: {
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    padding: 8,
-    borderRadius: 20,
+    padding: 6,
+    borderRadius: 18,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -608,8 +608,8 @@ const styles = StyleSheet.create({
   },
   mapButton: {
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    padding: 8,
-    borderRadius: 20,
+    padding: 6,
+    borderRadius: 18,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -620,7 +620,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   riskText: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '700',
   },
   modalOverlay: {
