@@ -387,7 +387,7 @@ export default function HomeScreen() {
                         style={styles.headerImage}
                     />
                     <ThemedView style={styles.headerOverlay} pointerEvents="none">
-                        <ThemedText type="title" style={[styles.thinText, styles.appTitleOverlay]}>Windward Stream Watch</ThemedText>
+                        <ThemedText type="title" style={[styles.thinText, styles.appTitleOverlay]}>Windward Flood Check</ThemedText>
                     </ThemedView>
                 </ThemedView>
             }
@@ -745,7 +745,7 @@ const styles = StyleSheet.create({
         textShadowOffset: { width: 0, height: 1 },
         textShadowRadius: 4,
         letterSpacing: 0.5,
-        transform: [{ translateY: 48 }],
+        transform: [{ translateY: 56 }],
     },
     titleContainer: {
         paddingHorizontal: 16,
