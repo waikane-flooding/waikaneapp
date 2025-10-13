@@ -13,7 +13,7 @@ import WaikaneStreamHeight from '@/components/visualizations/WaikaneStreamHeight
 import WaiaholeStreamHeight from '@/components/visualizations/WaiaholeStreamHeight';
 import WaikaneStreamGraph from '@/components/visualizations/WaikaneStreamGraph';
 import WaiaholeStreamGraph from '@/components/visualizations/WaiaholeStreamGraph';
-import WaikaneTideLevel from '@/components/visualizations/WaikaneTideLevel';
+import WaikaneTideLevel from '@/components/visualizations/WaikaneTideLevel.js';
 import WaikaneTideGraph from '@/components/visualizations/WaikaneTideGraph';
 import PunaluuStreamHeight from '@/components/visualizations/PunaluuStreamHeight';
 import PunaluuStreamGraph from '@/components/visualizations/PunaluuStreamGraph';
@@ -461,6 +461,24 @@ export default function HomeScreen() {
             {/* Rain Section Header */}
             <ThemedView style={styles.section}>
                 <ThemedText type="subtitle" style={[styles.thinText, styles.sectionHeaderText]}>Rainfall</ThemedText>
+            </ThemedView>
+
+            {/* Rainfall Legend */}
+            <ThemedView style={styles.gaugeWrapper}>
+                <ThemedView style={styles.rainfallLegendContainer}>
+                    <ThemedView style={styles.legendItem}>
+                        <ThemedView style={[styles.legendColor, { backgroundColor: '#34C759' }]} />
+                        <ThemedText style={styles.legendText}>Normal</ThemedText>
+                    </ThemedView>
+                    <ThemedView style={styles.legendItem}>
+                        <ThemedView style={[styles.legendColor, { backgroundColor: '#FFC107' }]} />
+                        <ThemedText style={styles.legendText}>Elevated</ThemedText>
+                    </ThemedView>
+                    <ThemedView style={styles.legendItem}>
+                        <ThemedView style={[styles.legendColor, { backgroundColor: '#F44336' }]} />
+                        <ThemedText style={styles.legendText}>Extreme</ThemedText>
+                    </ThemedView>
+                </ThemedView>
             </ThemedView>
 
             {/* Makai Rain Label */}
@@ -1144,5 +1162,26 @@ const styles = StyleSheet.create({
         fontSize: 22,
         color: '#007AFF',
         letterSpacing: 0.5,
+    },
+    rainfallLegendContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginTop: 15,
+        gap: 16,
+    },
+    legendItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginHorizontal: 4,
+    },
+    legendColor: {
+        width: 15,
+        height: 15,
+        borderRadius: 3,
+        marginRight: 5,
+    },
+    legendText: {
+        color: 'white',
+        fontSize: 14,
     },
 });

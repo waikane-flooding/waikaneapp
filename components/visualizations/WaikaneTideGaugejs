@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Animated } from 'react-native';
+import Svg, { Path, Text as SvgText } from 'react-native-svg';
 
-const WaikaneTideLevel = () => {
+const WaikaneTideGauge = () => {
   const [tideLevel, setTideLevel] = useState(null);
   const [tideTime, setTideTime] = useState(null);
   const [tideDirection, setTideDirection] = useState(null);
+  const [animatedValue] = useState(new Animated.Value(0));
 
   const minLevel = -2;
   const maxLevel = 4;
@@ -49,6 +51,13 @@ const WaikaneTideLevel = () => {
           const latest = pastTides[pastTides.length - 1]; // Most recent PAST reading
           setTideLevel(latest.height);
           setTideTime(latest.time);
+          // Animate to new tide level
+          const targetPercent = (latest.height - minLevel) / (maxLevel - minLevel);
+          Animated.timing(animatedValue, {
+            toValue: targetPercent,
+            duration: 2000,
+            useNativeDriver: false,
+          }).start();
 
           // Find the next data point after the latest reading
           const nextIdx = allTides.findIndex(d => d.time.getTime() === latest.time.getTime()) + 1;
@@ -67,7 +76,7 @@ const WaikaneTideLevel = () => {
         }
       })
       .catch(err => console.error("Failed to load tide data", err));
-  }, []);
+  }, [animatedValue, minLevel, maxLevel]);
 
   const greenEnd = 2.92;
   const yellowEnd = 3.42;
@@ -90,21 +99,110 @@ const WaikaneTideLevel = () => {
       })
     : 'Loading...';
 
+  const customTicks = [-2, -1, 0, 1, 2, 3, 4];
+
   return (
     <View style={styles.container}>
-      
-      <View style={styles.dataContainer}>
+      <View style={styles.gaugeContainer}>
+        <Svg width={700} height={300}>
+          {/* Background arc */}
+          <Path
+            d="M100,280 A250,250 0 0,1 600,280"
+            stroke="#333"
+            strokeWidth={20}
+            fill="none"
+            strokeLinecap="round"
+          />
+          {/* Animated colored arc based on tide level */}
+          {tideLevel !== null && (() => {
+            const percent = Math.min((tideLevel - minLevel) / (maxLevel - minLevel), 0.98); // Cap at 98%
+            const angle = percent * Math.PI;
+            const endX = 350 + 250 * Math.cos(Math.PI - angle);
+            const endY = 280 - 250 * Math.sin(Math.PI - angle);
+            // Always use small arc flag to prevent wrapping
+            return (
+              <Path
+                d={`M100,280 A250,250 0 0,1 ${endX},${endY}`}
+                stroke={getColorForLevel(tideLevel)}
+                strokeWidth={20}
+                fill="none"
+                strokeLinecap="round"
+              />
+            );
+          })()}
+          {/* Tick labels */}
+          {customTicks.map((tick) => {
+            const tickPercent = (tick - minLevel) / (maxLevel - minLevel);
+            const angle = Math.PI - tickPercent * Math.PI;
+            const labelRadius = 270;
+            const lx = 350 + labelRadius * Math.cos(angle);
+            const ly = 280 - labelRadius * Math.sin(angle);
+            return (
+              <SvgText
+                key={tick}
+                x={lx}
+                y={ly}
+                fontSize="18"
+                fill="#fff"
+                textAnchor="middle"
+                alignmentBaseline="middle"
+              >
+                {`${tick} ft`}
+              </SvgText>
+            );
+          })}
+          {/* Threshold tick marks and labels */}
+          {[{ value: greenEnd, color: '#FFC107', label: '2.92 ft' }, { value: yellowEnd, color: '#F44336', label: '3.42 ft' }].map((threshold, idx) => {
+            const percent = (threshold.value - minLevel) / (maxLevel - minLevel);
+            const angle = Math.PI - percent * Math.PI;
+            const tickRadius = 250;
+            const tickLength = 20;
+            const tickCenter = tickRadius;
+            const halfLength = tickLength / 2;
+            const x1 = 350 + (tickCenter - halfLength) * Math.cos(angle);
+            const y1 = 280 - (tickCenter - halfLength) * Math.sin(angle);
+            const x2 = 350 + (tickCenter + halfLength) * Math.cos(angle);
+            const y2 = 280 - (tickCenter + halfLength) * Math.sin(angle);
+            
+            const labelRadius = 200;
+            const lx = 350 + labelRadius * Math.cos(angle);
+            const ly = 280 - labelRadius * Math.sin(angle);
+            return (
+              <React.Fragment key={threshold.value}>
+                {/* Tick mark */}
+                <Path
+                  d={`M${x1},${y1} L${x2},${y2}`}
+                  stroke={threshold.color}
+                  strokeWidth={5}
+                  strokeLinecap="round"
+                />
+                {/* Label */}
+                <SvgText
+                  x={lx}
+                  y={ly}
+                  fontSize="20"
+                  fill={threshold.color}
+                  textAnchor="middle"
+                  alignmentBaseline="middle"
+                  fontWeight="bold"
+                >
+                  {threshold.label}
+                </SvgText>
+              </React.Fragment>
+            );
+          })}
+        </Svg>
+      </View>
+      <View style={styles.valueContainer}>
         <Text style={[styles.value, { color: tideLevel !== null ? getColorForLevel(tideLevel) : 'white' }]}>
           {tideLevel !== null ? `${tideLevel.toFixed(2)} ft` : 'Loading...'}
         </Text>
-        
         <Text style={styles.datetime}>{formattedDateTime}</Text>
-        
-        <Text style={styles.direction}>
+        {/* Tide Direction */}
+        <Text style={{ color: 'white', fontSize: 16, marginTop: 8, textAlign: 'center' }}>
           Tide is {tideDirection ? tideDirection : 'Loading...'}
         </Text>
       </View>
-
       <View style={styles.legendContainer}>
         <View style={styles.legendItem}>
           <View style={[styles.legendColor, { backgroundColor: '#4CAF50' }]} />
@@ -127,36 +225,42 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
-    borderRadius: 10,
-    margin: 10,
+    marginTop: 2,
+    marginBottom: 2,
+    position: 'relative',
   },
-  dataContainer: {
+  gaugeContainer: {
+    marginBottom: 0,
+    position: 'relative',
+  },
+  valueContainer: {
+    position: 'absolute',
+    bottom: 80,
+    left: 0,
+    right: 0,
     alignItems: 'center',
-    marginBottom: 15,
+    zIndex: 10,
   },
   value: {
     fontSize: 32,
     textAlign: 'center',
     fontWeight: 'bold',
-    marginBottom: 10,
   },
   datetime: {
     color: 'white',
     fontSize: 16,
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  direction: {
-    color: 'white',
-    fontSize: 16,
+    marginTop: 4,
     textAlign: 'center',
   },
   legendContainer: {
+    position: 'absolute',
+    bottom: 40,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 15,
     gap: 16,
+    zIndex: 10,
   },
   legendItem: {
     flexDirection: 'row',
@@ -175,4 +279,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default WaikaneTideLevel;
+export default WaikaneTideGauge;
