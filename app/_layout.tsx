@@ -42,8 +42,8 @@ const assessPunaluuStreamRisk = (level: number | null): string => {
 
 const assessTideRisk = (level: number | null): string => {
   if (!level) return 'UNKNOWN';
-  const greenEnd = 2.12;
-  const yellowEnd = 2.92;
+  const greenEnd = 2.92;
+  const yellowEnd = 3.42;
   if (level < greenEnd) return 'LOW';
   if (level < yellowEnd) return 'MEDIUM';
   return 'HIGH';
