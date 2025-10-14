@@ -109,6 +109,36 @@ export default function HomeScreen() {
     const [alerts, setAlerts] = useState<any[]>([]);
     const [alertsLoading, setAlertsLoading] = useState(true);
     const [alertsError, setAlertsError] = useState<string | null>(null);
+    // Helper: NWS fetch with platform-safe behavior
+    const fetchNws = useCallback(async (url: string) => {
+        // NWS requires identification; web cannot set UA -> always proxy on web.
+        // On native, try direct with identification headers, then fallback to proxy on 401/403 or failure.
+        const headers: Record<string, string> = {
+            Accept: 'application/geo+json',
+            From: 'infowrrc@hawaii.edu',
+        };
+        const ua = 'WindwardStreamWatch/1.0 (https://github.com/waikane-flooding/waikaneapp; infowrrc@hawaii.edu)';
+        if (Platform.OS !== 'web') headers['User-Agent'] = ua;
+
+        const proxied = `https://corsproxy.io/?${encodeURIComponent(url)}`;
+
+        if (Platform.OS === 'web') {
+            return fetch(proxied, { headers });
+        }
+
+        try {
+            const resp = await fetch(url, { headers });
+            if (resp.status === 401 || resp.status === 403) {
+                console.warn('NWS direct returned', resp.status, 'retrying via proxy');
+                return await fetch(proxied, { headers });
+            }
+            return resp;
+        } catch (err) {
+            console.warn('NWS direct fetch failed, retrying via proxy:', err);
+            return fetch(proxied, { headers });
+        }
+    }, []);
+
     
     const [refreshing, setRefreshing] = useState(false);
     const [waikaneData, setWaikaneData] = useState<{ 
@@ -241,59 +271,105 @@ export default function HomeScreen() {
         }
     }, [getStreamStatus, waiaholeThresholds]);
 
-    // Fetch weather forecast
-    const fetchForecast = useCallback(async () => {
-        setForecastLoading(true);
-        setForecastError(null);
-        try {
-            const pointsResp = await fetch(`https://api.weather.gov/points/${KANEOHE_COORDS.lat},${KANEOHE_COORDS.lon}`);
-            const pointsData = await pointsResp.json();
-            const forecastUrl = pointsData.properties.forecast;
-            const forecastResp = await fetch(forecastUrl);
-            const forecastData = await forecastResp.json();
-            setForecast(forecastData.properties.periods.slice(0, 6));
-        } catch {
-            setForecastError('Unable to load forecast.');
-        } finally {
-            setForecastLoading(false);
+    // Fetch weather forecast - via NWS (uses proxy on web)
+    useEffect(() => {
+        async function fetchForecast() {
+            setForecastLoading(true);
+            setForecastError(null);
+            try {
+                console.log('Fetching NWS points data...');
+                const pointsResp = await fetchNws(`https://api.weather.gov/points/${KANEOHE_COORDS.lat},${KANEOHE_COORDS.lon}`);
+                console.log('Points response status:', pointsResp.status);
+                
+                if (!pointsResp.ok) {
+                    throw new Error(`Points API returned ${pointsResp.status}`);
+                }
+                
+                const pointsData = await pointsResp.json();
+                console.log('Points data received');
+                
+                const forecastUrl = pointsData?.properties?.forecast;
+                if (!forecastUrl) {
+                    throw new Error('No forecast URL in points data');
+                }
+                
+                console.log('Fetching forecast from:', forecastUrl);
+                const forecastResp = await fetchNws(forecastUrl);
+                console.log('Forecast response status:', forecastResp.status);
+                
+                if (!forecastResp.ok) {
+                    throw new Error(`Forecast API returned ${forecastResp.status}`);
+                }
+                
+                const forecastData = await forecastResp.json();
+                
+                const periods = forecastData?.properties?.periods;
+                if (Array.isArray(periods) && periods.length > 0) {
+                    setForecast(periods.slice(0, 6));
+                    console.log('Forecast loaded successfully:', periods.length, 'periods');
+                } else {
+                    throw new Error('No forecast periods in response');
+                }
+            } catch (error) {
+                console.error('Forecast fetch error:', error);
+                setForecastError('Unable to load forecast.');
+            } finally {
+                setForecastLoading(false);
+            }
         }
+        fetchForecast();
     }, []);
 
-    // Fetch weather alerts
-    const fetchAlerts = useCallback(async () => {
-        setAlertsLoading(true);
-        setAlertsError(null);
-        try {
-            const resp = await fetch('https://api.weather.gov/alerts/active?area=HI');
-            const data = await resp.json();
-            const eastOahuSpecificAreas = [
-                'Kāneʻohe', 'Kaneohe', 'Waikāne', 'Waikane', 'Waiahole', 'Kualoa', 'Waimanalo', 
-                'Heʻeia', 'Heeia', 'Windward Oahu', 'Koʻolaupoko', 'Koolaupoko', 'Oahu Windward'
-            ];
-            const excludeKeywords = ['Coastal', 'Marine', 'Winter'];
-            const excludeOtherIslands = [
-                'Maui', 'Big Island', 'Kauai', 'Molokai', 'Lanai', 'Kahoolawe', 'Kona', 'Hilo', 'Kohala'
-            ];
-            
-            const filtered = (data.features || []).filter((alert: any) => {
-                const event = alert.properties.event || '';
-                const headline = alert.properties.headline || '';
-                const desc = alert.properties.areaDesc || '';
+    // Fetch weather alerts - via NWS (uses proxy on web)
+    useEffect(() => {
+        async function fetchAlerts() {
+            setAlertsLoading(true);
+            setAlertsError(null);
+            try {
+                console.log('Fetching NWS alerts...');
+                const resp = await fetchNws('https://api.weather.gov/alerts/active?area=HI');
+                console.log('Alerts response status:', resp.status);
                 
-                if (excludeKeywords.some(word => event.includes(word) || headline.includes(word))) return false;
-                if (excludeOtherIslands.some(island => desc.includes(island))) return false;
+                if (!resp.ok) {
+                    throw new Error(`Alerts API returned ${resp.status}`);
+                }
                 
-                const includeGeneralOahu = desc.includes('East Honolulu') || desc.includes('Honolulu Metro');
-                const includeSpecificEastOahu = eastOahuSpecificAreas.some(area => desc.includes(area));
+                const data = await resp.json();
+                console.log('Alerts data received');
                 
-                return includeGeneralOahu || includeSpecificEastOahu;
-            });
-            setAlerts(filtered);
-        } catch {
-            setAlertsError('Unable to load alerts.');
-        } finally {
-            setAlertsLoading(false);
+                const eastOahuSpecificAreas = [
+                    'Kāneʻohe', 'Kaneohe', 'Waikāne', 'Waikane', 'Waiahole', 'Kualoa', 'Waimanalo', 
+                    'Heʻeia', 'Heeia', 'Windward Oahu', 'Koʻolaupoko', 'Koolaupoko', 'Oahu Windward'
+                ];
+                const excludeKeywords = ['Coastal', 'Marine', 'Winter'];
+                const excludeOtherIslands = [
+                    'Maui', 'Big Island', 'Kauai', 'Molokai', 'Lanai', 'Kahoolawe', 'Kona', 'Hilo', 'Kohala'
+                ];
+                
+                const filtered = (data?.features || []).filter((alert: any) => {
+                    const event = alert.properties?.event || '';
+                    const headline = alert.properties?.headline || '';
+                    const desc = alert.properties?.areaDesc || '';
+                    
+                    if (excludeKeywords.some(word => event.includes(word) || headline.includes(word))) return false;
+                    if (excludeOtherIslands.some(island => desc.includes(island))) return false;
+                    
+                    const includeGeneralOahu = desc.includes('East Honolulu') || desc.includes('Honolulu Metro');
+                    const includeSpecificEastOahu = eastOahuSpecificAreas.some(area => desc.includes(area));
+                    
+                    return includeGeneralOahu || includeSpecificEastOahu;
+                });
+                
+                setAlerts(filtered);
+                console.log('Alerts loaded successfully:', filtered.length, 'relevant alerts');
+            } catch (error) {
+                console.error('Alerts fetch error:', error);
+                setAlertsError('Unable to load alerts.');
+            } finally {
+                setAlertsLoading(false);
+            }
         }
+        fetchAlerts();
     }, []);
 
     // Load stream data for a specific stream type
@@ -312,13 +388,12 @@ export default function HomeScreen() {
         fetchWaikaneData();
         fetchWaiaholeData();
         fetchRainData();
-        fetchForecast();
-        fetchAlerts();
         // Load stream data for caching
         loadStreamData('waikane');
         loadStreamData('waiahole');
         loadStreamData('punaluu');
-    }, [fetchWaikaneData, fetchWaiaholeData, fetchRainData, fetchForecast, fetchAlerts, loadStreamData]);
+        // Note: forecast and alerts are fetched by their own useEffect hooks above
+    }, [fetchWaikaneData, fetchWaiaholeData, fetchRainData, loadStreamData]);
 
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
@@ -326,16 +401,18 @@ export default function HomeScreen() {
             fetchWaikaneData(), 
             fetchWaiaholeData(), 
             fetchRainData(), 
-            fetchForecast(), 
-            fetchAlerts(),
             loadStreamData('waikane'),
             loadStreamData('waiahole'),
             loadStreamData('punaluu')
         ]);
+        // Trigger forecast and alerts refresh on web by reloading the page (effects run on mount)
+        if (Platform.OS === 'web' && typeof window !== 'undefined') {
+            window.location.reload();
+        }
         setTimeout(() => {
             setRefreshing(false);
         }, 500);
-    }, [fetchWaikaneData, fetchWaiaholeData, fetchRainData, fetchForecast, fetchAlerts, loadStreamData]);
+    }, [fetchWaikaneData, fetchWaiaholeData, fetchRainData, loadStreamData]);
 
     const openMap = async () => {
         await WebBrowser.openBrowserAsync('https://experience.arcgis.com/experience/60260cda4f744186bbd9c67163b747d3');
