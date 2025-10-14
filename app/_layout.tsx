@@ -1,4 +1,4 @@
-import { DarkTheme, ThemeProvider } from '@react-navigation/native'; // Remove DefaultTheme import
+import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -263,7 +263,8 @@ function FloodRiskIndicator() {
         });
 
       } catch (error) {
-        console.error('Error fetching risk data:', error);
+        // Silently handle network errors to avoid flooding console
+        // The app will continue to use existing state values
       }
     };
 
@@ -397,7 +398,7 @@ function FloodRiskIndicator() {
               </View>
 
               <View style={styles.readingItem}>
-                <ThemedText style={styles.readingLabel}>Makai Rainfall:</ThemedText>
+                <ThemedText style={styles.readingLabel}>Makai Rainfall (Last Hour):</ThemedText>
                 <ThemedText style={[styles.readingValue, {
                   color: riskData.makaiRain !== null && typeof riskData.makaiRain === 'number' ?
                     (assessMakaiRainRisk(riskData.makaiRain) === 'HIGH' ? '#FF3B30' :
@@ -408,7 +409,7 @@ function FloodRiskIndicator() {
               </View>
 
               <View style={styles.readingItem}>
-                <ThemedText style={styles.readingLabel}>Mauka Rainfall:</ThemedText>
+                <ThemedText style={styles.readingLabel}>Mauka Rainfall (Last Hour):</ThemedText>
                 <ThemedText style={[styles.readingValue, {
                   color: riskData.maukaRain !== null && typeof riskData.maukaRain === 'number' ?
                     (assessMaukaRainRisk(riskData.maukaRain) === 'HIGH' ? '#FF3B30' :
@@ -447,7 +448,7 @@ export default function RootLayout() {
           <Stack.Screen name="+not-found" />
         </Stack>
         <FloodRiskIndicator />
-        <StatusBar style="light" /> {/* Use light status bar for dark background */}
+        <StatusBar style="light" />
       </View>
     </ThemeProvider>
   );

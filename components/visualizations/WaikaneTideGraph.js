@@ -13,7 +13,7 @@ const WaikaneTideGraph = () => {
         setCurveData(curve);
       })
       .catch(error => {
-        console.error('Error fetching curve data:', error);
+        setCurveData([]);
       });
   }, []);
 
@@ -24,7 +24,7 @@ const WaikaneTideGraph = () => {
         setTideData(data);
       })
       .catch(error => {
-        console.error('Error fetching tide data:', error);
+        setTideData([]);
       });
   }, []);
 

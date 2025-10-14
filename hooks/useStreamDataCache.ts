@@ -68,7 +68,6 @@ export const useStreamDataCache = () => {
       
       return result;
     } catch (error) {
-      console.error(`Failed to fetch ${streamType} stream data:`, error);
       return cached || null;
     } finally {
       setIsLoading(prev => ({ ...prev, [streamType]: false }));

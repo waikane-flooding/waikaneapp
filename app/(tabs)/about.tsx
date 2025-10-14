@@ -67,8 +67,7 @@ export default function AboutScreen() {
 
       <ThemedView style={styles.disclaimerSection}>
         <ThemedText style={styles.disclaimerTitle}>
-          <Ionicons name="alert-circle-outline" size={18} color="#FF3B30" />{' '}
-          Disclaimer
+          <Ionicons name="alert-circle-outline" size={18} color="#FF3B30" /> Disclaimer
         </ThemedText>
         <ThemedText style={styles.disclaimerText}>
           For informational and educational use only. Combines flooding data to raise awareness in Waikāne and Waiāhole, but not intended for emergency response, evacuation planning, or real-time decision-making. Information is experimental and may not reflect current conditions. Does not send push notifications, alerts, or automated warnings. Do not rely on this app for safety decisions. For official guidance, consult Hawai&apos;i Emergency Management Agency and National Weather Service.
@@ -110,7 +109,7 @@ export default function AboutScreen() {
             For detailed information on data sources and methodology used in this app, please see the linked documentation.
           </ThemedText>
           <ThemedView style={styles.contactContainer}>
-            <Ionicons name="document-attach-outline" size={16} color="#007AFF" />{' '}
+            <Ionicons name="document-attach-outline" size={16} color="#007AFF" />
             <ExternalLink href="https://drive.google.com/file/d/1XxqdHgw4vJnn4HDAJypEXkAB__A6UEih/view?usp=sharing">
               <ThemedText type="link" style={styles.thinText}>
                  Data & Methods documentation (Google Drive)
@@ -155,14 +154,14 @@ export default function AboutScreen() {
         </ThemedText>
         
         <ThemedView style={styles.contactContainer}>
-          <Ionicons name="send-outline" size={16} color="#007AFF" />{' '}
+          <Ionicons name="send-outline" size={16} color="#007AFF" />
           <ExternalLink href="mailto:infowrrc@hawaii.edu">
             <ThemedText type="link" style={styles.thinText}>infowrrc@hawaii.edu</ThemedText>
           </ExternalLink>
         </ThemedView>
         
         <ThemedView style={styles.contactContainer}>
-          <Ionicons name="document-text-outline" size={16} color="#4CAF50" />{' '}
+          <Ionicons name="document-text-outline" size={16} color="#4CAF50" />
           <ExternalLink href="https://docs.google.com/forms/d/1DNHiR7vRSWIE4Wwi1eb7QwxUcjzsfUhyukAmjoJdjTw/edit">
             <ThemedText type="link" style={styles.thinText}>Feedback Form</ThemedText>
           </ExternalLink>
@@ -291,5 +290,6 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(0, 122, 255, 0.1)',
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 8,
   },
 });

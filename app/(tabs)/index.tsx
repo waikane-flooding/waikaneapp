@@ -13,7 +13,7 @@ import WaikaneStreamHeight from '@/components/visualizations/WaikaneStreamHeight
 import WaiaholeStreamHeight from '@/components/visualizations/WaiaholeStreamHeight';
 import WaikaneStreamGraph from '@/components/visualizations/WaikaneStreamGraph';
 import WaiaholeStreamGraph from '@/components/visualizations/WaiaholeStreamGraph';
-import WaikaneTideLevel from '@/components/visualizations/WaikaneTideLevel.js';
+import WaikaneTideLevel from '@/components/visualizations/WaikaneTideLevel';
 import WaikaneTideGraph from '@/components/visualizations/WaikaneTideGraph';
 import PunaluuStreamHeight from '@/components/visualizations/PunaluuStreamHeight';
 import PunaluuStreamGraph from '@/components/visualizations/PunaluuStreamGraph';
@@ -97,8 +97,8 @@ export default function HomeScreen() {
                 });
             }
         } catch (e) {
-            setMakaiRain({ lastHour: 'Error', lastSixHours: 'Error', lastReading: 'Error' });
-            setMaukaRain({ lastHour: 'Error', lastSixHours: 'Error', lastReading: 'Error' });
+            setMakaiRain({ lastHour: 'No Data', lastSixHours: 'No Data', lastReading: 'Offline' });
+            setMaukaRain({ lastHour: 'No Data', lastSixHours: 'No Data', lastReading: 'Offline' });
         }
     }, []);
     
@@ -188,8 +188,8 @@ export default function HomeScreen() {
                 });
             }
         } catch (error) {
-            console.error('Failed to load Waikane stream data', error);
-            setWaikaneData({ height: 'Error', lastReading: 'Error', direction: 'Error', status: 'Error' });
+            // Silently handle network errors to avoid flooding console
+            setWaikaneData({ height: 'No Data', lastReading: 'Offline', direction: null, status: 'Offline' });
         }
     }, [getStreamStatus, waikaneThresholds]);
 
@@ -236,8 +236,8 @@ export default function HomeScreen() {
                 });
             }
         } catch (error) {
-            console.error('Failed to load Waiahole stream data', error);
-            setWaiaholeData({ height: 'Error', lastReading: 'Error', direction: 'Error', status: 'Error' });
+            // Silently handle network errors to avoid flooding console
+            setWaiaholeData({ height: 'No Data', lastReading: 'Offline', direction: null, status: 'Offline' });
         }
     }, [getStreamStatus, waiaholeThresholds]);
 
@@ -387,7 +387,7 @@ export default function HomeScreen() {
                         style={styles.headerImage}
                     />
                     <ThemedView style={styles.headerOverlay} pointerEvents="none">
-                        <ThemedText type="title" style={[styles.thinText, styles.appTitleOverlay]}>Windward Flood Check</ThemedText>
+                        <ThemedText type="title" style={[styles.thinText, styles.appTitleOverlay]}>Windward Stream Watch</ThemedText>
                     </ThemedView>
                 </ThemedView>
             }
@@ -432,8 +432,6 @@ export default function HomeScreen() {
                 <ThemedView style={styles.gaugeWrapper}>{currentStream.gauge}</ThemedView>
                 <ThemedView style={styles.chartWrapper}>{currentStream.graph}</ThemedView>
             </ThemedView>
-
-            {/* ...existing code... */}
 
             {/* Tide Section Header */}
             <ThemedView style={styles.section}>
@@ -745,7 +743,7 @@ const styles = StyleSheet.create({
         textShadowOffset: { width: 0, height: 1 },
         textShadowRadius: 4,
         letterSpacing: 0.5,
-        transform: [{ translateY: 56 }],
+        transform: [{ translateY: 48 }],
     },
     titleContainer: {
         paddingHorizontal: 16,
@@ -1018,7 +1016,7 @@ const styles = StyleSheet.create({
         minHeight: 120,
     },
     gaugeContainer: {
-        backgroundColor: '#181f2a', // dark blue/gray for contrast
+        backgroundColor: '#181f2a',
         borderRadius: 18,
         paddingVertical: 18,
         paddingHorizontal: 8,
@@ -1032,7 +1030,7 @@ const styles = StyleSheet.create({
         elevation: 4,
     },
     gaugeInnerBg: {
-        backgroundColor: '#181f2a', // match gaugeContainer
+        backgroundColor: '#181f2a',
         borderRadius: 12,
         padding: 12,
         width: '100%',
@@ -1181,7 +1179,7 @@ const styles = StyleSheet.create({
         marginRight: 5,
     },
     legendText: {
-        color: 'white',
+        color: '#007AFF',
         fontSize: 14,
     },
 });

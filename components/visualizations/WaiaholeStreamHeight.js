@@ -112,7 +112,7 @@ const WaiaholeStreamHeight = ({ streamData, trendData }) => {
                 x={lx}
                 y={ly}
                 fontSize="18"
-                fill="#fff"
+                fill="#007AFF"
                 textAnchor="middle"
                 alignmentBaseline="middle"
               >
@@ -163,12 +163,12 @@ const WaiaholeStreamHeight = ({ streamData, trendData }) => {
         </Svg>
       </View>
       <View style={styles.valueContainer}>
-        <Text style={[styles.value, { color: streamLevel !== null ? getColorForLevel(streamLevel) : 'white' }]}>
+        <Text style={[styles.value, { color: streamLevel !== null ? getColorForLevel(streamLevel) : '#007AFF' }]}>
           {streamLevel !== null ? `${streamLevel.toFixed(2)} ft` : 'Loading...'}
         </Text>
         <Text style={styles.datetime}>{formattedDateTime}</Text>
         {/* Stream Direction */}
-        <Text style={{ color: 'white', fontSize: 16, marginTop: 8, textAlign: 'center' }}>
+        <Text style={{ color: '#007AFF', fontSize: 16, marginTop: 8, textAlign: 'center' }}>
           Stream is {streamDirection ? streamDirection : 'Loading...'}
         </Text>
       </View>
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   datetime: {
-    color: 'white',
+    color: '#007AFF',
     fontSize: 16,
     marginTop: 4,
     textAlign: 'center',
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
     marginRight: 5,
   },
   legendText: {
-    color: 'white',
+    color: '#007AFF',
     fontSize: 14,
   },
 });

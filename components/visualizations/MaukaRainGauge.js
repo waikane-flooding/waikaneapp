@@ -107,7 +107,7 @@ const MaukaRainGauge = () => {
                 x={lx}
                 y={ly}
                 fontSize="18"
-                fill="#fff"
+                fill="#007AFF"
                 textAnchor="middle"
                 alignmentBaseline="middle"
               >
@@ -158,7 +158,7 @@ const MaukaRainGauge = () => {
         </Svg>
       </View>
       <View style={styles.valueContainer}>
-        <Text style={[styles.value, { color: rainLevel !== null ? getColorForLevel(rainLevel) : 'white' }]}> 
+        <Text style={[styles.value, { color: rainLevel !== null ? getColorForLevel(rainLevel) : '#007AFF' }]}> 
           {rainLevel !== null ? `${rainLevel.toFixed(2)} in` : 'Loading...'}
         </Text>
         <Text style={styles.datetime}>{
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   datetime: {
-    color: 'white',
+    color: '#007AFF',
     fontSize: 16,
     marginTop: 4,
     textAlign: 'center',
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
     marginRight: 5,
   },
   legendText: {
-    color: 'white',
+    color: '#007AFF',
     fontSize: 14,
   },
 });

@@ -143,7 +143,7 @@ const WaikaneTideGauge = () => {
                 x={lx}
                 y={ly}
                 fontSize="18"
-                fill="#fff"
+                fill="#007AFF"
                 textAnchor="middle"
                 alignmentBaseline="middle"
               >
@@ -194,12 +194,12 @@ const WaikaneTideGauge = () => {
         </Svg>
       </View>
       <View style={styles.valueContainer}>
-        <Text style={[styles.value, { color: tideLevel !== null ? getColorForLevel(tideLevel) : 'white' }]}>
+        <Text style={[styles.value, { color: tideLevel !== null ? getColorForLevel(tideLevel) : '#007AFF' }]}>
           {tideLevel !== null ? `${tideLevel.toFixed(2)} ft` : 'Loading...'}
         </Text>
         <Text style={styles.datetime}>{formattedDateTime}</Text>
         {/* Tide Direction */}
-        <Text style={{ color: 'white', fontSize: 16, marginTop: 8, textAlign: 'center' }}>
+        <Text style={{ color: '#007AFF', fontSize: 16, marginTop: 8, textAlign: 'center' }}>
           Tide is {tideDirection ? tideDirection : 'Loading...'}
         </Text>
       </View>
@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   datetime: {
-    color: 'white',
+    color: '#007AFF',
     fontSize: 16,
     marginTop: 4,
     textAlign: 'center',
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
     marginRight: 5,
   },
   legendText: {
-    color: 'white',
+    color: '#007AFF',
     fontSize: 14,
   },
 });

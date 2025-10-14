@@ -66,7 +66,10 @@ const WaikaneTideLevel = () => {
           }
         }
       })
-      .catch(err => console.error("Failed to load tide data", err));
+      .catch(err => {
+        setTideLevel(null);
+        setTideTime(null);
+      });
   }, []);
 
   const greenEnd = 2.92;
@@ -94,7 +97,7 @@ const WaikaneTideLevel = () => {
     <View style={styles.container}>
       
       <View style={styles.dataContainer}>
-        <Text style={[styles.value, { color: tideLevel !== null ? getColorForLevel(tideLevel) : 'white' }]}>
+        <Text style={[styles.value, { color: tideLevel !== null ? getColorForLevel(tideLevel) : '#007AFF' }]}>
           {tideLevel !== null ? `${tideLevel.toFixed(2)} ft` : 'Loading...'}
         </Text>
         
@@ -142,13 +145,13 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   datetime: {
-    color: 'white',
+    color: '#007AFF',
     fontSize: 16,
     marginBottom: 10,
     textAlign: 'center',
   },
   direction: {
-    color: 'white',
+    color: '#007AFF',
     fontSize: 16,
     textAlign: 'center',
   },
@@ -170,7 +173,7 @@ const styles = StyleSheet.create({
     marginRight: 5,
   },
   legendText: {
-    color: 'white',
+    color: '#007AFF',
     fontSize: 14,
   },
 });
