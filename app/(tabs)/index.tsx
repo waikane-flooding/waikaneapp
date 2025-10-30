@@ -117,7 +117,7 @@ export default function HomeScreen() {
             Accept: 'application/geo+json',
             From: 'infowrrc@hawaii.edu',
         };
-        const ua = 'WindwardStreamWatch/1.0 (https://github.com/waikane-flooding/waikaneapp; infowrrc@hawaii.edu)';
+    const ua = 'FloodCheck/1.0 (https://github.com/waikane-flooding/waikaneapp; infowrrc@hawaii.edu)';
         if (Platform.OS !== 'web') headers['User-Agent'] = ua;
 
         const proxied = `https://corsproxy.io/?${encodeURIComponent(url)}`;
@@ -464,7 +464,7 @@ export default function HomeScreen() {
                         style={styles.headerImage}
                     />
                     <ThemedView style={styles.headerOverlay} pointerEvents="none">
-                        <ThemedText type="title" style={[styles.thinText, styles.appTitleOverlay]}>Windward Stream Watch</ThemedText>
+                        <ThemedText type="title" style={[styles.thinText, styles.appTitleOverlay]}>Flood Check</ThemedText>
                     </ThemedView>
                 </ThemedView>
             }
@@ -820,7 +820,7 @@ const styles = StyleSheet.create({
         textShadowOffset: { width: 0, height: 1 },
         textShadowRadius: 4,
         letterSpacing: 0.5,
-        transform: [{ translateY: 48 }],
+        transform: [{ translateY: 68 }],
     },
     titleContainer: {
         paddingHorizontal: 16,
