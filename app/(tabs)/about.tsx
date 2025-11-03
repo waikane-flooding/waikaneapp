@@ -150,7 +150,7 @@ export default function AboutScreen() {
       <ThemedView style={styles.section}>
         <ThemedText type="subtitle" style={styles.sectionTitle}>Contact & Feedback</ThemedText>
         <ThemedText style={styles.thinText}>
-          For questions, support, or feedback about the app, please reach out via email or the form.
+          For questions, support, or feedback about the app, please reach out via email.
         </ThemedText>
         
         <ThemedView style={styles.contactContainer}>
@@ -160,12 +160,7 @@ export default function AboutScreen() {
           </ExternalLink>
         </ThemedView>
         
-        <ThemedView style={styles.contactContainer}>
-          <Ionicons name="document-text-outline" size={16} color="#4CAF50" />
-          <ExternalLink href="https://docs.google.com/forms/d/1DNHiR7vRSWIE4Wwi1eb7QwxUcjzsfUhyukAmjoJdjTw/edit">
-            <ThemedText type="link" style={styles.thinText}>Feedback Form</ThemedText>
-          </ExternalLink>
-        </ThemedView>
+        {/* Feedback form removed - contact by email only */}
       </ThemedView>
 
       {/* Emergency Contacts section moved here */}

@@ -464,7 +464,7 @@ export default function HomeScreen() {
                         style={styles.headerImage}
                     />
                     <ThemedView style={styles.headerOverlay} pointerEvents="none">
-                        <ThemedText type="title" style={[styles.thinText, styles.appTitleOverlay]}>Flood Check</ThemedText>
+                        <ThemedText type="title" style={[styles.thinText, styles.appTitleOverlay]}>Windward Flood Check</ThemedText>
                     </ThemedView>
                 </ThemedView>
             }
@@ -479,52 +479,56 @@ export default function HomeScreen() {
         >
             {/* Title now overlaid on header image */}
 
-            {/* Streams Section Header */}
+            {/* Streams Section header */}
             <ThemedView style={styles.section}>
-                <ThemedText type="subtitle" style={[styles.thinText, styles.sectionHeaderText]}>Streams</ThemedText>
-            </ThemedView>
-            {/* Single stream chart container with navigation arrows */}
-            <ThemedView style={styles.streamSection}>
-                <ThemedView style={styles.streamNavigation}>
-                    <Pressable
-                        onPress={() => setStreamIdx(i => Math.max(0, i - 1))}
-                        disabled={streamIdx === 0}
-                        style={({ pressed }) => ({ opacity: streamIdx === 0 ? 0.3 : pressed ? 0.6 : 1, marginRight: 12 })}
-                        accessibilityLabel="Previous stream"
-                    >
-                        <Ionicons name="arrow-back-circle" size={36} color="#007AFF" />
-                    </Pressable>
-                    <ThemedText type="subtitle" style={styles.thinText}>
-                        <Ionicons name="water" size={16} color="#007AFF" /> {currentStream.name}
-                    </ThemedText>
-                    <Pressable
-                        onPress={() => setStreamIdx(i => Math.min(streamCharts.length - 1, i + 1))}
-                        disabled={streamIdx === streamCharts.length - 1}
-                        style={({ pressed }) => ({ opacity: streamIdx === streamCharts.length - 1 ? 0.3 : pressed ? 0.6 : 1, marginLeft: 12 })}
-                        accessibilityLabel="Next stream"
-                    >
-                        <Ionicons name="arrow-forward-circle" size={36} color="#007AFF" />
-                    </Pressable>
+                <ThemedView style={styles.sectionHeaderContainer}>
+                    <ThemedText type="subtitle" style={[styles.thinText, styles.sectionHeaderText]}>Streams</ThemedText>
                 </ThemedView>
-                <ThemedView style={styles.gaugeWrapper}>{currentStream.gauge}</ThemedView>
-                <ThemedView style={styles.chartWrapper}>{currentStream.graph}</ThemedView>
+                {/* Single stream chart container with navigation arrows */}
+                <ThemedView style={styles.streamSection}>
+                    <ThemedView style={styles.streamNavigation}>
+                        <Pressable
+                            onPress={() => setStreamIdx(i => Math.max(0, i - 1))}
+                            disabled={streamIdx === 0}
+                            style={({ pressed }) => ({ opacity: streamIdx === 0 ? 0.3 : pressed ? 0.6 : 1, marginRight: 12 })}
+                            accessibilityLabel="Previous stream"
+                        >
+                            <Ionicons name="arrow-back-circle" size={36} color="#007AFF" />
+                        </Pressable>
+                        <ThemedText type="subtitle" style={styles.thinText}>
+                            <Ionicons name="water" size={16} color="#007AFF" /> {currentStream.name}
+                        </ThemedText>
+                        <Pressable
+                            onPress={() => setStreamIdx(i => Math.min(streamCharts.length - 1, i + 1))}
+                            disabled={streamIdx === streamCharts.length - 1}
+                            style={({ pressed }) => ({ opacity: streamIdx === streamCharts.length - 1 ? 0.3 : pressed ? 0.6 : 1, marginLeft: 12 })}
+                            accessibilityLabel="Next stream"
+                        >
+                            <Ionicons name="arrow-forward-circle" size={36} color="#007AFF" />
+                        </Pressable>
+                    </ThemedView>
+                    <ThemedText style={styles.streamNavHint}>Tap arrows to switch</ThemedText>
+                    <ThemedView style={styles.gaugeWrapper}>{currentStream.gauge}</ThemedView>
+                    <ThemedView style={styles.chartWrapper}>{currentStream.graph}</ThemedView>
+                </ThemedView>
+            </ThemedView>
+            <ThemedView style={styles.sectionDividerWrap}>
+                <ThemedView style={styles.sectionDivider} />
             </ThemedView>
 
-            {/* Tide Section Header */}
+            {/* Tide Section header */}
             <ThemedView style={styles.section}>
-                <ThemedText type="subtitle" style={[styles.thinText, styles.sectionHeaderText]}>Tide</ThemedText>
-            </ThemedView>
+                <ThemedView style={styles.sectionHeaderContainer}>
+                    <ThemedText type="subtitle" style={[styles.thinText, styles.sectionHeaderText]}>Tide</ThemedText>
+                </ThemedView>
 
-            {/* Kanehoe Tide Label */}
-            <ThemedText type="subtitle" style={styles.thinText}>
-                <Ionicons name="water" size={16} color="#007AFF" /> Waikāne
-            </ThemedText>
-            <ThemedText style={[styles.thinText, { fontSize: 13, color: '#666', marginBottom: 8, marginLeft: 2 }]}>
-                TPT2777 Waikane, Kaneohe Bay (MLLW)
-            </ThemedText>
+                {/* Kaneohe Tide Label */}
+                <ThemedText type="subtitle" style={styles.thinText}>
+                    <Ionicons name="water" size={16} color="#007AFF" /> Waikāne
+                </ThemedText>
+                <ThemedText style={[styles.thinText, { fontSize: 13, color: '#666', marginBottom: 8, marginLeft: 2 }]}>TPT2777 Waikane, Kaneohe Bay (MLLW)</ThemedText>
 
-            {/* Tide Gauge and Trend */}
-            <ThemedView style={styles.section}>
+                {/* Tide Gauge and Trend */}
                 <ThemedView style={styles.gaugeWrapper}>
                     <WaikaneTideLevel />
                 </ThemedView>
@@ -532,14 +536,17 @@ export default function HomeScreen() {
                     <WaikaneTideGraph />
                 </ThemedView>
             </ThemedView>
-
-            {/* Rain Section Header */}
-            <ThemedView style={styles.section}>
-                <ThemedText type="subtitle" style={[styles.thinText, styles.sectionHeaderText]}>Rainfall</ThemedText>
+            <ThemedView style={styles.sectionDividerWrap}>
+                <ThemedView style={styles.sectionDivider} />
             </ThemedView>
 
-            {/* Rainfall Legend */}
-            <ThemedView style={styles.gaugeWrapper}>
+            {/* Rain Section header */}
+            <ThemedView style={styles.section}>
+                <ThemedView style={styles.sectionHeaderContainer}>
+                    <ThemedText type="subtitle" style={[styles.thinText, styles.sectionHeaderText]}>Rainfall</ThemedText>
+                </ThemedView>
+
+                {/* Rainfall Legend */}
                 <ThemedView style={styles.rainfallLegendContainer}>
                     <ThemedView style={styles.legendItem}>
                         <ThemedView style={[styles.legendColor, { backgroundColor: '#34C759' }]} />
@@ -554,54 +561,53 @@ export default function HomeScreen() {
                         <ThemedText style={styles.legendText}>Extreme</ThemedText>
                     </ThemedView>
                 </ThemedView>
+
+                {/* Makai Rain Label */}
+                <ThemedText type="subtitle" style={styles.thinText}>
+                    <Ionicons name="rainy" size={16} color="#007AFF" /> Makai (towards the ocean)
+                </ThemedText>
+                <ThemedText style={[styles.thinText, { fontSize: 13, color: '#666', marginBottom: 8, marginLeft: 2 }]}>837.7 Waiahole RG at Kamehameha Hwy., Oahu, HI - USGS-212855157504501</ThemedText>
+
+                {/* Makai Rain Info Box (plain) */}
+                <ThemedView style={styles.monitorInfoPlain}>
+                    <ThemedView style={styles.infoItem}>
+                        <ThemedText style={styles.label}>Last Hour:</ThemedText>
+                        <ThemedText style={[styles.value, { color: getMakaiRainColor(makaiRain.lastHour) }]}>{makaiRain.lastHour}</ThemedText>
+                    </ThemedView>
+                    <ThemedView style={styles.infoItem}>
+                        <ThemedText style={styles.label}>Last Six Hours:</ThemedText>
+                        <ThemedText style={[styles.value, { color: getMakaiRainColor(makaiRain.lastSixHours) }]}>{makaiRain.lastSixHours}</ThemedText>
+                    </ThemedView>
+                    <ThemedView style={styles.infoItem}>
+                        <ThemedText style={styles.label}>Last Reading:</ThemedText>
+                        <ThemedText style={styles.value}>{makaiRain.lastReading}</ThemedText>
+                    </ThemedView>
+                </ThemedView>
+
+                {/* Mauka Rain Label */}
+                <ThemedText type="subtitle" style={styles.thinText}>
+                    <Ionicons name="rainy" size={16} color="#007AFF" /> Mauka (towards the mountain)
+                </ThemedText>
+                <ThemedText style={[styles.thinText, { fontSize: 13, color: '#666', marginBottom: 8, marginLeft: 2 }]}>883.12 Poamoho Rain Gage No 1, nr Wahiawa, Oahu,HI - USGS-213215157552800</ThemedText>
+
+                {/* Mauka Rain Info Box (plain) */}
+                <ThemedView style={styles.monitorInfoPlain}>
+                    <ThemedView style={styles.infoItem}>
+                        <ThemedText style={styles.label}>Last Hour:</ThemedText>
+                        <ThemedText style={[styles.value, { color: getMaukaRainColor(maukaRain.lastHour) }]}>{maukaRain.lastHour}</ThemedText>
+                    </ThemedView>
+                    <ThemedView style={styles.infoItem}>
+                        <ThemedText style={styles.label}>Last Six Hours:</ThemedText>
+                        <ThemedText style={[styles.value, { color: getMaukaRainColor(maukaRain.lastSixHours) }]}>{maukaRain.lastSixHours}</ThemedText>
+                    </ThemedView>
+                    <ThemedView style={styles.infoItem}>
+                        <ThemedText style={styles.label}>Last Reading:</ThemedText>
+                        <ThemedText style={styles.value}>{maukaRain.lastReading}</ThemedText>
+                    </ThemedView>
+                </ThemedView>
             </ThemedView>
-
-            {/* Makai Rain Label */}
-            <ThemedText type="subtitle" style={styles.thinText}>
-                <Ionicons name="rainy" size={16} color="#007AFF" /> Makai (towards the ocean)
-            </ThemedText>
-            <ThemedText style={[styles.thinText, { fontSize: 13, color: '#666', marginBottom: 8, marginLeft: 2 }]}>
-                837.7 Waiahole RG at Kamehameha Hwy., Oahu, HI - USGS-212855157504501
-            </ThemedText>
-
-            {/* Makai Rain Info Box */}
-            <ThemedView style={styles.monitorInfo}>
-                <ThemedView style={styles.infoItem}>
-                    <ThemedText style={styles.label}>Last Hour:</ThemedText>
-                    <ThemedText style={[styles.value, { color: getMakaiRainColor(makaiRain.lastHour) }]}>{makaiRain.lastHour}</ThemedText>
-                </ThemedView>
-                <ThemedView style={styles.infoItem}>
-                    <ThemedText style={styles.label}>Last Six Hours:</ThemedText>
-                    <ThemedText style={[styles.value, { color: getMakaiRainColor(makaiRain.lastSixHours) }]}>{makaiRain.lastSixHours}</ThemedText>
-                </ThemedView>
-                <ThemedView style={styles.infoItem}>
-                    <ThemedText style={styles.label}>Last Reading:</ThemedText>
-                    <ThemedText style={styles.value}>{makaiRain.lastReading}</ThemedText>
-                </ThemedView>
-            </ThemedView>
-
-            {/* Mauka Rain Label */}
-            <ThemedText type="subtitle" style={styles.thinText}>
-                <Ionicons name="rainy" size={16} color="#007AFF" /> Mauka (towards the mountain)
-            </ThemedText>
-            <ThemedText style={[styles.thinText, { fontSize: 13, color: '#666', marginBottom: 8, marginLeft: 2 }]}>
-                883.12 Poamoho Rain Gage No 1, nr Wahiawa, Oahu,HI - USGS-213215157552800
-            </ThemedText>
-
-            {/* Mauka Rain Info Box */}
-            <ThemedView style={styles.monitorInfo}>
-                <ThemedView style={styles.infoItem}>
-                    <ThemedText style={styles.label}>Last Hour:</ThemedText>
-                    <ThemedText style={[styles.value, { color: getMaukaRainColor(maukaRain.lastHour) }]}>{maukaRain.lastHour}</ThemedText>
-                </ThemedView>
-                <ThemedView style={styles.infoItem}>
-                    <ThemedText style={styles.label}>Last Six Hours:</ThemedText>
-                    <ThemedText style={[styles.value, { color: getMaukaRainColor(maukaRain.lastSixHours) }]}>{maukaRain.lastSixHours}</ThemedText>
-                </ThemedView>
-                <ThemedView style={styles.infoItem}>
-                    <ThemedText style={styles.label}>Last Reading:</ThemedText>
-                    <ThemedText style={styles.value}>{maukaRain.lastReading}</ThemedText>
-                </ThemedView>
+            <ThemedView style={styles.sectionDividerWrap}>
+                <ThemedView style={styles.sectionDivider} />
             </ThemedView>
 
             {/*
@@ -631,110 +637,114 @@ export default function HomeScreen() {
             </ThemedView>
             */}
 
-            {/* Weather Section Header */}
+            {/* Weather Section header */}
             <ThemedView style={styles.section}>
-                <ThemedText type="subtitle" style={[styles.thinText, styles.sectionHeaderText]}>Weather</ThemedText>
-            </ThemedView>
+                <ThemedView style={styles.sectionHeaderContainer}>
+                    <ThemedText type="subtitle" style={[styles.thinText, styles.sectionHeaderText]}>Weather</ThemedText>
+                </ThemedView>
 
-            {/* Weather Forecast */}
-            <ThemedView style={styles.section}>
-                <ThemedText type="subtitle" style={styles.thinText}>
-                    <Ionicons name="calendar" size={16} color="#4169E1" /> Waiāhole 3-Day Forecast
-                </ThemedText>
-                
-                <ThemedView style={styles.forecastCardHorizontal}>
-                    <ScrollView style={styles.forecastScroll} horizontal showsHorizontalScrollIndicator={false}>
-                        {forecastLoading ? (
-                            <ThemedText style={styles.placeholderText}>Loading forecast...</ThemedText>
-                        ) : forecastError ? (
-                            <ThemedText style={[styles.placeholderText, { color: 'red' }]}>{forecastError}</ThemedText>
-                        ) : forecast.length > 0 ? (
-                            forecast.map((period: any) => (
-                                <ThemedView key={period.number} style={styles.forecastCardItem}>
-                                    <Ionicons name={getForecastIcon(period.shortForecast)} size={32} color="#4169E1" style={{ marginBottom: 6 }} />
-                                    <ThemedText style={styles.forecastTitle}>{period.name}</ThemedText>
-                                    <ThemedText style={styles.forecastTemp}>{period.temperature}°{period.temperatureUnit}</ThemedText>
-                                    <ThemedText style={styles.forecastText}>{period.shortForecast}</ThemedText>
-                                </ThemedView>
-                            ))
-                        ) : (
-                            <ThemedText style={styles.placeholderText}>No forecast data available.</ThemedText>
-                        )}
-                    </ScrollView>
+                {/* Forecast */}
+                <ThemedView style={{ marginTop: 8 }}>
+                    <ThemedText type="subtitle" style={styles.thinText}>
+                        <Ionicons name="calendar" size={16} color="#4169E1" /> Waiāhole 3-Day Forecast
+                    </ThemedText>
+
+                    <ThemedText style={styles.forecastHint}>Swipe to view</ThemedText>
+                    <ThemedView style={styles.forecastCardHorizontal}>
+                        <ScrollView style={styles.forecastScroll} horizontal showsHorizontalScrollIndicator={false}>
+                            {forecastLoading ? (
+                                <ThemedText style={styles.placeholderText}>Loading forecast...</ThemedText>
+                            ) : forecastError ? (
+                                <ThemedText style={[styles.placeholderText, { color: 'red' }]}>{forecastError}</ThemedText>
+                            ) : forecast.length > 0 ? (
+                                forecast.map((period: any) => (
+                                    <ThemedView key={period.number} style={styles.forecastCardItem}>
+                                        <Ionicons name={getForecastIcon(period.shortForecast)} size={32} color="#4169E1" style={{ marginBottom: 6 }} />
+                                        <ThemedText style={styles.forecastTitle}>{period.name}</ThemedText>
+                                        <ThemedText style={styles.forecastTemp}>{period.temperature}°{period.temperatureUnit}</ThemedText>
+                                        <ThemedText style={styles.forecastText}>{period.shortForecast}</ThemedText>
+                                    </ThemedView>
+                                ))
+                            ) : (
+                                <ThemedText style={styles.placeholderText}>No forecast data available.</ThemedText>
+                            )}
+                        </ScrollView>
+                    </ThemedView>
+                </ThemedView>
+
+                {/* Alerts */}
+                <ThemedView style={{ marginTop: 12 }}>
+                    <ThemedText type="subtitle" style={[styles.thinText, { marginBottom: 12 }]}>National Weather Service Updates</ThemedText>
+
+                    {alertsLoading ? (
+                        <ThemedView style={styles.alertsCard}>
+                            <ActivityIndicator size="small" color="#d9534f" />
+                        </ThemedView>
+                    ) : alertsError ? (
+                        <ThemedView style={styles.alertsCard}>
+                            <ThemedText style={[styles.placeholderText, { color: '#d9534f' }]}>{alertsError}</ThemedText>
+                        </ThemedView>
+                    ) : alerts.length > 0 ? (
+                        <ThemedView style={styles.alertsCard}>
+                            {alerts.map((alert: any) => {
+                                const alertSeverity = getAlertSeverity(alert);
+                                return (
+                                    <ThemedView 
+                                        key={alert.id} 
+                                        style={[
+                                            styles.alertItem,
+                                            { 
+                                                backgroundColor: alertSeverity.bgColor,
+                                                borderLeftWidth: 4,
+                                                borderLeftColor: alertSeverity.color
+                                            }
+                                        ]}
+                                    >
+                                        <ThemedView style={styles.alertHeader}>
+                                            <ThemedText style={[styles.alertTitle, { color: alertSeverity.color }]}>
+                                                {alert.properties.event}
+                                            </ThemedText>
+                                            <ThemedView style={[styles.severityBadge, { backgroundColor: alertSeverity.color }]}>
+                                                <ThemedText style={styles.severityText}>
+                                                    {alertSeverity.level.toUpperCase()}
+                                                </ThemedText>
+                                            </ThemedView>
+                                        </ThemedView>
+                                        <ThemedText style={styles.alertTime}>
+                                            {alert.properties.effective ? `From: ${new Date(alert.properties.effective).toLocaleString('en-US', {
+                                                month: 'short',
+                                                day: 'numeric',
+                                                year: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                                hour12: true
+                                            })}` : ''}
+                                            {alert.properties.ends ? `  To: ${new Date(alert.properties.ends).toLocaleString('en-US', {
+                                                month: 'short',
+                                                day: 'numeric',
+                                                year: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                                hour12: true
+                                            })}` : ''}
+                                        </ThemedText>
+                                        <ThemedText style={styles.alertArea}>{alert.properties.areaDesc}</ThemedText>
+                                        {alert.properties.headline && (
+                                            <ThemedText style={[styles.alertHeadline, { color: alertSeverity.color }]}>
+                                                {alert.properties.headline}
+                                            </ThemedText>
+                                        )}
+                                    </ThemedView>
+                                );
+                            })}
+                        </ThemedView>
+                    ) : (
+                        <ThemedText style={styles.noAlertsText}>No active updates for East Oʻahu/Windward side.</ThemedText>
+                    )}
                 </ThemedView>
             </ThemedView>
-
-            {/* Weather Alerts */}
-            <ThemedView style={styles.section}>
-                <ThemedText type="subtitle" style={[styles.thinText, { marginBottom: 18 }]}>
-                    National Weather Service Updates
-                </ThemedText>
-
-                {alertsLoading ? (
-                    <ThemedView style={styles.alertsCard}>
-                        <ActivityIndicator size="small" color="#d9534f" />
-                    </ThemedView>
-                ) : alertsError ? (
-                    <ThemedView style={styles.alertsCard}>
-                        <ThemedText style={[styles.placeholderText, { color: '#d9534f' }]}>{alertsError}</ThemedText>
-                    </ThemedView>
-                ) : alerts.length > 0 ? (
-                    <ThemedView style={styles.alertsCard}>
-                        {alerts.map((alert: any) => {
-                            const alertSeverity = getAlertSeverity(alert);
-                            return (
-                                <ThemedView 
-                                    key={alert.id} 
-                                    style={[
-                                        styles.alertItem,
-                                        { 
-                                            backgroundColor: alertSeverity.bgColor,
-                                            borderLeftWidth: 4,
-                                            borderLeftColor: alertSeverity.color
-                                        }
-                                    ]}
-                                >
-                                    <ThemedView style={styles.alertHeader}>
-                                        <ThemedText style={[styles.alertTitle, { color: alertSeverity.color }]}>
-                                            {alert.properties.event}
-                                        </ThemedText>
-                                        <ThemedView style={[styles.severityBadge, { backgroundColor: alertSeverity.color }]}>
-                                            <ThemedText style={styles.severityText}>
-                                                {alertSeverity.level.toUpperCase()}
-                                            </ThemedText>
-                                        </ThemedView>
-                                    </ThemedView>
-                                    <ThemedText style={styles.alertTime}>
-                                        {alert.properties.effective ? `From: ${new Date(alert.properties.effective).toLocaleString('en-US', {
-                                            month: 'short',
-                                            day: 'numeric',
-                                            year: 'numeric',
-                                            hour: '2-digit',
-                                            minute: '2-digit',
-                                            hour12: true
-                                        })}` : ''}
-                                        {alert.properties.ends ? `  To: ${new Date(alert.properties.ends).toLocaleString('en-US', {
-                                            month: 'short',
-                                            day: 'numeric',
-                                            year: 'numeric',
-                                            hour: '2-digit',
-                                            minute: '2-digit',
-                                            hour12: true
-                                        })}` : ''}
-                                    </ThemedText>
-                                    <ThemedText style={styles.alertArea}>{alert.properties.areaDesc}</ThemedText>
-                                    {alert.properties.headline && (
-                                        <ThemedText style={[styles.alertHeadline, { color: alertSeverity.color }]}>
-                                            {alert.properties.headline}
-                                        </ThemedText>
-                                    )}
-                                </ThemedView>
-                            );
-                        })}
-                    </ThemedView>
-                ) : (
-                    <ThemedText style={styles.noAlertsText}>No active updates for East Oʻahu/Windward side.</ThemedText>
-                )}
+            <ThemedView style={styles.sectionDividerWrap}>
+                <ThemedView style={styles.sectionDivider} />
             </ThemedView>
 
         </ParallaxScrollView>
@@ -780,7 +790,7 @@ const styles = StyleSheet.create({
         width: '100%',
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 8,
+    marginBottom: Platform.OS === 'web' ? 8 : 2,
         transform: Platform.OS === 'web' ? [{ scale: 0.85 }] : [{ scale: 0.68 }],
     },
     horizontalScroll: {
@@ -839,7 +849,7 @@ const styles = StyleSheet.create({
         letterSpacing: 0.5,
     },
     section: {
-        marginBottom: 16,
+        marginVertical: Platform.OS === 'web' ? 12 : 2,
         gap: 4,
     },
     thinText: {
@@ -850,6 +860,12 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         padding: 16,
         marginTop: 8,
+    },
+    monitorInfoPlain: {
+        backgroundColor: 'transparent',
+        borderRadius: 0,
+        padding: 8,
+        marginTop: 6,
     },
     infoItem: {
         flexDirection: 'row',
@@ -903,7 +919,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         width: '100%',
-        marginBottom: 12,
+    marginBottom: Platform.OS === 'web' ? 12 : 2,
     },
     // ...existing code...
         chartWrapper: {
@@ -911,7 +927,7 @@ const styles = StyleSheet.create({
             alignItems: 'center',
             transform: Platform.OS === 'web' ? [] : [{ scale: 0.58 }],
             transformOrigin: 'center',
-            marginBottom: 12,
+            marginBottom: Platform.OS === 'web' ? 10 : 2,
         },
     chartTitle: {
         fontWeight: '600',
@@ -1217,17 +1233,15 @@ const styles = StyleSheet.create({
         lineHeight: 16,
     },
     sectionHeaderContainer: {
-        backgroundColor: 'rgba(0, 122, 255, 0.1)',
-        borderLeftWidth: 4,
-        borderLeftColor: '#007AFF',
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-        marginVertical: 8,
+        backgroundColor: 'rgba(30, 144, 255, 0.08)',
+        paddingVertical: Platform.OS === 'web' ? 12 : 8,
+        paddingHorizontal: 12,
+        marginVertical: Platform.OS === 'web' ? 8 : 4,
         borderRadius: 8,
-        marginBottom: 16,
-        shadowColor: '#007AFF',
+        marginBottom: Platform.OS === 'web' ? 16 : 6,
+        shadowColor: '#1E90FF',
         shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
+        shadowOpacity: 0.08,
         shadowRadius: 2,
         elevation: 2,
     },
@@ -1235,8 +1249,32 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         width: '100%',
         fontSize: 22,
-        color: '#007AFF',
+        color: '#0A84FF',
         letterSpacing: 0.5,
+    },
+    sectionBox: {
+        borderWidth: 1,
+        borderColor: '#007AFF',
+        borderRadius: 8,
+        padding: 12,
+        marginVertical: 8,
+        // don't clip children (visualizations use transforms)
+        overflow: Platform.OS === 'web' ? 'visible' : 'visible',
+    },
+    sectionDivider: {
+        height: 1.5,
+        backgroundColor: '#0A84FF',
+        opacity: 0.22,
+        marginTop: 4,
+        marginBottom: 4,
+        marginHorizontal: 8,
+        alignSelf: 'stretch',
+    },
+    sectionDividerWrap: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: Platform.OS === 'web' ? 6 : 2,
+        width: '100%',
     },
     rainfallLegendContainer: {
         flexDirection: 'row',
@@ -1256,7 +1294,21 @@ const styles = StyleSheet.create({
         marginRight: 5,
     },
     legendText: {
-        color: '#007AFF',
+        color: '#0A84FF',
         fontSize: 14,
+    },
+    forecastHint: {
+        textAlign: 'center',
+        color: '#666',
+        fontSize: 12,
+        marginTop: 6,
+        marginBottom: 2,
+    },
+    streamNavHint: {
+        textAlign: 'center',
+        color: '#666',
+        fontSize: 12,
+        marginTop: 6,
+        marginBottom: 4,
     },
 });
