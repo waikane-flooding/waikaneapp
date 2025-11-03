@@ -790,7 +790,7 @@ const styles = StyleSheet.create({
         width: '100%',
         alignItems: 'center',
         justifyContent: 'center',
-    marginBottom: Platform.OS === 'web' ? 8 : 2,
+    marginBottom: Platform.OS === 'web' ? 6 : 0,
         transform: Platform.OS === 'web' ? [{ scale: 0.85 }] : [{ scale: 0.68 }],
     },
     horizontalScroll: {
@@ -849,7 +849,7 @@ const styles = StyleSheet.create({
         letterSpacing: 0.5,
     },
     section: {
-        marginVertical: Platform.OS === 'web' ? 12 : 2,
+        marginVertical: Platform.OS === 'web' ? 12 : 0,
         gap: 4,
     },
     thinText: {
@@ -911,7 +911,8 @@ const styles = StyleSheet.create({
         width: '100%',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingHorizontal: 16,
+        paddingHorizontal: 12,
+        paddingVertical: Platform.OS === 'web' ? 8 : 0,
         alignSelf: 'center',
     },
     streamNavigation: {
@@ -919,7 +920,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         width: '100%',
-    marginBottom: Platform.OS === 'web' ? 12 : 2,
+    marginBottom: Platform.OS === 'web' ? 10 : 2,
     },
     // ...existing code...
         chartWrapper: {
@@ -927,7 +928,8 @@ const styles = StyleSheet.create({
             alignItems: 'center',
             transform: Platform.OS === 'web' ? [] : [{ scale: 0.58 }],
             transformOrigin: 'center',
-            marginBottom: Platform.OS === 'web' ? 10 : 2,
+            marginBottom: Platform.OS === 'web' ? 10 : -6,
+            marginTop: Platform.OS === 'web' ? 6 : -12,
         },
     chartTitle: {
         fontWeight: '600',
@@ -1273,7 +1275,7 @@ const styles = StyleSheet.create({
     sectionDividerWrap: {
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: Platform.OS === 'web' ? 6 : 2,
+        paddingVertical: Platform.OS === 'web' ? 6 : 0,
         width: '100%',
     },
     rainfallLegendContainer: {
