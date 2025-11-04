@@ -1,0 +1,14 @@
+[
+    {
+        "name": "Punaluu Stream Gauge",
+        "path": [{"lat": 21.5906, "lon": -157.8789}]
+    },
+    {
+        "name": "Waiahole Stream Gauge",
+        "path": [{"lat": 21.4819722, "lon": -157.8458333}]
+    },
+    {
+        "name": "Waikane Stream Gauge",
+        "path": [{"lat": 21.4970833, "lon": -157.8629722}]
+    }
+]

@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, StyleSheet, Platform, Text } from 'react-native';
+import StreamGauges from './PlotlyData/StreamGauges.json';
+import Tides from './PlotlyData/Tides.json';
 
 // Conditionally import WebView only for mobile platforms
 let WebView;
@@ -13,7 +15,7 @@ if (Platform.OS !== 'web') {
 
 const Map = () => {
   const [htmlContent, setHtmlContent] = useState('');
-  const [coordinates, setCoordinates] = useState([]);
+  const [coordinates, setCoordinates] = useState({ rain: [], stream: [], tides: [] });
   const mapRef = useRef(null);
 
   useEffect(() => {
@@ -29,16 +31,25 @@ const Map = () => {
       }
     ];
 
-    // Extract coordinates
-    const coords = rainGaugeData.map(gauge => ({
+    // Extract coordinates for rain gauges
+    const rainCoords = rainGaugeData.map(gauge => ({
       lat: gauge.path[0].lat,
       lon: gauge.path[0].lon,
       name: gauge.name
     }));
-    
-    setCoordinates(coords);
 
-    // Create HTML content for the map
+    // Extract coordinates for stream gauges
+    const streamCoords = StreamGauges.map(gauge => ({
+      lat: gauge.path[0].lat,
+      lon: gauge.path[0].lon,
+      name: gauge.name
+    }));
+
+    // Store all coordinate data for later use
+    const coordsData = { rain: rainCoords, stream: streamCoords, tides: Tides };
+    setCoordinates(coordsData);
+
+    // Create HTML content for the map with the coordinate data
     const html = `
       <!DOCTYPE html>
       <html>
@@ -72,38 +83,98 @@ const Map = () => {
         <div id="map" style="display: none;"></div>
         <script>
           document.addEventListener('DOMContentLoaded', function() {
-            const data = [{
-              type: 'scattermapbox',
-              mode: 'markers',
-              lon: ${JSON.stringify(coords.map(x => x.lon))},
-              lat: ${JSON.stringify(coords.map(x => x.lat))},
-              marker: {
-                size: 14,
-                symbol: 'circle',
-                color: 'red',
-                opacity: 0.8
-              },
-              name: 'Rain Gauges',
-              text: ${JSON.stringify(coords.map(x => x.name))},
-              hovertemplate: '<b>%{text}</b><extra></extra>',
-              customdata: ${JSON.stringify(coords.map(x => x.name))}
-            }];
+            const coords = ${JSON.stringify(coordsData)};
+            console.log('Coordinates loaded:', coords);
+            
+            // Create data array with multiple traces
+            const data = [];
+            
+            // Rain Gauges trace
+            if (coords.rain && coords.rain.length > 0) {
+              console.log('Adding rain gauges:', coords.rain.length);
+              data.push({
+                type: 'scattermapbox',
+                mode: 'markers',
+                lon: coords.rain.map(x => x.lon),
+                lat: coords.rain.map(x => x.lat),
+                marker: {
+                  size: 14,
+                  symbol: 'circle',
+                  color: 'red',
+                  opacity: 0.8
+                },
+                name: 'Rain Gauges',
+                text: coords.rain.map(x => x.name),
+                hovertemplate: '<b>%{text}</b><extra></extra>',
+                customdata: coords.rain.map(x => x.name)
+              });
+            }
+
+            // Stream Gauges trace
+            if (coords.stream && coords.stream.length > 0) {
+              console.log('Adding stream gauges:', coords.stream.length);
+              console.log('Stream gauge coordinates:', coords.stream);
+              data.push({
+                type: 'scattermapbox',
+                mode: 'markers',
+                lon: coords.stream.map(x => x.lon),
+                lat: coords.stream.map(x => x.lat),
+                marker: {
+                  size: 14,
+                  symbol: 'circle',
+                  color: 'cyan',
+                  opacity: 1.0,
+                  line: {
+                    color: 'black',
+                    width: 3
+                  }
+                },
+                name: 'Stream Gauges',
+                text: coords.stream.map(x => x.name),
+                hovertemplate: '<b>%{text}</b><br>Stream Gauge<extra></extra>',
+                customdata: coords.stream.map(x => x.name)
+              });
+            }
+
+            // Tides lines traces
+            if (coords.tides && coords.tides.length > 0) {
+              console.log('Adding tide lines:', coords.tides.length);
+              coords.tides.forEach(tide => {
+                data.push({
+                  type: 'scattermapbox',
+                  mode: 'lines',
+                  lon: tide.path.map(point => point.lon),
+                  lat: tide.path.map(point => point.lat),
+                  line: {
+                    width: 3,
+                    color: 'green'
+                  },
+                  name: tide.name,
+                  hovertemplate: '<b>' + tide.name + '</b><extra></extra>',
+                  showlegend: true
+                });
+              });
+            }
+            
+            console.log('Total data traces:', data.length);
             
             const layout = {
-              title: {
-                text: 'Rain Gauge Locations',
-                font: { size: 18, family: "Arial", color: "black" }
-              },
               mapbox: {
                 style: "open-street-map",
                 center: { 
-                  lat: ${coords[0].lat}, 
-                  lon: ${coords[0].lon} 
+                  lat: coords.rain && coords.rain.length > 0 ? coords.rain[0].lat : 21.5, 
+                  lon: coords.rain && coords.rain.length > 0 ? coords.rain[0].lon : -157.8 
                 },
                 zoom: 10
               },
-              margin: { r: 10, t: 50, l: 10, b: 10 },
-              autosize: true
+              margin: { r: 10, t: 10, l: 10, b: 10 },
+              autosize: true,
+              showlegend: true,
+              legend: {
+                x: 0,
+                y: 1,
+                bgcolor: 'rgba(255, 255, 255, 0.8)'
+              }
             };
             
             const config = {
@@ -136,44 +207,97 @@ const Map = () => {
   if (Platform.OS === 'web') {
     // For web platform, create Plotly map directly
     useEffect(() => {
-      if (mapRef.current && coordinates.length > 0) {
+      if (mapRef.current && coordinates.rain && coordinates.rain.length > 0) {
         // Load Plotly dynamically
         const script = document.createElement('script');
         script.src = 'https://cdn.plot.ly/plotly-latest.min.js';
         script.onload = () => {
           if (window.Plotly && mapRef.current) {
-            const data = [{
-              type: 'scattermapbox',
-              mode: 'markers',
-              lon: coordinates.map(x => x.lon),
-              lat: coordinates.map(x => x.lat),
-              marker: {
-                size: 14,
-                symbol: 'circle',
-                color: 'red',
-                opacity: 0.8
-              },
-              name: 'Rain Gauges',
-              text: coordinates.map(x => x.name),
-              hovertemplate: '<b>%{text}</b><extra></extra>',
-              customdata: coordinates.map(x => x.name)
-            }];
+            // Create data array with multiple traces
+            const data = [];
+            
+            // Rain Gauges trace
+            if (coordinates.rain && coordinates.rain.length > 0) {
+              data.push({
+                type: 'scattermapbox',
+                mode: 'markers',
+                lon: coordinates.rain.map(x => x.lon),
+                lat: coordinates.rain.map(x => x.lat),
+                marker: {
+                  size: 14,
+                  symbol: 'circle',
+                  color: 'red',
+                  opacity: 0.8
+                },
+                name: 'Rain Gauges',
+                text: coordinates.rain.map(x => x.name),
+                hovertemplate: '<b>%{text}</b><extra></extra>',
+                customdata: coordinates.rain.map(x => x.name)
+              });
+            }
+
+            // Stream Gauges trace
+            if (coordinates.stream && coordinates.stream.length > 0) {
+              console.log('Web - Adding stream gauges:', coordinates.stream.length);
+              console.log('Web - Stream gauge coordinates:', coordinates.stream);
+              data.push({
+                type: 'scattermapbox',
+                mode: 'markers',
+                lon: coordinates.stream.map(x => x.lon),
+                lat: coordinates.stream.map(x => x.lat),
+                marker: {
+                  size: 14,
+                  symbol: 'circle',
+                  color: 'cyan',
+                  opacity: 1.0,
+                  line: {
+                    color: 'black',
+                    width: 3
+                  }
+                },
+                name: 'Stream Gauges',
+                text: coordinates.stream.map(x => x.name),
+                hovertemplate: '<b>%{text}</b><br>Stream Gauge<extra></extra>',
+                customdata: coordinates.stream.map(x => x.name)
+              });
+            }
+
+            // Tides lines traces
+            if (coordinates.tides && coordinates.tides.length > 0) {
+              coordinates.tides.forEach(tide => {
+                data.push({
+                  type: 'scattermapbox',
+                  mode: 'lines',
+                  lon: tide.path.map(point => point.lon),
+                  lat: tide.path.map(point => point.lat),
+                  line: {
+                    width: 3,
+                    color: 'green'
+                  },
+                  name: tide.name,
+                  hovertemplate: '<b>' + tide.name + '</b><extra></extra>',
+                  showlegend: true
+                });
+              });
+            }
             
             const layout = {
-              title: {
-                text: 'Rain Gauge Locations',
-                font: { size: 18, family: "Arial", color: "black" }
-              },
               mapbox: {
                 style: "open-street-map",
                 center: { 
-                  lat: coordinates[0].lat, 
-                  lon: coordinates[0].lon 
+                  lat: coordinates.rain[0].lat, 
+                  lon: coordinates.rain[0].lon 
                 },
                 zoom: 10
               },
-              margin: { r: 10, t: 50, l: 10, b: 10 },
-              autosize: true
+              margin: { r: 10, t: 10, l: 10, b: 10 },
+              autosize: true,
+              showlegend: true,
+              legend: {
+                x: 0,
+                y: 1,
+                bgcolor: 'rgba(255, 255, 255, 0.8)'
+              }
             };
             
             const config = {
