@@ -2,6 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, StyleSheet, Platform, Text } from 'react-native';
 import StreamGauges from './PlotlyData/StreamGauges.json';
 import Tides from './PlotlyData/Tides.json';
+import RainGauges from './PlotlyData/RainGauges.json';
+import WaikaneStream from './PlotlyData/WaikaneStream.json';
+import WaiaholeStream from './PlotlyData/WaiaholeStream.json';
 
 // Conditionally import WebView only for mobile platforms
 let WebView;
@@ -15,38 +18,32 @@ if (Platform.OS !== 'web') {
 
 const Map = () => {
   const [htmlContent, setHtmlContent] = useState('');
-  const [coordinates, setCoordinates] = useState({ rain: [], stream: [], tides: [] });
+  const [coordinates, setCoordinates] = useState({ rain: [], stream: [], tides: [], waikaneStreams: [], waiaholeStreams: [] });
   const mapRef = useRef(null);
 
   useEffect(() => {
-    // Define rain gauge data directly to avoid import issues
-    const rainGaugeData = [
-      {
-        "name": "Poamoho Rain Gauge",
-        "path": [{"lat": 21.533861100000024, "lon": -157.92138889999998}]
-      },
-      {
-        "name": "Waiahole Rain Gauge", 
-        "path": [{"lat": 21.48197220000003, "lon": -157.84583329999998}]
-      }
-    ];
-
     // Extract coordinates for rain gauges
-    const rainCoords = rainGaugeData.map(gauge => ({
-      lat: gauge.path[0].lat,
-      lon: gauge.path[0].lon,
+    const rainCoords = RainGauges.map(gauge => ({
+      lat: gauge.path[0][1],
+      lon: gauge.path[0][0],
       name: gauge.name
     }));
 
     // Extract coordinates for stream gauges
     const streamCoords = StreamGauges.map(gauge => ({
-      lat: gauge.path[0].lat,
-      lon: gauge.path[0].lon,
+      lat: gauge.path[0][1],
+      lon: gauge.path[0][0],
       name: gauge.name
     }));
 
     // Store all coordinate data for later use
-    const coordsData = { rain: rainCoords, stream: streamCoords, tides: Tides };
+    const coordsData = { 
+      rain: rainCoords, 
+      stream: streamCoords, 
+      tides: Tides,
+      waikaneStreams: WaikaneStream,
+      waiaholeStreams: WaiaholeStream
+    };
     setCoordinates(coordsData);
 
     // Create HTML content for the map with the coordinate data
@@ -139,19 +136,66 @@ const Map = () => {
             // Tides lines traces
             if (coords.tides && coords.tides.length > 0) {
               console.log('Adding tide lines:', coords.tides.length);
-              coords.tides.forEach(tide => {
+              coords.tides.forEach((tide, index) => {
                 data.push({
                   type: 'scattermapbox',
                   mode: 'lines',
-                  lon: tide.path.map(point => point.lon),
-                  lat: tide.path.map(point => point.lat),
+                  lon: tide.path.map(point => point[0]),
+                  lat: tide.path.map(point => point[1]),
                   line: {
                     width: 3,
                     color: 'green'
                   },
-                  name: tide.name,
-                  hovertemplate: '<b>' + tide.name + '</b><extra></extra>',
-                  showlegend: true
+                  name: 'Tides',
+                  hovertemplate: '<b>Tides</b><extra></extra>',
+                  showlegend: index === 0, // Only show in legend for the first tide
+                  legendgroup: 'tides'
+                });
+              });
+            }
+
+            // Waikane Stream lines traces
+            if (coords.waikaneStreams && coords.waikaneStreams.length > 0) {
+              console.log('Adding Waikane streams:', coords.waikaneStreams.length);
+              // Combine all Waikane stream segments into one trace
+              const allWaikaneCoords = coords.waikaneStreams.map(stream => stream.path);
+              allWaikaneCoords.forEach((streamPath, index) => {
+                data.push({
+                  type: 'scattermapbox',
+                  mode: 'lines',
+                  lon: streamPath.map(point => point[0]),
+                  lat: streamPath.map(point => point[1]),
+                  line: {
+                    width: 2,
+                    color: 'purple'
+                  },
+                  name: 'Waikane Stream',
+                  hovertemplate: '<b>Waikane Stream</b><extra></extra>',
+                  showlegend: index === 0, // Only show in legend for the first segment
+                  legendgroup: 'waikane'
+                });
+              });
+            }
+
+            // Waiahole Stream lines traces
+            if (coords.waiaholeStreams && coords.waiaholeStreams.length > 0) {
+              console.log('Adding Waiahole streams:', coords.waiaholeStreams.length);
+              // Combine all Waiahole stream segments into one trace
+              const allWaiaholeCoords = coords.waiaholeStreams.map(stream => stream.path);
+              allWaiaholeCoords.forEach((streamPath, index) => {
+                data.push({
+                  type: 'scattermapbox',
+                  mode: 'lines',
+                  lon: streamPath.map(point => point[0]),
+                  lat: streamPath.map(point => point[1]),
+                  line: {
+                    width: 2,
+                    color: 'orange'
+                  },
+                  name: 'Waiahole Stream',
+                  hovertemplate: '<b>Waiahole Stream</b><extra></extra>',
+                  showlegend: index === 0, // Only show in legend for the first segment
+                  legendgroup: 'waiahole'
                 });
               });
             }
@@ -264,19 +308,64 @@ const Map = () => {
 
             // Tides lines traces
             if (coordinates.tides && coordinates.tides.length > 0) {
-              coordinates.tides.forEach(tide => {
+              coordinates.tides.forEach((tide, index) => {
                 data.push({
                   type: 'scattermapbox',
                   mode: 'lines',
-                  lon: tide.path.map(point => point.lon),
-                  lat: tide.path.map(point => point.lat),
+                  lon: tide.path.map(point => point[0]),
+                  lat: tide.path.map(point => point[1]),
                   line: {
                     width: 3,
                     color: 'green'
                   },
-                  name: tide.name,
-                  hovertemplate: '<b>' + tide.name + '</b><extra></extra>',
-                  showlegend: true
+                  name: 'Tides',
+                  hovertemplate: '<b>Tides</b><extra></extra>',
+                  showlegend: index === 0, // Only show in legend for the first tide
+                  legendgroup: 'tides'
+                });
+              });
+            }
+
+            // Waikane Stream lines traces
+            if (coordinates.waikaneStreams && coordinates.waikaneStreams.length > 0) {
+              // Combine all Waikane stream segments into one trace
+              const allWaikaneCoords = coordinates.waikaneStreams.map(stream => stream.path);
+              allWaikaneCoords.forEach((streamPath, index) => {
+                data.push({
+                  type: 'scattermapbox',
+                  mode: 'lines',
+                  lon: streamPath.map(point => point[0]),
+                  lat: streamPath.map(point => point[1]),
+                  line: {
+                    width: 2,
+                    color: 'purple'
+                  },
+                  name: 'Waikane Stream',
+                  hovertemplate: '<b>Waikane Stream</b><extra></extra>',
+                  showlegend: index === 0, // Only show in legend for the first segment
+                  legendgroup: 'waikane'
+                });
+              });
+            }
+
+            // Waiahole Stream lines traces
+            if (coordinates.waiaholeStreams && coordinates.waiaholeStreams.length > 0) {
+              // Combine all Waiahole stream segments into one trace
+              const allWaiaholeCoords = coordinates.waiaholeStreams.map(stream => stream.path);
+              allWaiaholeCoords.forEach((streamPath, index) => {
+                data.push({
+                  type: 'scattermapbox',
+                  mode: 'lines',
+                  lon: streamPath.map(point => point[0]),
+                  lat: streamPath.map(point => point[1]),
+                  line: {
+                    width: 2,
+                    color: 'orange'
+                  },
+                  name: 'Waiahole Stream',
+                  hovertemplate: '<b>Waiahole Stream</b><extra></extra>',
+                  showlegend: index === 0, // Only show in legend for the first segment
+                  legendgroup: 'waiahole'
                 });
               });
             }
