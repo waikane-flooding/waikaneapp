@@ -6,7 +6,6 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { ExternalLink } from '@/components/ExternalLink';
-import Map from '@/components/visualizations/Map';
 
 const emergencyContacts = [
   {
@@ -73,19 +72,6 @@ export default function AboutScreen() {
         <ThemedText style={styles.disclaimerText}>
           For informational and educational use only. Combines flooding data to raise awareness in Waikāne and Waiāhole, but not intended for emergency response, evacuation planning, or real-time decision-making. Information is experimental and may not reflect current conditions. Does not send push notifications, alerts, or automated warnings. Do not rely on this app for safety decisions. For official guidance, consult Hawai&apos;i Emergency Management Agency and National Weather Service.
         </ThemedText>
-      </ThemedView>
-
-      {/* Map Test Section */}
-      <ThemedView style={styles.section}>
-        <ThemedText type="subtitle" style={styles.sectionTitle}>
-          <Ionicons name="map" size={18} color="#007AFF" /> Map Test - Rain Gauge Locations
-        </ThemedText>
-        <ThemedText style={[styles.thinText, { marginBottom: 12 }]}>
-          Testing the interactive map showing rain gauge locations in the area.
-        </ThemedText>
-        <ThemedView style={styles.mapContainer}>
-          <Map />
-        </ThemedView>
       </ThemedView>
 
       <ThemedView style={styles.section}>
@@ -300,12 +286,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-  },
-  mapContainer: {
-    height: 300,
-    borderRadius: 12,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(0, 122, 255, 0.2)',
   },
 });

@@ -107,7 +107,7 @@ const Map = () => {
                   lon: watershed.path.map(point => point[0]),
                   lat: watershed.path.map(point => point[1]),
                   line: {
-                    width: 2,
+                    width: 0.5,
                     color: colorSet.line
                   },
                   fill: 'toself',
@@ -131,7 +131,7 @@ const Map = () => {
                   lat: tide.path.map(point => point[1]),
                   line: {
                     width: 3,
-                    color: 'purple'
+                    color: '#00008B'
                   },
                   name: 'Tides',
                   hovertemplate: '<b>Tides</b><extra></extra>',
@@ -154,7 +154,7 @@ const Map = () => {
                   lat: streamPath.map(point => point[1]),
                   line: {
                     width: 2,
-                    color: 'blue'
+                    color: '#0096FF'
                   },
                   name: 'Streams',
                   hovertemplate: '<b>Waikane Stream</b><extra></extra>',
@@ -177,7 +177,7 @@ const Map = () => {
                   lat: streamPath.map(point => point[1]),
                   line: {
                     width: 2,
-                    color: 'blue'
+                    color: '#0096FF'
                   },
                   name: 'Streams',
                   hovertemplate: '<b>Waiahole Stream</b><extra></extra>',
@@ -200,7 +200,7 @@ const Map = () => {
                   lat: streamPath.map(point => point[1]),
                   line: {
                     width: 2,
-                    color: 'blue'
+                    color: '#0096FF'
                   },
                   name: 'Streams',
                   hovertemplate: '<b>Punaluu Stream</b><extra></extra>',
@@ -220,9 +220,8 @@ const Map = () => {
                 lon: coords.stream.map(x => x.lon),
                 lat: coords.stream.map(x => x.lat),
                 marker: {
-                  size: 16,
+                  size: 15,
                   color: 'green',
-                  opacity: 0.8,
                   line: {
                     color: 'black',
                     width: 3
@@ -244,9 +243,8 @@ const Map = () => {
                 lon: coords.rain.map(x => x.lon),
                 lat: coords.rain.map(x => x.lat),
                 marker: {
-                  size: 12,
+                  size: 10,
                   color: 'red',
-                  opacity: 0.8
                 },
                 name: 'Rain Gauges',
                 text: coords.rain.map(x => x.name),
@@ -261,10 +259,10 @@ const Map = () => {
               mapbox: {
                 style: "open-street-map",
                 center: { 
-                  lat: coords.rain && coords.rain.length > 0 ? coords.rain[0].lat : 21.5, 
-                  lon: coords.rain && coords.rain.length > 0 ? coords.rain[0].lon : -157.8 
+                  lat: 21.514,
+                  lon: -157.887  
                 },
-                zoom: 10
+                zoom: 11
               },
               margin: { r: 10, t: 10, l: 10, b: 10 },
               autosize: true,
@@ -331,7 +329,7 @@ const Map = () => {
                   lon: watershed.path.map(point => point[0]),
                   lat: watershed.path.map(point => point[1]),
                   line: {
-                    width: 2,
+                    width: 0.5,
                     color: colorSet.line
                   },
                   fill: 'toself',
@@ -354,7 +352,7 @@ const Map = () => {
                   lat: tide.path.map(point => point[1]),
                   line: {
                     width: 3,
-                    color: 'purple'
+                    color: '#00008B'
                   },
                   name: 'Tides',
                   hovertemplate: '<b>Tides</b><extra></extra>',
@@ -376,7 +374,7 @@ const Map = () => {
                   lat: streamPath.map(point => point[1]),
                   line: {
                     width: 2,
-                    color: 'blue'
+                    color: '#0096FF'
                   },
                   name: 'Streams',
                   hovertemplate: '<b>Waikane Stream</b><extra></extra>',
@@ -398,7 +396,7 @@ const Map = () => {
                   lat: streamPath.map(point => point[1]),
                   line: {
                     width: 2,
-                    color: 'blue'
+                    color: '#0096FF'
                   },
                   name: 'Streams',
                   hovertemplate: '<b>Waiahole Stream</b><extra></extra>',
@@ -420,7 +418,7 @@ const Map = () => {
                   lat: streamPath.map(point => point[1]),
                   line: {
                     width: 2,
-                    color: 'blue'
+                    color: '#0096FF'
                   },
                   name: 'Streams',
                   hovertemplate: '<b>Punaluu Stream</b><extra></extra>',
@@ -440,9 +438,8 @@ const Map = () => {
                 lon: coordinates.stream.map(x => x.lon),
                 lat: coordinates.stream.map(x => x.lat),
                 marker: {
-                  size: 16,
+                  size: 15,
                   color: 'green',
-                  opacity: 0.8,
                   line: {
                     color: 'black',
                     width: 3
@@ -463,9 +460,8 @@ const Map = () => {
                 lon: coordinates.rain.map(x => x.lon),
                 lat: coordinates.rain.map(x => x.lat),
                 marker: {
-                  size: 12,
+                  size: 10,
                   color: 'red',
-                  opacity: 0.8
                 },
                 name: 'Rain Gauges',
                 text: coordinates.rain.map(x => x.name),
@@ -478,10 +474,10 @@ const Map = () => {
               mapbox: {
                 style: "open-street-map",
                 center: { 
-                  lat: coordinates.rain[0].lat, 
-                  lon: coordinates.rain[0].lon 
+                  lat: 21.514,
+                  lon: -157.887 
                 },
-                zoom: 10
+                zoom: 11
               },
               margin: { r: 10, t: 10, l: 10, b: 10 },
               autosize: true,

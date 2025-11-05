@@ -10,6 +10,7 @@ import 'react-native-reanimated';
 
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import Map from '@/components/visualizations/Map';
 
 
 // Risk assessment functions for each data source
@@ -165,72 +166,26 @@ function FloodRiskIndicator() {
   const mapLoadingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const MIN_LOADING_MS = 1000; // ensure loading overlay shows at least 1s
 
-  // Prefer this ArcGIS map viewer URL (works in iframe/new tab).
-  const MAP_URL = 'https://uhm.maps.arcgis.com/apps/mapviewer/index.html?configurableview=true&webmap=539a5fb15d654836be1a872335e84f82&theme=dark&legend=true&share=true&scroll=false&center=-157.86704430255412,21.5375859408125&scale=144447.638572';
-
-  // Open the map: on web open a new tab (react-native-webview not supported on web). On native (Expo Go) show the modal WebView.
+  // Open the map: show the Map.js component in a modal
   const openMap = () => {
-    if (Platform.OS === 'web' && typeof window !== 'undefined') {
-      try {
-        window.open(MAP_URL, '_blank', 'noopener,noreferrer');
-        return;
-      } catch (e) {
-        // fallback to setting modal if window.open is blocked
-      }
-    }
     // show loader and note start time
     setMapLoading(true);
     mapLoadStart.current = Date.now();
     setMapModalVisible(true);
+    
+    // Simulate loading time for Map.js component
+    const elapsed = Date.now() - (mapLoadStart.current || Date.now());
+    const remaining = Math.max(0, MIN_LOADING_MS - elapsed);
+    if (remaining > 0) {
+      mapLoadingTimer.current = setTimeout(() => {
+        setMapLoading(false);
+        mapLoadingTimer.current = null;
+      }, remaining);
+    } else {
+      setMapLoading(false);
+    }
   };
 
-  // HTML wrapper that embeds the ArcGIS map via an iframe. Using an iframe inside WebView
-  // is more compatible across mobile WebViews and Expo Go than loading ArcGIS module scripts.
-  // Fallback HTML (iframe) - used only on web fallback if needed
-  const mapHtml = `<!doctype html>
-  <html>
-    <head>
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <style>html,body,#map{height:100%;margin:0;padding:0;background:#000}</style>
-    </head>
-    <body>
-      <iframe id="map" src="${MAP_URL}" width="100%" height="100%" frameborder="0" allow="geolocation; local-network-access"></iframe>
-    </body>
-  </html>`;
-
-  // Native HTML that uses the ArcGIS embeddable component so we can detect when the map finishes initializing
-  const mapHtmlEmbedded = `<!doctype html>
-  <html>
-    <head>
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <script type="module" src="https://js.arcgis.com/4.34/embeddable-components/"></script>
-      <style>
-        html,body,#root{height:100%;margin:0;padding:0;background:#000}
-        arcgis-embedded-map{height:100%;width:100%;display:block}
-      </style>
-    </head>
-    <body>
-      <arcgis-embedded-map id="embeddedMap" item-id="539a5fb15d654836be1a872335e84f82" theme="dark" legend-enabled share-enabled center="-157.86704430255412,21.5375859408125" scale="144447.638572" portal-url="https://uhm.maps.arcgis.com"></arcgis-embedded-map>
-      <script>
-        (function(){
-          const el = document.getElementById('embeddedMap');
-          // Poll until the component appears to have rendered children
-          const checkReady = () => {
-            try {
-              // If shadowRoot exists and has children, consider ready
-              const shadow = el && el.shadowRoot;
-              if (shadow && shadow.children && shadow.children.length > 0) {
-                window.ReactNativeWebView && window.ReactNativeWebView.postMessage('map-ready');
-                return;
-              }
-            } catch(e){}
-            setTimeout(checkReady, 250);
-          };
-          setTimeout(checkReady, 250);
-        })();
-      </script>
-    </body>
-  </html>`;
   const [riskData, setRiskData] = useState<{
     waikaneStream: number | null;
     waiaholeStream: number | null;
@@ -514,7 +469,7 @@ function FloodRiskIndicator() {
         </TouchableOpacity>
       </Modal>
 
-      {/* Map Modal (WebView) */}
+      {/* Map Modal (Map.js Component) */}
       <Modal
         animationType="fade"
         transparent={true}
@@ -529,49 +484,7 @@ function FloodRiskIndicator() {
             >
               <Ionicons name="close" size={20} color="#222" />
             </TouchableOpacity>
-            <WebView
-              originWhitelist={["*"]}
-              source={Platform.OS === 'web' ? { html: mapHtml } : { html: mapHtmlEmbedded }}
-              style={styles.mapWebView}
-              allowsInlineMediaPlayback={true}
-              onLoadStart={() => {
-                setMapLoading(true);
-                mapLoadStart.current = Date.now();
-                if (mapLoadingTimer.current) {
-                  clearTimeout(mapLoadingTimer.current as any);
-                  mapLoadingTimer.current = null;
-                }
-              }}
-              onMessage={(event) => {
-                const msg = event.nativeEvent?.data;
-                if (msg === 'map-ready') {
-                  const started = mapLoadStart.current || Date.now();
-                  const elapsed = Date.now() - started;
-                  const remaining = Math.max(0, MIN_LOADING_MS - elapsed);
-                  if (remaining > 0) {
-                    mapLoadingTimer.current = setTimeout(() => {
-                      setMapLoading(false);
-                      mapLoadingTimer.current = null;
-                    }, remaining);
-                  } else {
-                    setMapLoading(false);
-                  }
-                }
-              }}
-              onError={() => {
-                const started = mapLoadStart.current || Date.now();
-                const elapsed = Date.now() - started;
-                const remaining = Math.max(0, MIN_LOADING_MS - elapsed);
-                if (remaining > 0) {
-                  mapLoadingTimer.current = setTimeout(() => {
-                    setMapLoading(false);
-                    mapLoadingTimer.current = null;
-                  }, remaining);
-                } else {
-                  setMapLoading(false);
-                }
-              }}
-            />
+            <Map />
             {mapLoading && (
               <View style={styles.mapLoadingOverlay} pointerEvents="none">
                 <RNActivityIndicator size="large" color="#007AFF" />
