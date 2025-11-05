@@ -5,6 +5,8 @@ import Tides from './PlotlyData/Tides.json';
 import RainGauges from './PlotlyData/RainGauges.json';
 import WaikaneStream from './PlotlyData/WaikaneStream.json';
 import WaiaholeStream from './PlotlyData/WaiaholeStream.json';
+import PunaluuStream from './PlotlyData/PunaluuStream.json';
+import Watersheds from './PlotlyData/Watersheds.json';
 
 // Conditionally import WebView only for mobile platforms
 let WebView;
@@ -18,7 +20,7 @@ if (Platform.OS !== 'web') {
 
 const Map = () => {
   const [htmlContent, setHtmlContent] = useState('');
-  const [coordinates, setCoordinates] = useState({ rain: [], stream: [], tides: [], waikaneStreams: [], waiaholeStreams: [] });
+  const [coordinates, setCoordinates] = useState({ rain: [], stream: [], tides: [], waikaneStreams: [], waiaholeStreams: [], punaluuStreams: [], watersheds: [] });
   const mapRef = useRef(null);
 
   useEffect(() => {
@@ -42,7 +44,9 @@ const Map = () => {
       stream: streamCoords, 
       tides: Tides,
       waikaneStreams: WaikaneStream,
-      waiaholeStreams: WaiaholeStream
+      waiaholeStreams: WaiaholeStream,
+      punaluuStreams: PunaluuStream,
+      watersheds: Watersheds
     };
     setCoordinates(coordsData);
 
@@ -86,54 +90,37 @@ const Map = () => {
             // Create data array with multiple traces
             const data = [];
             
-            // Rain Gauges trace
-            if (coords.rain && coords.rain.length > 0) {
-              console.log('Adding rain gauges:', coords.rain.length);
-              data.push({
-                type: 'scattermapbox',
-                mode: 'markers',
-                lon: coords.rain.map(x => x.lon),
-                lat: coords.rain.map(x => x.lat),
-                marker: {
-                  size: 14,
-                  symbol: 'circle',
-                  color: 'red',
-                  opacity: 0.8
-                },
-                name: 'Rain Gauges',
-                text: coords.rain.map(x => x.name),
-                hovertemplate: '<b>%{text}</b><extra></extra>',
-                customdata: coords.rain.map(x => x.name)
-              });
-            }
-
-            // Stream Gauges trace
-            if (coords.stream && coords.stream.length > 0) {
-              console.log('Adding stream gauges:', coords.stream.length);
-              console.log('Stream gauge coordinates:', coords.stream);
-              data.push({
-                type: 'scattermapbox',
-                mode: 'markers',
-                lon: coords.stream.map(x => x.lon),
-                lat: coords.stream.map(x => x.lat),
-                marker: {
-                  size: 14,
-                  symbol: 'circle',
-                  color: 'cyan',
-                  opacity: 1.0,
+            // Watersheds (rendered first - bottom layer)
+            if (coords.watersheds && coords.watersheds.length > 0) {
+              console.log('Adding watersheds:', coords.watersheds.length);
+              const watershedColors = [
+                { line: 'rgba(0, 0, 0, 0.8)', fill: 'rgba(0, 0, 0, 0.2)' },
+                { line: 'rgba(0, 0, 0, 0.8)', fill: 'rgba(0, 0, 0, 0.2)' },  
+                { line: 'rgba(0, 0, 0, 0.8)', fill: 'rgba(0, 0, 0, 0.2)' }
+              ];
+              
+              coords.watersheds.forEach((watershed, index) => {
+                const colorSet = watershedColors[index % watershedColors.length];
+                data.push({
+                  type: 'scattermapbox',
+                  mode: 'lines',
+                  lon: watershed.path.map(point => point[0]),
+                  lat: watershed.path.map(point => point[1]),
                   line: {
-                    color: 'black',
-                    width: 3
-                  }
-                },
-                name: 'Stream Gauges',
-                text: coords.stream.map(x => x.name),
-                hovertemplate: '<b>%{text}</b><br>Stream Gauge<extra></extra>',
-                customdata: coords.stream.map(x => x.name)
+                    width: 2,
+                    color: colorSet.line
+                  },
+                  fill: 'toself',
+                  fillcolor: colorSet.fill,
+                  name: 'Watersheds',
+                  hovertemplate: '<b>' + watershed.name + '</b><extra></extra>',
+                  showlegend: index === 0, // Only show in legend for the first watershed
+                  legendgroup: 'watersheds'
+                });
               });
             }
-
-            // Tides lines traces
+            
+            // Tides lines traces (rendered second layer)
             if (coords.tides && coords.tides.length > 0) {
               console.log('Adding tide lines:', coords.tides.length);
               coords.tides.forEach((tide, index) => {
@@ -144,7 +131,7 @@ const Map = () => {
                   lat: tide.path.map(point => point[1]),
                   line: {
                     width: 3,
-                    color: 'green'
+                    color: 'purple'
                   },
                   name: 'Tides',
                   hovertemplate: '<b>Tides</b><extra></extra>',
@@ -167,12 +154,12 @@ const Map = () => {
                   lat: streamPath.map(point => point[1]),
                   line: {
                     width: 2,
-                    color: 'purple'
+                    color: 'blue'
                   },
-                  name: 'Waikane Stream',
+                  name: 'Streams',
                   hovertemplate: '<b>Waikane Stream</b><extra></extra>',
                   showlegend: index === 0, // Only show in legend for the first segment
-                  legendgroup: 'waikane'
+                  legendgroup: 'streams'
                 });
               });
             }
@@ -190,13 +177,81 @@ const Map = () => {
                   lat: streamPath.map(point => point[1]),
                   line: {
                     width: 2,
-                    color: 'orange'
+                    color: 'blue'
                   },
-                  name: 'Waiahole Stream',
+                  name: 'Streams',
                   hovertemplate: '<b>Waiahole Stream</b><extra></extra>',
-                  showlegend: index === 0, // Only show in legend for the first segment
-                  legendgroup: 'waiahole'
+                  showlegend: false, // Don't show in legend since Waikane already shows it
+                  legendgroup: 'streams'
                 });
+              });
+            }
+
+            // Punaluu Stream lines traces
+            if (coords.punaluuStreams && coords.punaluuStreams.length > 0) {
+              console.log('Adding Punaluu streams:', coords.punaluuStreams.length);
+              // Combine all Punaluu stream segments into one trace
+              const allPunaluuCoords = coords.punaluuStreams.map(stream => stream.path);
+              allPunaluuCoords.forEach((streamPath, index) => {
+                data.push({
+                  type: 'scattermapbox',
+                  mode: 'lines',
+                  lon: streamPath.map(point => point[0]),
+                  lat: streamPath.map(point => point[1]),
+                  line: {
+                    width: 2,
+                    color: 'blue'
+                  },
+                  name: 'Streams',
+                  hovertemplate: '<b>Punaluu Stream</b><extra></extra>',
+                  showlegend: false, // Don't show in legend since Waikane already shows it
+                  legendgroup: 'streams'
+                });
+              });
+            }
+            
+            // Stream Gauges trace (rendered first - bottom layer)
+            if (coords.stream && coords.stream.length > 0) {
+              console.log('Adding stream gauges:', coords.stream.length);
+              console.log('Stream gauge coordinates:', coords.stream);
+              data.push({
+                type: 'scattermapbox',
+                mode: 'markers',
+                lon: coords.stream.map(x => x.lon),
+                lat: coords.stream.map(x => x.lat),
+                marker: {
+                  size: 16,
+                  color: 'green',
+                  opacity: 0.8,
+                  line: {
+                    color: 'black',
+                    width: 3
+                  }
+                },
+                name: 'Stream Gauges',
+                text: coords.stream.map(x => x.name),
+                hovertemplate: '<b>%{text}</b><br><extra></extra>',
+                customdata: coords.stream.map(x => x.name)
+              });
+            }
+
+            // Rain Gauges trace (rendered on top)
+            if (coords.rain && coords.rain.length > 0) {
+              console.log('Adding rain gauges:', coords.rain.length);
+              data.push({
+                type: 'scattermapbox',
+                mode: 'markers',
+                lon: coords.rain.map(x => x.lon),
+                lat: coords.rain.map(x => x.lat),
+                marker: {
+                  size: 12,
+                  color: 'red',
+                  opacity: 0.8
+                },
+                name: 'Rain Gauges',
+                text: coords.rain.map(x => x.name),
+                hovertemplate: '<b>%{text}</b><extra></extra>',
+                customdata: coords.rain.map(x => x.name)
               });
             }
             
@@ -260,53 +315,36 @@ const Map = () => {
             // Create data array with multiple traces
             const data = [];
             
-            // Rain Gauges trace
-            if (coordinates.rain && coordinates.rain.length > 0) {
-              data.push({
-                type: 'scattermapbox',
-                mode: 'markers',
-                lon: coordinates.rain.map(x => x.lon),
-                lat: coordinates.rain.map(x => x.lat),
-                marker: {
-                  size: 14,
-                  symbol: 'circle',
-                  color: 'red',
-                  opacity: 0.8
-                },
-                name: 'Rain Gauges',
-                text: coordinates.rain.map(x => x.name),
-                hovertemplate: '<b>%{text}</b><extra></extra>',
-                customdata: coordinates.rain.map(x => x.name)
-              });
-            }
-
-            // Stream Gauges trace
-            if (coordinates.stream && coordinates.stream.length > 0) {
-              console.log('Web - Adding stream gauges:', coordinates.stream.length);
-              console.log('Web - Stream gauge coordinates:', coordinates.stream);
-              data.push({
-                type: 'scattermapbox',
-                mode: 'markers',
-                lon: coordinates.stream.map(x => x.lon),
-                lat: coordinates.stream.map(x => x.lat),
-                marker: {
-                  size: 14,
-                  symbol: 'circle',
-                  color: 'cyan',
-                  opacity: 1.0,
+            // Watersheds (rendered first - bottom layer)
+            if (coordinates.watersheds && coordinates.watersheds.length > 0) {
+              const watershedColors = [
+                { line: 'rgba(0, 0, 0, 0.8)', fill: 'rgba(0, 0, 0, 0.2)' },
+                { line: 'rgba(0, 0, 0, 0.8)', fill: 'rgba(0, 0, 0, 0.2)' },  
+                { line: 'rgba(0, 0, 0, 0.8)', fill: 'rgba(0, 0, 0, 0.2)' }
+              ];
+              
+              coordinates.watersheds.forEach((watershed, index) => {
+                const colorSet = watershedColors[index % watershedColors.length];
+                data.push({
+                  type: 'scattermapbox',
+                  mode: 'lines',
+                  lon: watershed.path.map(point => point[0]),
+                  lat: watershed.path.map(point => point[1]),
                   line: {
-                    color: 'black',
-                    width: 3
-                  }
-                },
-                name: 'Stream Gauges',
-                text: coordinates.stream.map(x => x.name),
-                hovertemplate: '<b>%{text}</b><br>Stream Gauge<extra></extra>',
-                customdata: coordinates.stream.map(x => x.name)
+                    width: 2,
+                    color: colorSet.line
+                  },
+                  fill: 'toself',
+                  fillcolor: colorSet.fill,
+                  name: 'Watersheds',
+                  hovertemplate: '<b>' + watershed.name + '</b><extra></extra>',
+                  showlegend: index === 0, // Only show in legend for the first watershed
+                  legendgroup: 'watersheds'
+                });
               });
             }
-
-            // Tides lines traces
+            
+            // Tides lines traces (rendered second layer)
             if (coordinates.tides && coordinates.tides.length > 0) {
               coordinates.tides.forEach((tide, index) => {
                 data.push({
@@ -316,7 +354,7 @@ const Map = () => {
                   lat: tide.path.map(point => point[1]),
                   line: {
                     width: 3,
-                    color: 'green'
+                    color: 'purple'
                   },
                   name: 'Tides',
                   hovertemplate: '<b>Tides</b><extra></extra>',
@@ -338,12 +376,12 @@ const Map = () => {
                   lat: streamPath.map(point => point[1]),
                   line: {
                     width: 2,
-                    color: 'purple'
+                    color: 'blue'
                   },
-                  name: 'Waikane Stream',
+                  name: 'Streams',
                   hovertemplate: '<b>Waikane Stream</b><extra></extra>',
                   showlegend: index === 0, // Only show in legend for the first segment
-                  legendgroup: 'waikane'
+                  legendgroup: 'streams'
                 });
               });
             }
@@ -360,13 +398,79 @@ const Map = () => {
                   lat: streamPath.map(point => point[1]),
                   line: {
                     width: 2,
-                    color: 'orange'
+                    color: 'blue'
                   },
-                  name: 'Waiahole Stream',
+                  name: 'Streams',
                   hovertemplate: '<b>Waiahole Stream</b><extra></extra>',
-                  showlegend: index === 0, // Only show in legend for the first segment
-                  legendgroup: 'waiahole'
+                  showlegend: false, // Don't show in legend since Waikane already shows it
+                  legendgroup: 'streams'
                 });
+              });
+            }
+
+            // Punaluu Stream lines traces
+            if (coordinates.punaluuStreams && coordinates.punaluuStreams.length > 0) {
+              // Combine all Punaluu stream segments into one trace
+              const allPunaluuCoords = coordinates.punaluuStreams.map(stream => stream.path);
+              allPunaluuCoords.forEach((streamPath, index) => {
+                data.push({
+                  type: 'scattermapbox',
+                  mode: 'lines',
+                  lon: streamPath.map(point => point[0]),
+                  lat: streamPath.map(point => point[1]),
+                  line: {
+                    width: 2,
+                    color: 'blue'
+                  },
+                  name: 'Streams',
+                  hovertemplate: '<b>Punaluu Stream</b><extra></extra>',
+                  showlegend: false, // Don't show in legend since Waikane already shows it
+                  legendgroup: 'streams'
+                });
+              });
+            }
+            
+            // Stream Gauges trace (rendered first - bottom layer)
+            if (coordinates.stream && coordinates.stream.length > 0) {
+              console.log('Web - Adding stream gauges:', coordinates.stream.length);
+              console.log('Web - Stream gauge coordinates:', coordinates.stream);
+              data.push({
+                type: 'scattermapbox',
+                mode: 'markers',
+                lon: coordinates.stream.map(x => x.lon),
+                lat: coordinates.stream.map(x => x.lat),
+                marker: {
+                  size: 16,
+                  color: 'green',
+                  opacity: 0.8,
+                  line: {
+                    color: 'black',
+                    width: 3
+                  }
+                },
+                name: 'Stream Gauges',
+                text: coordinates.stream.map(x => x.name),
+                hovertemplate: '<b>%{text}</b><br><extra></extra>',
+                customdata: coordinates.stream.map(x => x.name)
+              });
+            }
+
+            // Rain Gauges trace (rendered on top)
+            if (coordinates.rain && coordinates.rain.length > 0) {
+              data.push({
+                type: 'scattermapbox',
+                mode: 'markers',
+                lon: coordinates.rain.map(x => x.lon),
+                lat: coordinates.rain.map(x => x.lat),
+                marker: {
+                  size: 12,
+                  color: 'red',
+                  opacity: 0.8
+                },
+                name: 'Rain Gauges',
+                text: coordinates.rain.map(x => x.name),
+                hovertemplate: '<b>%{text}</b><extra></extra>',
+                customdata: coordinates.rain.map(x => x.name)
               });
             }
             
