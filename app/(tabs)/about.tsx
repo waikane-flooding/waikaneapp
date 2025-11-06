@@ -110,9 +110,9 @@ export default function AboutScreen() {
           </ThemedText>
           <ThemedView style={styles.contactContainer}>
             <Ionicons name="document-attach-outline" size={16} color="#007AFF" />
-            <ExternalLink href="https://drive.google.com/file/d/1XxqdHgw4vJnn4HDAJypEXkAB__A6UEih/view?usp=sharing">
+            <ExternalLink href="https://windwardfloodcheck-readme.readthedocs.io/en/latest/">
               <ThemedText type="link" style={styles.thinText}>
-                 Data & Methods documentation (Google Drive)
+                 Data & Methods
               </ThemedText>
             </ExternalLink>
           </ThemedView>
