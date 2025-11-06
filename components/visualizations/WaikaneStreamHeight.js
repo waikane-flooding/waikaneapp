@@ -69,6 +69,7 @@ const WaikaneStreamHeight = ({ streamData, trendData }) => {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.title}>Waikāne Stream Gauge</Text>
       <View style={styles.gaugeContainer}>
         <Svg width={700} height={300}>
           {/* Background arc */}
@@ -197,6 +198,13 @@ const styles = StyleSheet.create({
     marginTop: 2,
     marginBottom: 2,
     position: 'relative',
+  },
+  title: {
+    fontSize: 25,
+    fontWeight: 'bold',
+    color: '#007AFF',
+    textAlign: 'center',
+    marginBottom: 10,
   },
   gaugeContainer: {
     marginBottom: 0,

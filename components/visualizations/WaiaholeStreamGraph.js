@@ -189,11 +189,22 @@ const WaiaholeStreamGraph = ({ streamData: propStreamData }) => {
     <View style={styles.container}>
       <View style={styles.chartContainer}>
         <Svg width={chartWidth} height={chartHeight}>
+          {/* Chart title */}
+                    <SvgText
+                      x={chartWidth / 2}
+                      y={30}
+                      fontSize="20"
+                      fill="#333"
+                      textAnchor="middle"
+                      fontWeight="bold"
+                    >
+                      Waiāhole Stream Graph
+                    </SvgText>
           {/* Y-axis title */}
           <SvgText
             x={padding - 30}
             y={padding + graphHeight / 2}
-            fontSize="14"
+            fontSize="18"
             fill="#333"
             textAnchor="middle"
             transform={`rotate(-90, ${padding - 30}, ${padding + graphHeight / 2})`}
@@ -205,7 +216,7 @@ const WaiaholeStreamGraph = ({ streamData: propStreamData }) => {
           <SvgText
             x={padding + graphWidth / 2}
             y={padding + graphHeight + 50}
-            fontSize="14"
+            fontSize="18"
             fill="#333"
             textAnchor="middle"
             fontWeight="bold"

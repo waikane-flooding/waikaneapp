@@ -95,6 +95,7 @@ const WaikaneTideLevel = () => {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.title}>Waikāne Tide Level</Text>
       
       <View style={styles.dataContainer}>
         <Text style={[styles.value, { color: tideLevel !== null ? getColorForLevel(tideLevel) : '#007AFF' }]}>
@@ -133,6 +134,13 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
     margin: 10,
+  },
+  title: {
+    fontSize: 25,
+    fontWeight: 'bold',
+    color: '#007AFF',
+    marginBottom: 15,
+    textAlign: 'center',
   },
   dataContainer: {
     alignItems: 'center',

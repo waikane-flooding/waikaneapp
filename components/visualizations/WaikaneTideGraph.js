@@ -247,11 +247,22 @@ const WaikaneTideGraph = () => {
     <View style={styles.container}>
       <View style={styles.chartContainer}>
         <Svg width={chartWidth} height={chartHeight}>
+          {/* Chart title */}
+                    <SvgText
+                      x={chartWidth / 2}
+                      y={30}
+                      fontSize="20"
+                      fill="#333"
+                      textAnchor="middle"
+                      fontWeight="bold"
+                    >
+                      Waikāne Stream Graph
+                    </SvgText>
           {/* Y-axis title */}
           <SvgText
             x={padding - 25}
             y={padding + graphHeight / 2}
-            fontSize="14"
+            fontSize="18"
             fill="#333"
             textAnchor="middle"
             transform={`rotate(-90, ${padding - 25}, ${padding + graphHeight / 2})`}
@@ -263,7 +274,7 @@ const WaikaneTideGraph = () => {
           <SvgText
             x={padding + graphWidth / 2}
             y={padding + graphHeight + 50}
-            fontSize="14"
+            fontSize="18"
             fill="#333"
             textAnchor="middle"
             fontWeight="bold"
