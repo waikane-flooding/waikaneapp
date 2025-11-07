@@ -189,7 +189,7 @@ const PunaluuStreamGraph = ({ streamData: propStreamData }) => {
             textAnchor="middle"
             fontWeight="bold"
           >
-            Punaluu Stream Graph
+            Punalu'u Stream Graph
           </SvgText>
           {/* Y-axis title */}
                     <SvgText
