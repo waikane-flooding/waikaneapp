@@ -1,7 +1,7 @@
 {
   "expo": {
-  "name": "Windward Flood Check",
-  "slug": "windward-flood-check",
+    "name": "Windward Flood Check",
+    "slug": "windward-flood-check",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -12,7 +12,10 @@
     "author": "WRRC Shuler Lab (University of Hawai‘i)",
     "copyright": "© 2025 WRRC Shuler Lab. All rights reserved.",
     "primaryLanguage": "en",
-    "categories": ["Weather", "Utilities"],
+    "categories": [
+      "Weather",
+      "Utilities"
+    ],
     "ageRating": "4+",
     "ios": {
       "supportsTablet": true,
@@ -56,11 +59,19 @@
       "typedRoutes": true
     },
     "extra": {
-      "router": {}
-      
-    
+      "router": {},
+      "eas": {
+        "projectId": "a18f707f-f1bb-4745-87c7-b19e140d21c6"
+      }
     },
     "owner": "chiaraduyn",
-      "keywords": ["flood", "hawaii", "weather", "WRRC", "Oahu", "alerts"]
+    "keywords": [
+      "flood",
+      "hawaii",
+      "weather",
+      "WRRC",
+      "Oahu",
+      "alerts"
+    ]
   }
 }
