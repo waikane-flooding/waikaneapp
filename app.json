@@ -56,10 +56,9 @@
       "typedRoutes": true
     },
     "extra": {
-      "router": {},
-      "eas": {
-        "projectId": "windward-flood-check"
-      }
+      "router": {}
+      
+    
     },
     "owner": "chiaraduyn",
       "keywords": ["flood", "hawaii", "weather", "WRRC", "Oahu", "alerts"]
