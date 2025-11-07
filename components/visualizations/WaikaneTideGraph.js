@@ -256,7 +256,7 @@ const WaikaneTideGraph = () => {
                       textAnchor="middle"
                       fontWeight="bold"
                     >
-                      Waikāne Stream Graph
+                      Waikāne Tide Graph
                     </SvgText>
           {/* Y-axis title */}
           <SvgText
