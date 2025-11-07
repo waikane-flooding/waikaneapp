@@ -136,10 +136,10 @@ const styles = StyleSheet.create({
     margin: 10,
   },
   title: {
-    fontSize: 25,
-    fontWeight: 'bold',
+    fontSize: 18,
+    fontWeight: '400',
     color: '#007AFF',
-    marginBottom: 15,
+    marginBottom: 10,
     textAlign: 'center',
   },
   dataContainer: {

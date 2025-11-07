@@ -200,11 +200,11 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   title: {
-    fontSize: 25,
-    fontWeight: 'bold',
+    fontSize: 18,
+    fontWeight: '400',
     color: '#007AFF',
     textAlign: 'center',
-    marginBottom: 10,
+    marginBottom: 8,
   },
   gaugeContainer: {
     marginBottom: 0,
