@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Svg, Path, Line, Circle, Defs, LinearGradient, Stop, Text as SvgText } from 'react-native-svg';
 
+<<<<<<< HEAD
 const WaikaneStreamGraph = () => {
   const [streamData, setStreamData] = useState([]);
 
@@ -15,11 +16,37 @@ const WaikaneStreamGraph = () => {
         console.error('Error fetching stream data:', error);
       });
   }, []);
+=======
+const WaikaneStreamGraph = ({ streamData: propStreamData }) => {
+  const [streamData, setStreamData] = useState([]);
+
+  useEffect(() => {
+    // Use prop data instead of fetching
+    if (propStreamData && propStreamData.length > 0) {
+      setStreamData(propStreamData);
+    }
+  }, [propStreamData]);
+
+  // Show loading state if no prop data is available yet
+  if (!propStreamData || propStreamData.length === 0) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Loading...</Text>
+        </View>
+      </View>
+    );
+  }
+>>>>>>> test-anne-new
 
   // Chart dimensions - responsive but maintain aspect ratio
   const chartWidth = 650;
   const chartHeight = 300;
+<<<<<<< HEAD
   const padding = 40;
+=======
+  const padding = 50;
+>>>>>>> test-anne-new
   const graphWidth = chartWidth - 2 * padding;
   const graphHeight = chartHeight - 2 * padding;
 
@@ -32,6 +59,7 @@ const WaikaneStreamGraph = () => {
   const sortedStreamData = [...streamData]
     .filter(d => d.ft != null && d.DateTime)
     .sort((a, b) => new Date(a.DateTime) - new Date(b.DateTime));
+<<<<<<< HEAD
   
   if (sortedStreamData.length === 0) {
     return (
@@ -42,6 +70,8 @@ const WaikaneStreamGraph = () => {
       </View>
     );
   }
+=======
+>>>>>>> test-anne-new
 
   // Find the latest reading's date
   let latestDate = null;
@@ -183,6 +213,43 @@ const WaikaneStreamGraph = () => {
     <View style={styles.container}>
       <View style={styles.chartContainer}>
         <Svg width={chartWidth} height={chartHeight}>
+<<<<<<< HEAD
+=======
+          {/* Chart title */}
+                    <SvgText
+                      x={chartWidth / 2}
+                      y={30}
+                      fontSize="20"
+                      fill="#333"
+                      textAnchor="middle"
+                      fontWeight="bold"
+                    >
+                      Waikāne Stream Graph
+                    </SvgText>
+          {/* Y-axis title */}
+                    <SvgText
+                      x={padding - 30}
+                      y={padding + graphHeight / 2}
+                      fontSize="18"
+                      fill="#333"
+                      textAnchor="middle"
+                      transform={`rotate(-90, ${padding - 30}, ${padding + graphHeight / 2})`}
+                      fontWeight="bold"
+                    >
+                      Observed Gauge Height (ft)
+                    </SvgText>
+                    {/* X-axis title */}
+                    <SvgText
+                      x={padding + graphWidth / 2}
+                      y={padding + graphHeight + 50}
+                      fontSize="18"
+                      fill="#333"
+                      textAnchor="middle"
+                      fontWeight="bold"
+                    >
+                      Date and Time
+                    </SvgText>
+>>>>>>> test-anne-new
           <Defs>
             <LinearGradient id="streamGradient" x1="0%" y1="0%" x2="0%" y2="100%">
               <Stop offset="0%" stopColor="rgba(0, 122, 255, 0.3)" />
@@ -297,7 +364,11 @@ const WaikaneStreamGraph = () => {
                 fill="#666"
                 textAnchor="end"
               >
+<<<<<<< HEAD
                 {tick + " ft"}
+=======
+                {tick}
+>>>>>>> test-anne-new
               </SvgText>
             );
           })}
@@ -347,18 +418,32 @@ const WaikaneStreamGraph = () => {
           <SvgText
             x={padding + 5}
             y={threshold1Y - 5}
+<<<<<<< HEAD
             fontSize="10"
             fill="#FFC107"
           >
             7 ft
+=======
+            fontSize="12"
+            fill="#FFC107"
+          >
+            Elevated: 7.00 ft
+>>>>>>> test-anne-new
           </SvgText>
           <SvgText
             x={padding + 5}
             y={threshold2Y - 5}
+<<<<<<< HEAD
             fontSize="10"
             fill="#F44336"
           >
             10.8 ft
+=======
+            fontSize="12"
+            fill="#F44336"
+          >
+            Extreme: 10.80 ft
+>>>>>>> test-anne-new
           </SvgText>
         </Svg>
         

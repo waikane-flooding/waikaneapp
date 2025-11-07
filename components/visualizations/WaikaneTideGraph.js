@@ -7,36 +7,62 @@ const WaikaneTideGraph = () => {
   const [tideData, setTideData] = useState([]);
 
   useEffect(() => {
+<<<<<<< HEAD
     fetch('http://149.165.172.129:5000/api/waikane_tide_curve')
+=======
+    fetch('http://149.165.159.226:5000/api/waikane_tide_curve')
+>>>>>>> test-anne-new
       .then(res => res.json())
       .then(curve => {
         setCurveData(curve);
       })
       .catch(error => {
+<<<<<<< HEAD
         console.error('Error fetching curve data:', error);
+=======
+        setCurveData([]);
+>>>>>>> test-anne-new
       });
   }, []);
 
   useEffect(() => {
+<<<<<<< HEAD
     fetch('http://149.165.172.129:5000/api/waikane_tides')
+=======
+    fetch('http://149.165.159.226:5000/api/waikane_tides')
+>>>>>>> test-anne-new
       .then(res => res.json())
       .then(data => {
         setTideData(data);
       })
       .catch(error => {
+<<<<<<< HEAD
         console.error('Error fetching tide data:', error);
+=======
+        setTideData([]);
+>>>>>>> test-anne-new
       });
   }, []);
 
   // Chart dimensions - fill the container
+<<<<<<< HEAD
   const chartWidth = 650; // Add small padding to prevent extending to edge
   const chartHeight = 300;
   const padding = 50; // Increased padding to give more space for Y-axis labels
+=======
+  const chartWidth = 650;
+  const chartHeight = 300;
+  const padding = 50;
+>>>>>>> test-anne-new
   const graphWidth = chartWidth - 2 * padding;
   const graphHeight = chartHeight - 2 * padding;
 
   // Y-axis range
+<<<<<<< HEAD
   const yMin = -1;
+=======
+  const yMin = -2;
+>>>>>>> test-anne-new
   const yMax = 4;
   const yRange = yMax - yMin;
 
@@ -184,7 +210,11 @@ const WaikaneTideGraph = () => {
   }
 
   // Y-axis labels
+<<<<<<< HEAD
   const yTicks = [-1, 0, 1, 2, 3, 4];
+=======
+  const yTicks = [-2, -1, 0, 1, 2, 3, 4];
+>>>>>>> test-anne-new
   
   // X-axis labels (every 6 hours, aligned to 12 AM, 6 AM, 12 PM, 6 PM)
   const xTicks = [];
@@ -240,13 +270,56 @@ const WaikaneTideGraph = () => {
   }
   
   // Threshold lines
+<<<<<<< HEAD
   const threshold1Y = padding + ((yMax - 2.12) / yRange) * graphHeight;
   const threshold2Y = padding + ((yMax - 2.92) / yRange) * graphHeight;
+=======
+  const threshold1Y = padding + ((yMax - 2.92) / yRange) * graphHeight;
+  const threshold2Y = padding + ((yMax - 3.42) / yRange) * graphHeight;
+>>>>>>> test-anne-new
 
   return (
     <View style={styles.container}>
       <View style={styles.chartContainer}>
         <Svg width={chartWidth} height={chartHeight}>
+<<<<<<< HEAD
+=======
+          {/* Chart title */}
+                    <SvgText
+                      x={chartWidth / 2}
+                      y={30}
+                      fontSize="20"
+                      fill="#333"
+                      textAnchor="middle"
+                      fontWeight="bold"
+                    >
+                      Waikāne Stream Graph
+                    </SvgText>
+          {/* Y-axis title */}
+          <SvgText
+            x={padding - 25}
+            y={padding + graphHeight / 2}
+            fontSize="18"
+            fill="#333"
+            textAnchor="middle"
+            transform={`rotate(-90, ${padding - 25}, ${padding + graphHeight / 2})`}
+            fontWeight="bold"
+          >
+            Tide Height (ft)
+          </SvgText>
+          {/* X-axis title */}
+          <SvgText
+            x={padding + graphWidth / 2}
+            y={padding + graphHeight + 50}
+            fontSize="18"
+            fill="#333"
+            textAnchor="middle"
+            fontWeight="bold"
+          >
+            Date and Time
+          </SvgText>
+          
+>>>>>>> test-anne-new
           <Defs>
             <LinearGradient id="tideGradient" x1="0%" y1="0%" x2="0%" y2="100%">
               <Stop offset="0%" stopColor="rgba(54, 162, 235, 0.3)" />
@@ -387,11 +460,19 @@ const WaikaneTideGraph = () => {
                 fill="#666"
                 textAnchor="end"
               >
+<<<<<<< HEAD
                 {tick + " ft"}
               </SvgText>
             );
           })}
           
+=======
+                {tick}
+              </SvgText>
+            );
+          })}
+  
+>>>>>>> test-anne-new
           {/* X-axis labels */}
           {xTicks.map((tick, index) => (
             <SvgText
@@ -437,18 +518,32 @@ const WaikaneTideGraph = () => {
           <SvgText
             x={padding + 5}
             y={threshold1Y - 5}
+<<<<<<< HEAD
             fontSize="10"
             fill="#FFC107"
           >
             2.12 ft
+=======
+            fontSize="12"
+            fill="#FFC107"
+          >
+            Elevated: 2.92 ft
+>>>>>>> test-anne-new
           </SvgText>
           <SvgText
             x={padding + 5}
             y={threshold2Y - 5}
+<<<<<<< HEAD
             fontSize="10"
             fill="#F44336"
           >
             2.92 ft
+=======
+            fontSize="12"
+            fill="#F44336"
+          >
+            Extreme: 3.42 ft
+>>>>>>> test-anne-new
           </SvgText>
         </Svg>
         
@@ -478,6 +573,7 @@ const WaikaneTideGraph = () => {
 
 const styles = StyleSheet.create({
   container: {
+<<<<<<< HEAD
     flex: 1,
     backgroundColor: 'white',
     paddingHorizontal: 10,
@@ -489,6 +585,25 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: 'white',
     borderRadius: 8,
+=======
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    borderRadius: 8,
+    padding: 10,
+    margin: 2,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  chartContainer: {
+    position: 'relative',
+>>>>>>> test-anne-new
   },
   loadingContainer: {
     width: 650,

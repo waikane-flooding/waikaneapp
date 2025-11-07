@@ -1,10 +1,15 @@
 import React, { useEffect, useState } from 'react';
+<<<<<<< HEAD
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import Svg, { Path, Text as SvgText } from 'react-native-svg';
+=======
+import { View, Text, StyleSheet } from 'react-native';
+>>>>>>> test-anne-new
 
 const WaikaneTideLevel = () => {
   const [tideLevel, setTideLevel] = useState(null);
   const [tideTime, setTideTime] = useState(null);
+<<<<<<< HEAD
   const [animatedValue] = useState(new Animated.Value(0));
 
   const minLevel = -1;
@@ -12,6 +17,15 @@ const WaikaneTideLevel = () => {
 
   useEffect(() => {
     fetch('http://149.165.172.129:5000/api/waikane_tide_curve')
+=======
+  const [tideDirection, setTideDirection] = useState(null);
+
+  const minLevel = -2;
+  const maxLevel = 4;
+
+  useEffect(() => {
+    fetch('http://149.165.159.226:5000/api/waikane_tide_curve')
+>>>>>>> test-anne-new
       .then(res => res.json())
       .then(data => {
         // Get current time in HST (UTC-10, no DST)
@@ -35,11 +49,17 @@ const WaikaneTideLevel = () => {
           return new Date(Date.UTC(year, month - 1, day, Number(hour) + 10, Number(minute), Number(second)));
         }
 
+<<<<<<< HEAD
         const pastTides = data
+=======
+        // Sort all data points by time ascending
+        const allTides = data
+>>>>>>> test-anne-new
           .map(item => ({
             time: parseHSTTimestamp(item["Datetime"]),
             height: item["Predicted_ft_MSL"]
           }))
+<<<<<<< HEAD
           .filter(d => d.time <= nowUTC && !isNaN(d.time.getTime()) && d.height != null)
           .sort((a, b) => b.time - a.time);
 
@@ -61,6 +81,42 @@ const WaikaneTideLevel = () => {
 
   const greenEnd = 2.12;
   const yellowEnd = 2.92;
+=======
+          .filter(d => !isNaN(d.time.getTime()) && d.height != null)
+          .sort((a, b) => a.time - b.time);
+
+        // Find the latest reading at or before now
+        const pastTides = allTides.filter(d => d.time <= nowUTC);
+        if (pastTides.length > 0) {
+          const latest = pastTides[pastTides.length - 1]; // Most recent PAST reading
+          setTideLevel(latest.height);
+          setTideTime(latest.time);
+
+          // Find the next data point after the latest reading
+          const nextIdx = allTides.findIndex(d => d.time.getTime() === latest.time.getTime()) + 1;
+          if (nextIdx > 0 && nextIdx < allTides.length) {
+            const next = allTides[nextIdx];
+            if (next.height > latest.height) {
+              setTideDirection('Rising');
+            } else if (next.height < latest.height) {
+              setTideDirection('Falling');
+            } else {
+              setTideDirection('Stable');
+            }
+          } else {
+            setTideDirection('N/A');
+          }
+        }
+      })
+      .catch(err => {
+        setTideLevel(null);
+        setTideTime(null);
+      });
+  }, []);
+
+  const greenEnd = 2.92;
+  const yellowEnd = 3.42;
+>>>>>>> test-anne-new
 
   // Get color based on tide level
   const getColorForLevel = (level) => {
@@ -70,6 +126,7 @@ const WaikaneTideLevel = () => {
   };
 
   const formattedDateTime = tideTime
+<<<<<<< HEAD
     ? 'Latest Reading: ' + new Date(tideTime).toLocaleString('en-US', {
         timeZone: 'Pacific/Honolulu',
         month: 'short',
@@ -156,6 +213,46 @@ const WaikaneTideLevel = () => {
         <View style={styles.legendItem}>
           <View style={[styles.legendColor, { backgroundColor: '#F44336' }]} />
           <Text style={styles.legendText}>Major Flooding</Text>
+=======
+    ? new Date(tideTime).toLocaleString('en-US', {
+        timeZone: 'Pacific/Honolulu',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      })
+    : 'Loading...';
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Waikāne Tide Level</Text>
+      
+      <View style={styles.dataContainer}>
+        <Text style={[styles.value, { color: tideLevel !== null ? getColorForLevel(tideLevel) : '#007AFF' }]}>
+          {tideLevel !== null ? `${tideLevel.toFixed(2)} ft` : 'Loading...'}
+        </Text>
+        
+        <Text style={styles.datetime}>{formattedDateTime}</Text>
+        
+        <Text style={styles.direction}>
+          Tide is {tideDirection ? tideDirection : 'Loading...'}
+        </Text>
+      </View>
+
+      <View style={styles.legendContainer}>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendColor, { backgroundColor: '#4CAF50' }]} />
+          <Text style={styles.legendText}>Normal</Text>
+        </View>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendColor, { backgroundColor: '#FFC107' }]} />
+          <Text style={styles.legendText}>Elevated</Text>
+        </View>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendColor, { backgroundColor: '#F44336' }]} />
+          <Text style={styles.legendText}>Extreme</Text>
+>>>>>>> test-anne-new
         </View>
       </View>
     </View>
@@ -166,6 +263,7 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
+<<<<<<< HEAD
     marginTop: 10,
     marginBottom: 10,
     position: 'relative',
@@ -181,11 +279,28 @@ const styles = StyleSheet.create({
     right: 0,
     alignItems: 'center',
     zIndex: 10,
+=======
+    padding: 20,
+    borderRadius: 10,
+    margin: 10,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: '400',
+    color: '#007AFF',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  dataContainer: {
+    alignItems: 'center',
+    marginBottom: 15,
+>>>>>>> test-anne-new
   },
   value: {
     fontSize: 32,
     textAlign: 'center',
     fontWeight: 'bold',
+<<<<<<< HEAD
   },
   datetime: {
     color: 'white',
@@ -202,6 +317,26 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 16,
     zIndex: 10,
+=======
+    marginBottom: 10,
+  },
+  datetime: {
+    color: '#007AFF',
+    fontSize: 16,
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  direction: {
+    color: '#007AFF',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  legendContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 15,
+    gap: 16,
+>>>>>>> test-anne-new
   },
   legendItem: {
     flexDirection: 'row',
@@ -215,7 +350,11 @@ const styles = StyleSheet.create({
     marginRight: 5,
   },
   legendText: {
+<<<<<<< HEAD
     color: 'white',
+=======
+    color: '#007AFF',
+>>>>>>> test-anne-new
     fontSize: 14,
   },
 });

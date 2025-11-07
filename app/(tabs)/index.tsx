@@ -1,102 +1,45 @@
 //home screen
 import { Ionicons } from '@expo/vector-icons';
+import { StyleSheet, Pressable, Platform, RefreshControl, ScrollView, View, Dimensions, ActivityIndicator } from 'react-native';
+import * as WebBrowser from 'expo-web-browser';
 import { Image } from 'expo-image';
-import { StyleSheet, Linking, TouchableOpacity } from 'react-native';
-import { router } from 'expo-router';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 
-import { ExternalLink } from '@/components/ExternalLink';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { IconSymbol } from '@/components/ui/IconSymbol';
+import WaikaneStreamHeight from '@/components/visualizations/WaikaneStreamHeight';
+import WaiaholeStreamHeight from '@/components/visualizations/WaiaholeStreamHeight';
+import WaikaneStreamGraph from '@/components/visualizations/WaikaneStreamGraph';
+import WaiaholeStreamGraph from '@/components/visualizations/WaiaholeStreamGraph';
+import WaikaneTideLevel from '@/components/visualizations/WaikaneTideLevel';
+import WaikaneTideGraph from '@/components/visualizations/WaikaneTideGraph';
+import PunaluuStreamHeight from '@/components/visualizations/PunaluuStreamHeight';
+import PunaluuStreamGraph from '@/components/visualizations/PunaluuStreamGraph';
+import { useStreamDataCache } from '@/hooks/useStreamDataCache';
 
-const emergencyContacts = [
-  {
-    name: "Honolulu Emergency Services",
-    number: "911",
-    description: "For immediate emergency response",
-    website: "https://emergencyservices.honolulu.gov"
-  },
-  {
-    name: "Windward Police Station",
-    number: "(808) 723-8640",
-    description: "Kāne'ohe Police Department",
-    website: "https://www.honolulupd.org/d4/"
-  },
-  {
-    name: "Honolulu Police Department",
-    number: "(808) 723-8488",
-    description: "General number for non-emergencies",
-    website: "https://www.honolulupd.org/"
-  },
-  {
-    name: "Board of Water Supply",
-    number: "(808) 748-5000",
-    description: "Water emergency & main breaks",
-    website: "https://www.boardofwatersupply.com/"
-  },
-  {
-    name: "State of Hawai'i, DLNR",
-    number: "(808) 587-0230",
-    description: "Engineering & flood control",
-    website: "https://dlnreng.hawaii.gov"
-  },
-  {
-    name: "Hawaiian Electric",
-    number: "855-304-1212",
-    description: "Power outages & emergencies",
-    website: "https://www.hawaiianelectric.com/"
-  }
-];
+// Types for rain data
+type RainData = {
+    '1HrRainfall': number;
+    '6HrRainfall': number;
+    'DateTime': string;
+    'Name': string;
+};
 
-const quickActions = [
-  {
-    title: 'Stream Monitor',
-    subtitle: 'Real-time water levels',
-    icon: 'water',
-    color: '#007AFF',
-    bgColor: 'rgba(0, 122, 255, 0.1)',
-    route: '/stream-monitor'
-  },
-  {
-    title: 'Tide Conditions',
-    subtitle: 'Kāneʻohe Bay tides',
-    icon: 'time',
-    color: '#4682B4',
-    bgColor: 'rgba(70, 130, 180, 0.1)',
-    route: '/tide-conditions'
-  },
-  {
-    title: 'Weather & Alerts',
-    subtitle: 'Forecasts & warnings',
-    icon: 'cloudy',
-    color: '#4169E1',
-    bgColor: 'rgba(65, 105, 225, 0.1)',
-    route: '/wave-weather'
-  },
-  {
-    title: 'FAQ & Help',
-    subtitle: 'App guide & support',
-    icon: 'help-circle',
-    color: '#4CAF50',
-    bgColor: 'rgba(76, 175, 80, 0.1)',
-    route: '/faq'
-  }
-];
+// Weather constants
+const KANEOHE_COORDS = { lat: 21.4181, lon: -157.8036 };
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/windward-header.jpg')}
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title" style={styles.thinText}>Waikāne Flood Tracker</ThemedText>
-      </ThemedView>
+    // Stream data caching
+    const { fetchStreamData, clearCache } = useStreamDataCache();
+    const [streamDataCache, setStreamDataCache] = useState<{
+        waikane?: { data: any[]; trends: any[] };
+        waiahole?: { data: any[]; trends: any[] };
+        punaluu?: { data: any[]; trends: any[] };
+    }>({});
 
+<<<<<<< HEAD
       {/* <ThemedView style={styles.welcomeSection}>
         <ThemedText style={styles.welcomeText}>
           Stay informed about flood conditions in Waikāne and Waiahole areas of windward Oʻahu.
@@ -105,201 +48,1280 @@ export default function HomeScreen() {
           Monitor real-time data and get alerts to make informed decisions during heavy rainfall.
         </ThemedText>
       </ThemedView> */}
+=======
+    // Helper to get color for rainfall value
+    function getMakaiRainColor(val: string) {
+        const num = parseFloat(val);
+        if (isNaN(num)) return '#007AFF';
+        if (num < 2.8) return '#34C759'; // green
+        if (num < 4.1) return '#FFC107'; // yellow
+        if (num <= 6) return '#F44336'; // red
+        return '#007AFF';
+    }
+    function getMaukaRainColor(val: string) {
+        const num = parseFloat(val);
+        if (isNaN(num)) return '#007AFF';
+        if (num < 3.11) return '#34C759'; // green
+        if (num < 4.54) return '#FFC107'; // yellow
+        if (num <= 7) return '#F44336'; // red
+        return '#007AFF';
+    }
+    // Rain data state
+    const [makaiRain, setMakaiRain] = useState<{
+        lastHour: string;
+        lastSixHours: string;
+        lastReading: string;
+    }>({ lastHour: 'Loading...', lastSixHours: 'Loading...', lastReading: 'Loading...' });
+    const [maukaRain, setMaukaRain] = useState<{
+        lastHour: string;
+        lastSixHours: string;
+        lastReading: string;
+    }>({ lastHour: 'Loading...', lastSixHours: 'Loading...', lastReading: 'Loading...' });
+    // Fetch Makai and Mauka rain data
+    const fetchRainData = useCallback(async () => {
+        try {
+            const res = await fetch('http://149.165.159.226:5000/api/rain_data');
+            const data: RainData[] = await res.json();
+            // Find latest Makai and Mauka
+            const makai = data.filter(d => d.Name && d.Name.toLowerCase().includes('makai'))
+                .sort((a, b) => new Date(b.DateTime).getTime() - new Date(a.DateTime).getTime())[0];
+            const mauka = data.filter(d => d.Name && d.Name.toLowerCase().includes('mauka'))
+                .sort((a, b) => new Date(b.DateTime).getTime() - new Date(a.DateTime).getTime())[0];
+>>>>>>> test-anne-new
 
-      <ThemedView style={styles.section}>
-        <ThemedText type="subtitle" style={styles.sectionTitle}>
-          <Ionicons name="flash" size={18} color="#FF6B35" /> Quick Actions
-        </ThemedText>
-        <ThemedView style={styles.quickActionsGrid}>
-          {quickActions.map((action, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[styles.quickActionCard, { backgroundColor: action.bgColor }]}
-              onPress={() => router.push(action.route as any)}
-              activeOpacity={0.8}
-            >
-              <Ionicons name={action.icon as any} size={32} color={action.color} />
-              <ThemedText style={[styles.quickActionTitle, { color: action.color }]}>
-                {action.title}
-              </ThemedText>
-              <ThemedText style={styles.quickActionSubtitle}>
-                {action.subtitle}
-              </ThemedText>
-            </TouchableOpacity>
-          ))}
-        </ThemedView>
-      </ThemedView>
+            if (makai) {
+                setMakaiRain({
+                    lastHour: makai['1HrRainfall']?.toFixed(2) + ' in',
+                    lastSixHours: makai['6HrRainfall']?.toFixed(2) + ' in',
+                    lastReading: new Date(makai.DateTime).toLocaleString('en-US', {
+                        hour: '2-digit', minute: '2-digit', hour12: true, month: 'short', day: 'numeric'
+                    }),
+                });
+            }
+            if (mauka) {
+                setMaukaRain({
+                    lastHour: mauka['1HrRainfall']?.toFixed(2) + ' in',
+                    lastSixHours: mauka['6HrRainfall']?.toFixed(2) + ' in',
+                    lastReading: new Date(mauka.DateTime).toLocaleString('en-US', {
+                        hour: '2-digit', minute: '2-digit', hour12: true, month: 'short', day: 'numeric'
+                    }),
+                });
+            }
+        } catch (e) {
+            setMakaiRain({ lastHour: 'No Data', lastSixHours: 'No Data', lastReading: 'Offline' });
+            setMaukaRain({ lastHour: 'No Data', lastSixHours: 'No Data', lastReading: 'Offline' });
+        }
+    }, []);
+    
+    // Weather data state
+    const [forecast, setForecast] = useState<any[]>([]);
+    const [forecastLoading, setForecastLoading] = useState(true);
+    const [forecastError, setForecastError] = useState<string | null>(null);
+    const [alerts, setAlerts] = useState<any[]>([]);
+    const [alertsLoading, setAlertsLoading] = useState(true);
+    const [alertsError, setAlertsError] = useState<string | null>(null);
+    // Helper: NWS fetch with platform-safe behavior
+    const fetchNws = useCallback(async (url: string) => {
+        // NWS requires identification; web cannot set UA -> always proxy on web.
+        // On native, try direct with identification headers, then fallback to proxy on 401/403 or failure.
+        const headers: Record<string, string> = {
+            Accept: 'application/geo+json',
+            From: 'infowrrc@hawaii.edu',
+        };
+    const ua = 'FloodCheck/1.0 (https://github.com/waikane-flooding/waikaneapp; infowrrc@hawaii.edu)';
+        if (Platform.OS !== 'web') headers['User-Agent'] = ua;
 
-      <ThemedView style={styles.section}>
-        <ThemedText type="subtitle" style={styles.sectionTitle}>
-          <Ionicons name="shield" size={18} color="#FF3B30" /> Emergency Contacts
-        </ThemedText>
-        
-        {emergencyContacts.map((contact, index) => (
-          <ThemedView key={index} style={styles.contactCard}>
-            <ThemedView style={styles.contactHeaderColumn}>
-              <ExternalLink href={contact.website as any}>
-                <ThemedText style={styles.contactName} type="link">{contact.name}</ThemedText>
-              </ExternalLink>
-              <ThemedText 
-                style={styles.contactNumberBelow}
-                onPress={() => Linking.openURL(`tel:${contact.number}`)}
-              >
-                {contact.number}
-              </ThemedText>
+        const proxied = `https://corsproxy.io/?${encodeURIComponent(url)}`;
+
+        if (Platform.OS === 'web') {
+            return fetch(proxied, { headers });
+        }
+
+        try {
+            const resp = await fetch(url, { headers });
+            if (resp.status === 401 || resp.status === 403) {
+                console.warn('NWS direct returned', resp.status, 'retrying via proxy');
+                return await fetch(proxied, { headers });
+            }
+            return resp;
+        } catch (err) {
+            console.warn('NWS direct fetch failed, retrying via proxy:', err);
+            return fetch(proxied, { headers });
+        }
+    }, []);
+
+    
+    const [refreshing, setRefreshing] = useState(false);
+    const [waikaneData, setWaikaneData] = useState<{ 
+        height: string | null; 
+        lastReading: string | null; 
+        direction: string | null;
+        status: string; 
+        statusColor?: string; 
+    }>({ height: null, lastReading: null, direction: null, status: 'Loading...' });
+    const [waiaholeData, setWaiaholeData] = useState<{ 
+        height: string | null; 
+        lastReading: string | null; 
+        direction: string | null;
+        status: string; 
+        statusColor?: string; 
+    }>({ height: null, lastReading: null, direction: null, status: 'Loading...' });
+
+    // Threshold values for different stream levels
+    const waikaneThresholds = useMemo(() => ({
+        greenEnd: 7,
+        yellowEnd: 10.8
+    }), []);
+
+    const waiaholeThresholds = useMemo(() => ({
+        greenEnd: 12,
+        yellowEnd: 16.4
+    }), []);
+
+    // Get status based on stream level
+    const getStreamStatus = useCallback((level: number, thresholds: { greenEnd: number; yellowEnd: number }) => {
+        if (level < thresholds.greenEnd) return { status: 'Normal', color: '#34C759' };
+        if (level < thresholds.yellowEnd) return { status: 'Warning', color: '#FFC107' };
+        return { status: 'Danger', color: '#F44336' };
+    }, []);
+
+    // Fetch Waikane and Waiahole stream data, including trend
+    const fetchWaikaneData = useCallback(async () => {
+        try {
+            const [streamRes, trendRes] = await Promise.all([
+                fetch('http://149.165.159.169:5000/api/waikane_stream'),
+                fetch('http://149.165.159.169:5000/api/stream_trend')
+            ]);
+            const data = await streamRes.json();
+            const trendData = await trendRes.json();
+
+            const now = new Date();
+            const latest = data
+                .filter((d: any) => d.ft != null && d.DateTime)
+                .map((d: any) => ({
+                    time: new Date(d.DateTime),
+                    value: d.ft
+                }))
+                .filter((d: any) => d.time <= now)
+                .sort((a: any, b: any) => b.time - a.time)[0]; // Most recent past point
+
+            // Find Waikane trend
+            let direction: string | null = null;
+            if (trendData && Array.isArray(trendData)) {
+                const waikaneTrend = trendData.find((t: any) => t.Name && t.Name.toLowerCase().includes('waikane'));
+                direction = waikaneTrend && waikaneTrend.Trend ? waikaneTrend.Trend : null;
+            }
+
+            if (latest) {
+                const statusInfo = getStreamStatus(latest.value, waikaneThresholds);
+                const formattedTime = latest.time.toLocaleString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                });
+
+                setWaikaneData({
+                    height: `${latest.value.toFixed(2)} ft`,
+                    lastReading: formattedTime,
+                    direction,
+                    status: statusInfo.status,
+                    statusColor: statusInfo.color
+                });
+            }
+        } catch (error) {
+            // Silently handle network errors to avoid flooding console
+            setWaikaneData({ height: 'No Data', lastReading: 'Offline', direction: null, status: 'Offline' });
+        }
+    }, [getStreamStatus, waikaneThresholds]);
+
+    const fetchWaiaholeData = useCallback(async () => {
+        try {
+            const [streamRes, trendRes] = await Promise.all([
+                fetch('http://149.165.159.169:5000/api/waiahole_stream'),
+                fetch('http://149.165.159.169:5000/api/stream_trend')
+            ]);
+            const data = await streamRes.json();
+            const trendData = await trendRes.json();
+
+            const now = new Date();
+            const latest = data
+                .filter((d: any) => d.ft != null && d.DateTime)
+                .map((d: any) => ({
+                    time: new Date(d.DateTime),
+                    value: d.ft
+                }))
+                .filter((d: any) => d.time <= now)
+                .sort((a: any, b: any) => b.time - a.time)[0]; // Most recent past point
+
+            // Find Waiahole trend
+            let direction: string | null = null;
+            if (trendData && Array.isArray(trendData)) {
+                const waiaholeTrend = trendData.find((t: any) => t.Name && t.Name.toLowerCase().includes('waiahole'));
+                direction = waiaholeTrend && waiaholeTrend.Trend ? waiaholeTrend.Trend : null;
+            }
+
+            if (latest) {
+                const statusInfo = getStreamStatus(latest.value, waiaholeThresholds);
+                const formattedTime = latest.time.toLocaleString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                });
+
+                setWaiaholeData({
+                    height: `${latest.value.toFixed(2)} ft`,
+                    lastReading: formattedTime,
+                    direction,
+                    status: statusInfo.status,
+                    statusColor: statusInfo.color
+                });
+            }
+        } catch (error) {
+            // Silently handle network errors to avoid flooding console
+            setWaiaholeData({ height: 'No Data', lastReading: 'Offline', direction: null, status: 'Offline' });
+        }
+    }, [getStreamStatus, waiaholeThresholds]);
+
+    // Fetch weather forecast - via NWS (uses proxy on web)
+    useEffect(() => {
+        async function fetchForecast() {
+            setForecastLoading(true);
+            setForecastError(null);
+            try {
+                console.log('Fetching NWS points data...');
+                const pointsResp = await fetchNws(`https://api.weather.gov/points/${KANEOHE_COORDS.lat},${KANEOHE_COORDS.lon}`);
+                console.log('Points response status:', pointsResp.status);
+                
+                if (!pointsResp.ok) {
+                    throw new Error(`Points API returned ${pointsResp.status}`);
+                }
+                
+                const pointsData = await pointsResp.json();
+                console.log('Points data received');
+                
+                const forecastUrl = pointsData?.properties?.forecast;
+                if (!forecastUrl) {
+                    throw new Error('No forecast URL in points data');
+                }
+                
+                console.log('Fetching forecast from:', forecastUrl);
+                const forecastResp = await fetchNws(forecastUrl);
+                console.log('Forecast response status:', forecastResp.status);
+                
+                if (!forecastResp.ok) {
+                    throw new Error(`Forecast API returned ${forecastResp.status}`);
+                }
+                
+                const forecastData = await forecastResp.json();
+                
+                const periods = forecastData?.properties?.periods;
+                if (Array.isArray(periods) && periods.length > 0) {
+                    setForecast(periods.slice(0, 6));
+                    console.log('Forecast loaded successfully:', periods.length, 'periods');
+                } else {
+                    throw new Error('No forecast periods in response');
+                }
+            } catch (error) {
+                console.error('Forecast fetch error:', error);
+                setForecastError('Unable to load forecast.');
+            } finally {
+                setForecastLoading(false);
+            }
+        }
+        fetchForecast();
+    }, []);
+
+    // Fetch weather alerts - via NWS (uses proxy on web)
+    useEffect(() => {
+        async function fetchAlerts() {
+            setAlertsLoading(true);
+            setAlertsError(null);
+            try {
+                console.log('Fetching NWS alerts...');
+                const resp = await fetchNws('https://api.weather.gov/alerts/active?area=HI');
+                console.log('Alerts response status:', resp.status);
+                
+                if (!resp.ok) {
+                    throw new Error(`Alerts API returned ${resp.status}`);
+                }
+                
+                const data = await resp.json();
+                console.log('Alerts data received');
+                
+                const eastOahuSpecificAreas = [
+                    'Kāneʻohe', 'Kaneohe', 'Waikāne', 'Waikane', 'Waiahole', 'Kualoa', 'Waimanalo', 
+                    'Heʻeia', 'Heeia', 'Windward Oahu', 'Koʻolaupoko', 'Koolaupoko', 'Oahu Windward'
+                ];
+                const excludeKeywords = ['Coastal', 'Marine', 'Winter'];
+                const excludeOtherIslands = [
+                    'Maui', 'Big Island', 'Kauai', 'Molokai', 'Lanai', 'Kahoolawe', 'Kona', 'Hilo', 'Kohala'
+                ];
+                
+                const filtered = (data?.features || []).filter((alert: any) => {
+                    const event = alert.properties?.event || '';
+                    const headline = alert.properties?.headline || '';
+                    const desc = alert.properties?.areaDesc || '';
+                    
+                    if (excludeKeywords.some(word => event.includes(word) || headline.includes(word))) return false;
+                    if (excludeOtherIslands.some(island => desc.includes(island))) return false;
+                    
+                    const includeGeneralOahu = desc.includes('East Honolulu') || desc.includes('Honolulu Metro');
+                    const includeSpecificEastOahu = eastOahuSpecificAreas.some(area => desc.includes(area));
+                    
+                    return includeGeneralOahu || includeSpecificEastOahu;
+                });
+                
+                setAlerts(filtered);
+                console.log('Alerts loaded successfully:', filtered.length, 'relevant alerts');
+            } catch (error) {
+                console.error('Alerts fetch error:', error);
+                setAlertsError('Unable to load alerts.');
+            } finally {
+                setAlertsLoading(false);
+            }
+        }
+        fetchAlerts();
+    }, []);
+
+    // Load stream data for a specific stream type
+    const loadStreamData = useCallback(async (streamType: 'waikane' | 'waiahole' | 'punaluu') => {
+        const cachedData = await fetchStreamData(streamType);
+        if (cachedData) {
+            setStreamDataCache(prev => ({
+                ...prev,
+                [streamType]: cachedData
+            }));
+        }
+    }, [fetchStreamData]);
+
+    // Load data on component mount
+    useEffect(() => {
+        fetchWaikaneData();
+        fetchWaiaholeData();
+        fetchRainData();
+        // Load stream data for caching
+        loadStreamData('waikane');
+        loadStreamData('waiahole');
+        loadStreamData('punaluu');
+        // Note: forecast and alerts are fetched by their own useEffect hooks above
+    }, [fetchWaikaneData, fetchWaiaholeData, fetchRainData, loadStreamData]);
+
+    const onRefresh = useCallback(async () => {
+        setRefreshing(true);
+        await Promise.all([
+            fetchWaikaneData(), 
+            fetchWaiaholeData(), 
+            fetchRainData(), 
+            loadStreamData('waikane'),
+            loadStreamData('waiahole'),
+            loadStreamData('punaluu')
+        ]);
+        // Trigger forecast and alerts refresh on web by reloading the page (effects run on mount)
+        if (Platform.OS === 'web' && typeof window !== 'undefined') {
+            window.location.reload();
+        }
+        setTimeout(() => {
+            setRefreshing(false);
+        }, 500);
+    }, [fetchWaikaneData, fetchWaiaholeData, fetchRainData, loadStreamData]);
+
+    const openMap = async () => {
+        await WebBrowser.openBrowserAsync('https://experience.arcgis.com/experience/60260cda4f744186bbd9c67163b747d3');
+    };
+
+    // Stream chart navigation logic
+    const streamCharts = [
+        {
+            name: 'Waikāne',
+            gauge: <WaikaneStreamHeight 
+                streamData={streamDataCache.waikane?.data || []} 
+                trendData={streamDataCache.waikane?.trends || []} 
+            />,
+            graph: <WaikaneStreamGraph 
+                streamData={streamDataCache.waikane?.data || []} 
+            />,
+        },
+        {
+            name: 'Waiāhole',
+            gauge: <WaiaholeStreamHeight 
+                streamData={streamDataCache.waiahole?.data || []} 
+                trendData={streamDataCache.waiahole?.trends || []} 
+            />,
+            graph: <WaiaholeStreamGraph 
+                streamData={streamDataCache.waiahole?.data || []} 
+            />,
+        },
+        {
+            name: 'Punaluʻu',
+            gauge: <PunaluuStreamHeight 
+                streamData={streamDataCache.punaluu?.data || []} 
+                trendData={streamDataCache.punaluu?.trends || []} 
+            />,
+            graph: <PunaluuStreamGraph 
+                streamData={streamDataCache.punaluu?.data || []} 
+            />,
+        },
+    ];
+    const [streamIdx, setStreamIdx] = useState(0);
+    const currentStream = streamCharts[streamIdx];
+
+    return (
+        <ParallaxScrollView
+            headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
+            headerImage={
+                <ThemedView style={styles.headerImageWrapper}>
+                    <Image
+                        source={require('@/assets/images/windward-header.jpg')}
+                        style={styles.headerImage}
+                    />
+                    <ThemedView style={styles.headerOverlay} pointerEvents="none">
+                        <ThemedText type="title" style={[styles.thinText, styles.appTitleOverlay]}>Windward Flood Check</ThemedText>
+                    </ThemedView>
+                </ThemedView>
+            }
+            refreshControl={
+                <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                    tintColor="#007AFF"
+                    colors={['#007AFF']}
+                />
+            }
+        >
+            {/* Title now overlaid on header image */}
+
+            {/* Streams Section header */}
+            <ThemedView style={styles.section}>
+                <ThemedView style={styles.sectionHeaderContainer}>
+                    <ThemedText type="subtitle" style={[styles.thinText, styles.sectionHeaderText]}>Streams</ThemedText>
+                </ThemedView>
+                {/* Single stream chart container with navigation arrows */}
+                <ThemedView style={styles.streamSection}>
+                    <ThemedView style={styles.streamNavigation}>
+                        <Pressable
+                            onPress={() => setStreamIdx(i => Math.max(0, i - 1))}
+                            disabled={streamIdx === 0}
+                            style={({ pressed }) => ({ opacity: streamIdx === 0 ? 0.3 : pressed ? 0.6 : 1, marginRight: 12 })}
+                            accessibilityLabel="Previous stream"
+                        >
+                            <Ionicons name="arrow-back-circle" size={36} color="#007AFF" />
+                        </Pressable>
+                        <ThemedText type="subtitle" style={styles.thinText}>
+                            <Ionicons name="water" size={16} color="#007AFF" /> {currentStream.name}
+                        </ThemedText>
+                        <Pressable
+                            onPress={() => setStreamIdx(i => Math.min(streamCharts.length - 1, i + 1))}
+                            disabled={streamIdx === streamCharts.length - 1}
+                            style={({ pressed }) => ({ opacity: streamIdx === streamCharts.length - 1 ? 0.3 : pressed ? 0.6 : 1, marginLeft: 12 })}
+                            accessibilityLabel="Next stream"
+                        >
+                            <Ionicons name="arrow-forward-circle" size={36} color="#007AFF" />
+                        </Pressable>
+                    </ThemedView>
+                    <ThemedText style={styles.streamNavHint}>Tap arrows to switch</ThemedText>
+                    <ThemedView style={styles.gaugeWrapper}>{currentStream.gauge}</ThemedView>
+                    <ThemedView style={styles.chartWrapper}>{currentStream.graph}</ThemedView>
+                </ThemedView>
             </ThemedView>
-            <ThemedText style={styles.contactDescription}>{contact.description}</ThemedText>
-          </ThemedView>
-        ))}
-      </ThemedView>
+            <ThemedView style={styles.sectionDividerWrap}>
+                <ThemedView style={styles.sectionDivider} />
+            </ThemedView>
 
-      <ThemedView style={styles.supportSection}>
-        <ThemedText style={styles.supportText}>
-          <Ionicons name="help-circle" size={16} color="#4CAF50" />{' '}
-          Need help? Check the FAQ tab or contact us at{' '}
-          <ExternalLink href="mailto:windwardfloodapp@gmail.com">
-            <ThemedText type="link" style={styles.emailText}>windwardfloodapp@gmail.com</ThemedText>
-          </ExternalLink>
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
-  );
+            {/* Tide Section header */}
+            <ThemedView style={styles.section}>
+                <ThemedView style={styles.sectionHeaderContainer}>
+                    <ThemedText type="subtitle" style={[styles.thinText, styles.sectionHeaderText]}>Tide</ThemedText>
+                </ThemedView>
+
+                {/* Kaneohe Tide Label */}
+                <ThemedText type="subtitle" style={styles.thinText}>
+                    <Ionicons name="water" size={16} color="#007AFF" /> Waikāne
+                </ThemedText>
+                <ThemedText style={[styles.thinText, { fontSize: 13, color: '#666', marginBottom: 8, marginLeft: 2 }]}>TPT2777 Waikane, Kaneohe Bay (MLLW)</ThemedText>
+
+                {/* Tide Gauge and Trend */}
+                <ThemedView style={styles.gaugeWrapper}>
+                    <WaikaneTideLevel />
+                </ThemedView>
+                <ThemedView style={styles.chartWrapper}>
+                    <WaikaneTideGraph />
+                </ThemedView>
+            </ThemedView>
+            <ThemedView style={styles.sectionDividerWrap}>
+                <ThemedView style={styles.sectionDivider} />
+            </ThemedView>
+
+            {/* Rain Section header */}
+            <ThemedView style={styles.section}>
+                <ThemedView style={styles.sectionHeaderContainer}>
+                    <ThemedText type="subtitle" style={[styles.thinText, styles.sectionHeaderText]}>Rainfall</ThemedText>
+                </ThemedView>
+
+                {/* Rainfall Legend */}
+                <ThemedView style={styles.rainfallLegendContainer}>
+                    <ThemedView style={styles.legendItem}>
+                        <ThemedView style={[styles.legendColor, { backgroundColor: '#34C759' }]} />
+                        <ThemedText style={styles.legendText}>Normal</ThemedText>
+                    </ThemedView>
+                    <ThemedView style={styles.legendItem}>
+                        <ThemedView style={[styles.legendColor, { backgroundColor: '#FFC107' }]} />
+                        <ThemedText style={styles.legendText}>Elevated</ThemedText>
+                    </ThemedView>
+                    <ThemedView style={styles.legendItem}>
+                        <ThemedView style={[styles.legendColor, { backgroundColor: '#F44336' }]} />
+                        <ThemedText style={styles.legendText}>Extreme</ThemedText>
+                    </ThemedView>
+                </ThemedView>
+
+                {/* Makai Rain Label */}
+                <ThemedText type="subtitle" style={styles.thinText}>
+                    <Ionicons name="rainy" size={16} color="#007AFF" /> Makai (towards the ocean)
+                </ThemedText>
+                <ThemedText style={[styles.thinText, { fontSize: 13, color: '#666', marginBottom: 8, marginLeft: 2 }]}>837.7 Waiahole RG at Kamehameha Hwy., Oahu, HI - USGS-212855157504501</ThemedText>
+
+                {/* Makai Rain Info Box (plain) */}
+                <ThemedView style={styles.monitorInfoPlain}>
+                    <ThemedView style={styles.infoItem}>
+                        <ThemedText style={styles.label}>Last Hour:</ThemedText>
+                        <ThemedText style={[styles.value, { color: getMakaiRainColor(makaiRain.lastHour) }]}>{makaiRain.lastHour}</ThemedText>
+                    </ThemedView>
+                    <ThemedView style={styles.infoItem}>
+                        <ThemedText style={styles.label}>Last Six Hours:</ThemedText>
+                        <ThemedText style={[styles.value, { color: getMakaiRainColor(makaiRain.lastSixHours) }]}>{makaiRain.lastSixHours}</ThemedText>
+                    </ThemedView>
+                    <ThemedView style={styles.infoItem}>
+                        <ThemedText style={styles.label}>Last Reading:</ThemedText>
+                        <ThemedText style={styles.value}>{makaiRain.lastReading}</ThemedText>
+                    </ThemedView>
+                </ThemedView>
+
+                {/* Mauka Rain Label */}
+                <ThemedText type="subtitle" style={styles.thinText}>
+                    <Ionicons name="rainy" size={16} color="#007AFF" /> Mauka (towards the mountain)
+                </ThemedText>
+                <ThemedText style={[styles.thinText, { fontSize: 13, color: '#666', marginBottom: 8, marginLeft: 2 }]}>883.12 Poamoho Rain Gage No 1, nr Wahiawa, Oahu,HI - USGS-213215157552800</ThemedText>
+
+                {/* Mauka Rain Info Box (plain) */}
+                <ThemedView style={styles.monitorInfoPlain}>
+                    <ThemedView style={styles.infoItem}>
+                        <ThemedText style={styles.label}>Last Hour:</ThemedText>
+                        <ThemedText style={[styles.value, { color: getMaukaRainColor(maukaRain.lastHour) }]}>{maukaRain.lastHour}</ThemedText>
+                    </ThemedView>
+                    <ThemedView style={styles.infoItem}>
+                        <ThemedText style={styles.label}>Last Six Hours:</ThemedText>
+                        <ThemedText style={[styles.value, { color: getMaukaRainColor(maukaRain.lastSixHours) }]}>{maukaRain.lastSixHours}</ThemedText>
+                    </ThemedView>
+                    <ThemedView style={styles.infoItem}>
+                        <ThemedText style={styles.label}>Last Reading:</ThemedText>
+                        <ThemedText style={styles.value}>{maukaRain.lastReading}</ThemedText>
+                    </ThemedView>
+                </ThemedView>
+            </ThemedView>
+            <ThemedView style={styles.sectionDividerWrap}>
+                <ThemedView style={styles.sectionDivider} />
+            </ThemedView>
+
+            {/*
+            <ThemedView style={styles.section}>
+                <ThemedText type="subtitle" style={styles.thinText}>
+                    <Ionicons name="map" size={16} color="#007AFF" /> Interactive Flood Risk Map
+                </ThemedText>
+                <ThemedText style={[styles.thinText, { marginBottom: 12 }]}>Powered by ArcGIS mapping technology</ThemedText>
+                <ThemedView style={styles.mapContainer}>
+                    <Pressable style={styles.mapPreviewPressable} onPress={openMap}>
+                        <Image
+                            source={require('@/assets/images/map-preview-placeholder.png')}
+                            style={styles.mapPreview}
+                            contentFit="cover"
+                            accessibilityLabel="Map preview"
+                        />
+                        <ThemedView style={styles.mapPreviewOverlay} pointerEvents="none">
+                            <ThemedView style={styles.mapPreviewTextBg}>
+                                <Ionicons name="map" size={28} color="#fff" style={{ marginBottom: 10, textShadowColor: '#222', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 6 }} />
+                                <ThemedText style={styles.mapButtonText}>Open Interactive Flood Risk Map</ThemedText>
+                                <ThemedText style={styles.mapButtonSubtext}>View flood-prone areas and monitoring stations</ThemedText>
+                                <Ionicons name="open-outline" size={18} color="#fff" style={{ marginTop: 10, textShadowColor: '#222', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 6 }} />
+                            </ThemedView>
+                        </ThemedView>
+                    </Pressable>
+                </ThemedView>
+            </ThemedView>
+            */}
+
+            {/* Weather Section header */}
+            <ThemedView style={styles.section}>
+                <ThemedView style={styles.sectionHeaderContainer}>
+                    <ThemedText type="subtitle" style={[styles.thinText, styles.sectionHeaderText]}>Weather</ThemedText>
+                </ThemedView>
+
+                {/* Forecast */}
+                <ThemedView style={{ marginTop: 8 }}>
+                    <ThemedText type="subtitle" style={styles.thinText}>
+                        <Ionicons name="calendar" size={16} color="#4169E1" /> Waiāhole 3-Day Forecast
+                    </ThemedText>
+
+                    <ThemedText style={styles.forecastHint}>Swipe to view</ThemedText>
+                    <ThemedView style={styles.forecastCardHorizontal}>
+                        <ScrollView style={styles.forecastScroll} horizontal showsHorizontalScrollIndicator={false}>
+                            {forecastLoading ? (
+                                <ThemedText style={styles.placeholderText}>Loading forecast...</ThemedText>
+                            ) : forecastError ? (
+                                <ThemedText style={[styles.placeholderText, { color: 'red' }]}>{forecastError}</ThemedText>
+                            ) : forecast.length > 0 ? (
+                                forecast.map((period: any) => (
+                                    <ThemedView key={period.number} style={styles.forecastCardItem}>
+                                        <Ionicons name={getForecastIcon(period.shortForecast)} size={32} color="#4169E1" style={{ marginBottom: 6 }} />
+                                        <ThemedText style={styles.forecastTitle}>{period.name}</ThemedText>
+                                        <ThemedText style={styles.forecastTemp}>{period.temperature}°{period.temperatureUnit}</ThemedText>
+                                        <ThemedText style={styles.forecastText}>{period.shortForecast}</ThemedText>
+                                    </ThemedView>
+                                ))
+                            ) : (
+                                <ThemedText style={styles.placeholderText}>No forecast data available.</ThemedText>
+                            )}
+                        </ScrollView>
+                    </ThemedView>
+                </ThemedView>
+
+                {/* Alerts */}
+                <ThemedView style={{ marginTop: 12 }}>
+                    <ThemedText type="subtitle" style={[styles.thinText, { marginBottom: 12 }]}>National Weather Service Updates</ThemedText>
+
+                    {alertsLoading ? (
+                        <ThemedView style={styles.alertsCard}>
+                            <ActivityIndicator size="small" color="#d9534f" />
+                        </ThemedView>
+                    ) : alertsError ? (
+                        <ThemedView style={styles.alertsCard}>
+                            <ThemedText style={[styles.placeholderText, { color: '#d9534f' }]}>{alertsError}</ThemedText>
+                        </ThemedView>
+                    ) : alerts.length > 0 ? (
+                        <ThemedView style={styles.alertsCard}>
+                            {alerts.map((alert: any) => {
+                                const alertSeverity = getAlertSeverity(alert);
+                                return (
+                                    <ThemedView 
+                                        key={alert.id} 
+                                        style={[
+                                            styles.alertItem,
+                                            { 
+                                                backgroundColor: alertSeverity.bgColor,
+                                                borderLeftWidth: 4,
+                                                borderLeftColor: alertSeverity.color
+                                            }
+                                        ]}
+                                    >
+                                        <ThemedView style={styles.alertHeader}>
+                                            <ThemedText style={[styles.alertTitle, { color: alertSeverity.color }]}>
+                                                {alert.properties.event}
+                                            </ThemedText>
+                                            <ThemedView style={[styles.severityBadge, { backgroundColor: alertSeverity.color }]}>
+                                                <ThemedText style={styles.severityText}>
+                                                    {alertSeverity.level.toUpperCase()}
+                                                </ThemedText>
+                                            </ThemedView>
+                                        </ThemedView>
+                                        <ThemedText style={styles.alertTime}>
+                                            {alert.properties.effective ? `From: ${new Date(alert.properties.effective).toLocaleString('en-US', {
+                                                month: 'short',
+                                                day: 'numeric',
+                                                year: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                                hour12: true
+                                            })}` : ''}
+                                            {alert.properties.ends ? `  To: ${new Date(alert.properties.ends).toLocaleString('en-US', {
+                                                month: 'short',
+                                                day: 'numeric',
+                                                year: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                                hour12: true
+                                            })}` : ''}
+                                        </ThemedText>
+                                        <ThemedText style={styles.alertArea}>{alert.properties.areaDesc}</ThemedText>
+                                        {alert.properties.headline && (
+                                            <ThemedText style={[styles.alertHeadline, { color: alertSeverity.color }]}>
+                                                {alert.properties.headline}
+                                            </ThemedText>
+                                        )}
+                                    </ThemedView>
+                                );
+                            })}
+                        </ThemedView>
+                    ) : (
+                        <ThemedText style={styles.noAlertsText}>No active updates for East Oʻahu/Windward side.</ThemedText>
+                    )}
+                </ThemedView>
+            </ThemedView>
+            <ThemedView style={styles.sectionDividerWrap}>
+                <ThemedView style={styles.sectionDivider} />
+            </ThemedView>
+
+        </ParallaxScrollView>
+    );
+}
+
+// Helper function for forecast icons
+function getForecastIcon(shortForecast: string) {
+    const text = shortForecast.toLowerCase();
+    if (text.includes('rain')) return 'rainy';
+    if (text.includes('showers')) return 'rainy-outline';
+    if (text.includes('cloud')) return 'cloudy';
+    if (text.includes('sun') || text.includes('clear')) return 'sunny';
+    if (text.includes('haze')) return 'partly-sunny';
+    if (text.includes('wind')) return 'flag';
+    return 'cloud-outline';
+}
+
+// Helper function to determine alert severity and color
+function getAlertSeverity(alert: any) {
+    const event = alert.properties.event?.toLowerCase() || '';
+    const severity = alert.properties.severity?.toLowerCase() || '';
+    
+    if (severity === 'extreme' || severity === 'severe' || 
+        event.includes('warning') || event.includes('watch') || 
+        event.includes('tornado') || event.includes('hurricane') || 
+        event.includes('flash flood') || event.includes('severe thunderstorm')) {
+        return { color: '#FF3B30', bgColor: 'rgba(255, 59, 48, 0.1)', level: 'high' };
+    }
+    
+    if (severity === 'moderate' || 
+        event.includes('advisory') || event.includes('statement') || 
+        event.includes('flood') || event.includes('wind') || 
+        event.includes('rain')) {
+        return { color: '#FF9500', bgColor: 'rgba(255, 149, 0, 0.1)', level: 'medium' };
+    }
+    
+    return { color: '#34C759', bgColor: 'rgba(52, 199, 89, 0.1)', level: 'low' };
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 12,
-  },
-  section: {
-    marginBottom: 20,
-    gap: 4,
-  },
-  headerImage: {
-    width: '100%',
-    height: '100%',
-  },
-  thinText: {
-    fontWeight: '300',
-  },
-  sectionTitle: {
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-  welcomeSection: {
-    backgroundColor: 'rgba(0, 122, 255, 0.08)',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 24,
-    borderLeftWidth: 4,
-    borderLeftColor: '#007AFF',
-  },
-  welcomeText: {
-    fontSize: 17,
-    fontWeight: '600',
-    marginBottom: 8,
-    color: '#007AFF',
-    lineHeight: 24,
-  },
-  descriptionText: {
-    fontSize: 15,
-    fontWeight: '400',
-    lineHeight: 20,
-    opacity: 0.8,
-  },
-  quickActionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    marginTop: 8,
-  },
-  quickActionCard: {
-    flex: 1,
-    minWidth: '47%',
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
-  },
-  quickActionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginTop: 8,
-    marginBottom: 4,
-    textAlign: 'center',
-  },
-  quickActionSubtitle: {
-    fontSize: 13,
-    opacity: 0.7,
-    textAlign: 'center',
-    fontWeight: '400',
-  },
-  supportSection: {
-    backgroundColor: 'rgba(76, 175, 80, 0.08)',
-    borderRadius: 12,
-    padding: 16,
-    marginTop: 8,
-    borderLeftWidth: 4,
-    borderLeftColor: '#4CAF50',
-  },
-  supportText: {
-    fontSize: 14,
-    fontWeight: '400',
-    color: '#4CAF50',
-    lineHeight: 20,
-    textAlign: 'center',
-  },
-  emailText: {
-    fontSize: 14,
-    fontWeight: '400',
-    lineHeight: 20,
-  },
-  contactCard: {
-    backgroundColor: 'rgba(0, 122, 255, 0.08)',
-    borderRadius: 12,
-    padding: 16,
-    marginTop: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(0, 122, 255, 0.2)',
-    flexShrink: 1,
-    flexGrow: 0,
-    width: '100%',
-    alignSelf: 'stretch',
-  },
-  contactHeaderColumn: {
-    flexDirection: 'column',
-    alignItems: 'flex-start',
-    marginBottom: 4,
-    gap: 2,
-  },
-  contactName: {
-    fontSize: 16,
-    fontWeight: '600',
-    flexShrink: 1,
-    flexGrow: 1,
-    minWidth: 0,
-    maxWidth: '65%',
-    flexBasis: '65%',
-    marginRight: 8,
-    color: 'white',
-  },
-  contactNumberBelow: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#007AFF',
-    textDecorationLine: 'underline',
-    marginTop: 2,
-    textAlign: 'left',
-  },
-  contactDescription: {
-    fontSize: 14,
-    fontWeight: '300',
-    opacity: 0.8,
-  },
+    gaugeWrapper: {
+        width: '100%',
+        alignItems: 'center',
+        justifyContent: 'center',
+    marginBottom: Platform.OS === 'web' ? 6 : 0,
+        transform: Platform.OS === 'web' ? [{ scale: 0.85 }] : [{ scale: 0.68 }],
+    },
+    horizontalScroll: {
+        width: '100%',
+        marginBottom: 16,
+    },
+    horizontalScrollContent: {
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    // ...existing code...
+    headerImage: {
+        width: '100%',
+        height: '100%',
+    },
+    headerImageWrapper: {
+        width: '100%',
+        height: '100%',
+    },
+    headerOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        paddingHorizontal: 20,
+        paddingTop: 40,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.15)',
+    },
+    appTitleOverlay: {
+        fontSize: 22,
+        color: '#fff',
+        textAlign: 'center',
+        textShadowColor: 'rgba(0,0,0,0.5)',
+        textShadowOffset: { width: 0, height: 1 },
+        textShadowRadius: 4,
+        letterSpacing: 0.5,
+        transform: [{ translateY: 68 }],
+    },
+    titleContainer: {
+        paddingHorizontal: 16,
+        paddingTop: 8,
+        paddingBottom: 4,
+        marginBottom: 4,
+    },
+    titleEmoji: {
+        fontSize: 28,
+        marginHorizontal: 12,
+    },
+    appTitle: {
+        textAlign: 'left',
+        fontSize: 26,
+        fontWeight: '400',
+        letterSpacing: 0.5,
+    },
+    section: {
+        marginVertical: Platform.OS === 'web' ? 12 : 0,
+        gap: 4,
+    },
+    thinText: {
+        fontWeight: '300',
+    },
+    monitorInfo: {
+        backgroundColor: 'rgba(0, 122, 255, 0.1)',
+        borderRadius: 8,
+        padding: 16,
+        marginTop: 8,
+    },
+    monitorInfoPlain: {
+        backgroundColor: 'transparent',
+        borderRadius: 0,
+        padding: 8,
+        marginTop: 6,
+    },
+    infoItem: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
+    label: {
+        fontWeight: '500',
+        fontSize: 16,
+    },
+    value: {
+        fontWeight: '300',
+        fontSize: 16,
+        color: '#007AFF',
+    },
+    statusContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginTop: 4,
+    },
+    statusBar: {
+        backgroundColor: '#34C759',
+        paddingHorizontal: 12,
+        paddingVertical: 4,
+        borderRadius: 12,
+    },
+    statusText: {
+        color: 'white',
+        fontWeight: '600',
+        fontSize: 14,
+    },
+    streamsRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        gap: 16,
+        marginBottom: 16,
+        width: '100%',
+    },
+    streamSection: {
+        width: '100%',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: 12,
+        paddingVertical: Platform.OS === 'web' ? 8 : 0,
+        alignSelf: 'center',
+    },
+    streamNavigation: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+    marginBottom: Platform.OS === 'web' ? 10 : 2,
+    },
+    // ...existing code...
+        chartWrapper: {
+            width: '100%',
+            alignItems: 'center',
+            transform: Platform.OS === 'web' ? [] : [{ scale: 0.58 }],
+            transformOrigin: 'center',
+            marginBottom: Platform.OS === 'web' ? 10 : -6,
+            marginTop: Platform.OS === 'web' ? 6 : -12,
+        },
+    chartTitle: {
+        fontWeight: '600',
+        fontSize: 16,
+        marginBottom: Platform.OS === 'web' ? 4 : 0,
+        textAlign: 'center',
+    },
+    chartPlaceholder: {
+        height: 200,
+        backgroundColor: 'rgba(0, 122, 255, 0.1)',
+        borderRadius: 8,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 2,
+        borderColor: '#007AFF',
+        borderStyle: 'dashed',
+    },
+    placeholderText: {
+        color: '#007AFF',
+        fontWeight: '500',
+        fontSize: 14,
+    },
+    streamInfoContainer: {
+        gap: 16,
+        marginBottom: 16,
+    },
+    streamCard: {
+        backgroundColor: 'rgba(0, 122, 255, 0.08)',
+        borderRadius: 12,
+        padding: 16,
+        borderWidth: 1,
+        borderColor: 'rgba(0, 122, 255, 0.2)',
+    },
+    streamTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        marginBottom: 8,
+        color: '#007AFF',
+    },
+    streamDescription: {
+        fontSize: 14,
+        lineHeight: 20,
+        marginBottom: 12,
+        fontWeight: '300',
+    },
+    streamDetails: {
+        gap: 4,
+    },
+    detailItem: {
+        fontSize: 13,
+        fontWeight: '400',
+        lineHeight: 18,
+    },
+    mapPlaceholder: {
+        height: 200,
+        backgroundColor: 'rgba(0, 122, 255, 0.05)',
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 2,
+        borderColor: '#007AFF',
+        borderStyle: 'dashed',
+        marginTop: 8,
+    },
+    mapPlaceholderText: {
+        color: '#007AFF',
+        fontWeight: '600',
+        fontSize: 16,
+        marginTop: 8,
+    },
+    mapSubtext: {
+        color: '#007AFF',
+        fontWeight: '400',
+        fontSize: 12,
+        marginTop: 4,
+    },
+    mapContainer: {
+        backgroundColor: 'rgba(0, 122, 255, 0.05)',
+        borderRadius: 12,
+        padding: 12,
+        borderWidth: 1,
+        borderColor: 'rgba(0, 122, 255, 0.2)',
+        overflow: 'hidden',
+    },
+    webView: {
+        height: 400,
+        borderRadius: 8,
+        backgroundColor: 'transparent',
+    },
+    mapButton: {
+        backgroundColor: 'rgba(0, 122, 255, 0.1)',
+        borderRadius: 12,
+        padding: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 2,
+        borderColor: '#007AFF',
+        borderStyle: 'dashed',
+        minHeight: 120,
+    },
+    mapButtonText: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#fff',
+        textAlign: 'center',
+        marginTop: 2,
+        marginBottom: 6,
+        textShadowColor: '#222',
+        textShadowOffset: { width: 0, height: 2 },
+        textShadowRadius: 6,
+        letterSpacing: 0.2,
+    },
+    mapButtonSubtext: {
+        fontSize: 15,
+        fontWeight: '400',
+        color: '#fff',
+        textAlign: 'center',
+        opacity: 0.92,
+        marginBottom: 2,
+        textShadowColor: '#222',
+        textShadowOffset: { width: 0, height: 2 },
+        textShadowRadius: 6,
+        letterSpacing: 0.1,
+    },
+    loadingContainer: {
+        height: 400,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 122, 255, 0.05)',
+        borderRadius: 8,
+    },
+    loadingText: {
+        color: '#007AFF',
+        fontWeight: '500',
+        fontSize: 16,
+        marginTop: 8,
+    },
+    mapPreview: {
+        width: '100%',
+        height: 220, // expanded height for better mobile appearance
+        borderRadius: 12,
+        marginBottom: 0,
+        backgroundColor: '#e0e0e0',
+        borderWidth: 0, // no border
+    },
+    mapPreviewPressable: {
+        position: 'relative',
+        width: '100%',
+        height: 220,
+        borderRadius: 12,
+        overflow: 'hidden',
+        marginBottom: 16,
+    },
+    mapPreviewOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'rgba(0,122,255,0.18)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 12,
+    },
+    mapPreviewTextBg: {
+        backgroundColor: 'rgba(20, 30, 60, 0.55)',
+        borderRadius: 12,
+        paddingVertical: 18,
+        paddingHorizontal: 16,
+        alignItems: 'center',
+        justifyContent: 'center',
+        // Removed borderWidth and borderColor for cleaner look
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.18,
+        shadowRadius: 10,
+        elevation: 6,
+        width: '100%', // expand overlay to match image width
+        minHeight: 120,
+    },
+    gaugeContainer: {
+        backgroundColor: '#181f2a',
+        borderRadius: 18,
+        paddingVertical: 18,
+        paddingHorizontal: 8,
+        marginBottom: 12,
+        width: '100%',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.13,
+        shadowRadius: 8,
+        elevation: 4,
+    },
+    gaugeInnerBg: {
+        backgroundColor: '#181f2a',
+        borderRadius: 12,
+        padding: 12,
+        width: '100%',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    // Weather styles
+    alertsCard: {
+        backgroundColor: 'rgba(255, 255, 255, 0.02)',
+        borderRadius: 12,
+        padding: 16,
+        marginTop: 8,
+    },
+    alertItem: {
+        backgroundColor: 'rgba(255, 59, 48, 0.1)',
+        borderRadius: 8,
+        padding: 12,
+        marginBottom: 8,
+    },
+    alertHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
+    alertTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        flex: 1,
+    },
+    severityBadge: {
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+        borderRadius: 10,
+        marginLeft: 8,
+    },
+    severityText: {
+        color: 'white',
+        fontSize: 12,
+        fontWeight: '600',
+    },
+    alertTime: {
+        fontSize: 12,
+        fontWeight: '400',
+        color: '#666',
+        marginBottom: 4,
+    },
+    alertArea: {
+        fontSize: 12,
+        fontWeight: '400',
+        color: '#888',
+        marginBottom: 6,
+    },
+    alertHeadline: {
+        fontSize: 14,
+        fontWeight: '500',
+        lineHeight: 18,
+    },
+    noAlertsText: {
+        fontSize: 14,
+        fontWeight: '400',
+        color: '#34C759',
+        textAlign: 'center',
+        padding: 16,
+    },
+    description: {
+        fontSize: 14,
+        fontWeight: '300',
+        color: '#666',
+        marginBottom: 12,
+        textAlign: 'center',
+    },
+    forecastCardHorizontal: {
+        backgroundColor: 'rgba(65, 105, 225, 0.05)',
+        borderRadius: 12,
+        padding: 12,
+        marginTop: 8,
+    },
+    forecastScroll: {
+        flexDirection: 'row',
+    },
+    forecastCardItem: {
+        backgroundColor: 'rgba(65, 105, 225, 0.1)',
+        borderRadius: 8,
+        padding: 12,
+        marginRight: 8,
+        minWidth: 120,
+        alignItems: 'center',
+    },
+    forecastTitle: {
+        fontSize: 14,
+        fontWeight: '600',
+        marginBottom: 4,
+        textAlign: 'center',
+    },
+    forecastTemp: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: '#4169E1',
+        marginBottom: 4,
+    },
+    forecastText: {
+        fontSize: 12,
+        fontWeight: '400',
+        color: '#666',
+        textAlign: 'center',
+        lineHeight: 16,
+    },
+    sectionHeaderContainer: {
+        backgroundColor: 'rgba(30, 144, 255, 0.08)',
+        paddingVertical: Platform.OS === 'web' ? 12 : 8,
+        paddingHorizontal: 12,
+        marginVertical: Platform.OS === 'web' ? 8 : 4,
+        borderRadius: 8,
+        marginBottom: Platform.OS === 'web' ? 16 : 6,
+        shadowColor: '#1E90FF',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.08,
+        shadowRadius: 2,
+        elevation: 2,
+    },
+    sectionHeaderText: {
+        textAlign: 'center',
+        width: '100%',
+        fontSize: 22,
+        color: '#0A84FF',
+        letterSpacing: 0.5,
+    },
+    sectionBox: {
+        borderWidth: 1,
+        borderColor: '#007AFF',
+        borderRadius: 8,
+        padding: 12,
+        marginVertical: 8,
+        // don't clip children (visualizations use transforms)
+        overflow: Platform.OS === 'web' ? 'visible' : 'visible',
+    },
+    sectionDivider: {
+        height: 1.5,
+        backgroundColor: '#0A84FF',
+        opacity: 0.22,
+        marginTop: 4,
+        marginBottom: 4,
+        marginHorizontal: 8,
+        alignSelf: 'stretch',
+    },
+    sectionDividerWrap: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: Platform.OS === 'web' ? 6 : 0,
+        width: '100%',
+    },
+    rainfallLegendContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginTop: 15,
+        gap: 16,
+    },
+    legendItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginHorizontal: 4,
+    },
+    legendColor: {
+        width: 15,
+        height: 15,
+        borderRadius: 3,
+        marginRight: 5,
+    },
+    legendText: {
+        color: '#0A84FF',
+        fontSize: 14,
+    },
+    forecastHint: {
+        textAlign: 'center',
+        color: '#666',
+        fontSize: 12,
+        marginTop: 6,
+        marginBottom: 2,
+    },
+    streamNavHint: {
+        textAlign: 'center',
+        color: '#666',
+        fontSize: 12,
+        marginTop: 6,
+        marginBottom: 4,
+    },
 });

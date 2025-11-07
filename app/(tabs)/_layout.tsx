@@ -38,10 +38,11 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="stream-monitor"
+        name="about"
         options={{
-          title: 'Stream Monitor',
+          title: 'About',
           tabBarIcon: ({ color, size }) => (
+<<<<<<< HEAD
             <Ionicons name="water" color={color} size={size} />
           ),
         }}
@@ -79,6 +80,9 @@ export default function TabLayout() {
           title: 'FAQ',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="help-circle" color={color} size={size} />
+=======
+            <Ionicons name="information-circle" color={color} size={size} />
+>>>>>>> test-anne-new
           ),
         }}
       />

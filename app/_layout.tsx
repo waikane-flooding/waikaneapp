@@ -1,49 +1,100 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { View, StyleSheet, TouchableOpacity, Modal, Linking, ScrollView, TouchableWithoutFeedback } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Modal, Platform, ActivityIndicator as RNActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+<<<<<<< HEAD
 import { useState, useEffect } from 'react';
+=======
+import { useState, useEffect, useRef } from 'react';
+import { WebView } from 'react-native-webview';
+>>>>>>> test-anne-new
 import 'react-native-reanimated';
 
-import { useColorScheme } from '@/hooks/useColorScheme';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import Map from '@/components/visualizations/Map';
 
-// Emergency contacts data
-const emergencyContacts = [
-  {
-    name: "Honolulu Emergency Services",
-    number: "911",
-    description: "For immediate emergency response",
-  },
-  {
-    name: "Windward Police Station",
-    number: "(808) 723-8640",
-    description: "Kāne'ohe Police Department",
-  },
-  {
-    name: "Honolulu Police Department",
-    number: "(808) 723-8488",
-    description: "General number for non-emergencies",
-  },
-  {
-    name: "Board of Water Supply",
-    number: "(808) 748-5000",
-    description: "Water emergency & main breaks",
-  },
-  {
-    name: "State of Hawai'i, DLNR",
-    number: "(808) 587-0230",
-    description: "Engineering & flood control",
-  },
-  {
-    name: "Hawaiian Electric",
-    number: "855-304-1212",
-    description: "Power outages & emergencies",
-  }
-];
+
+// Risk assessment functions for each data source
+const assessWaikaneStreamRisk = (level: number | null): string => {
+  if (!level) return 'UNKNOWN';
+  const greenEnd = 7;
+  const yellowEnd = 10.8;
+  if (level < greenEnd) return 'LOW';
+  if (level < yellowEnd) return 'MEDIUM';
+  return 'HIGH';
+};
+
+const assessWaiaholeStreamRisk = (level: number | null): string => {
+  if (!level) return 'UNKNOWN';
+  const greenEnd = 12;
+  const yellowEnd = 16.4;
+  if (level < greenEnd) return 'LOW';
+  if (level < yellowEnd) return 'MEDIUM';
+  return 'HIGH';
+};
+
+const assessPunaluuStreamRisk = (level: number | null): string => {
+  if (!level) return 'UNKNOWN';
+  const greenEnd = 10;
+  const yellowEnd = 14.7;
+  if (level < greenEnd) return 'LOW';
+  if (level < yellowEnd) return 'MEDIUM';
+  return 'HIGH';
+};
+
+const assessTideRisk = (level: number | null): string => {
+  if (!level) return 'UNKNOWN';
+  const greenEnd = 2.92;
+  const yellowEnd = 3.42;
+  if (level < greenEnd) return 'LOW';
+  if (level < yellowEnd) return 'MEDIUM';
+  return 'HIGH';
+};
+
+const assessMakaiRainRisk = (level: number | null): string => {
+  if (!level) return 'UNKNOWN';
+  const greenEnd = 2.8;
+  const yellowEnd = 4.1;
+  if (level <= greenEnd) return 'LOW';
+  if (level <= yellowEnd) return 'MEDIUM';
+  return 'HIGH';
+};
+
+const assessMaukaRainRisk = (level: number | null): string => {
+  if (!level) return 'UNKNOWN';
+  const greenEnd = 3.11;
+  const yellowEnd = 4.54;
+  if (level <= greenEnd) return 'LOW';
+  if (level <= yellowEnd) return 'MEDIUM';
+  return 'HIGH';
+};
+
+// Overall risk assessment
+const assessOverallRisk = (
+  waikaneStream: number | null,
+  waiaholeStream: number | null,
+  punaluuStream: number | null,
+  tide: number | null,
+  makaiRain: number | null,
+  maukaRain: number | null
+): string => {
+  const risks = [
+    assessWaikaneStreamRisk(waikaneStream),
+    assessWaiaholeStreamRisk(waiaholeStream),
+    assessPunaluuStreamRisk(punaluuStream),
+    assessTideRisk(tide),
+    assessMakaiRainRisk(makaiRain),
+    assessMaukaRainRisk(maukaRain)
+  ].filter(risk => risk !== 'UNKNOWN');
+
+  if (risks.length === 0) return 'UNKNOWN';
+  if (risks.includes('HIGH')) return 'HIGH';
+  if (risks.includes('MEDIUM')) return 'MEDIUM';
+  return 'LOW';
+};
 
 // Risk assessment functions for each data source
 const assessWaikaneStreamRisk = (level: number | null): string => {
@@ -153,89 +204,79 @@ const FLOOD_RISK_LEVELS = {
   }
 };
 
-function ContactsModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
-  return (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={visible}
-      onRequestClose={onClose}
-    >
-      <TouchableWithoutFeedback onPress={onClose}>
-        <View style={styles.modalOverlay}>
-          <TouchableWithoutFeedback onPress={() => {}}>
-            <View style={styles.contactsModalContent}>
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={onClose}
-              >
-                <Ionicons name="close" size={24} color="#666" />
-              </TouchableOpacity>
-              
-              <View style={styles.contactsModalHeader}>
-                <Ionicons name="call" size={28} color="#FF3B30" />
-                <ThemedText style={styles.contactsModalTitle}>
-                  Emergency Contacts
-                </ThemedText>
-              </View>
-              
-              <ScrollView 
-                style={styles.contactsList}
-                contentContainerStyle={styles.contactsListContent}
-                showsVerticalScrollIndicator={true}
-                scrollEnabled={true}
-                keyboardShouldPersistTaps="handled"
-              >
-                {emergencyContacts.map((contact, index) => (
-                  <TouchableOpacity 
-                    key={index} 
-                    style={styles.contactItem}
-                    activeOpacity={0.7}
-                  >
-                    <ThemedText style={styles.contactName}>
-                      {contact.name}
-                    </ThemedText>
-                    <TouchableOpacity
-                      onPress={() => Linking.openURL(`tel:${contact.number}`)}
-                      activeOpacity={0.7}
-                    >
-                      <ThemedText style={styles.contactNumber}>
-                        {contact.number}
-                      </ThemedText>
-                    </TouchableOpacity>
-                    <ThemedText style={styles.contactDescription}>
-                      {contact.description}
-                    </ThemedText>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
-          </TouchableWithoutFeedback>
-        </View>
-      </TouchableWithoutFeedback>
-    </Modal>
-  );
-}
 
 function FloodRiskIndicator() {
   const [modalVisible, setModalVisible] = useState(false);
+<<<<<<< HEAD
   const [contactsModalVisible, setContactsModalVisible] = useState(false);
   const [riskData, setRiskData] = useState<{
     waikaneStream: number | null;
     waiaholeStream: number | null;
     tide: number | null;
     rain: number | null;
+=======
+  
+  const [mapModalVisible, setMapModalVisible] = useState(false);
+  const closeMap = () => {
+    // clear any pending timers when closing
+    if (mapLoadingTimer.current) {
+      clearTimeout(mapLoadingTimer.current as any);
+      mapLoadingTimer.current = null;
+    }
+    setMapModalVisible(false);
+  };
+  const [mapLoading, setMapLoading] = useState(true);
+  const mapLoadStart = useRef<number | null>(null);
+  const mapLoadingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const MIN_LOADING_MS = 1000; // ensure loading overlay shows at least 1s
+
+  // Open the map: show the Map.js component in a modal
+  const openMap = () => {
+    // show loader and note start time
+    setMapLoading(true);
+    mapLoadStart.current = Date.now();
+    setMapModalVisible(true);
+    
+    // Simulate loading time for Map.js component
+    const elapsed = Date.now() - (mapLoadStart.current || Date.now());
+    const remaining = Math.max(0, MIN_LOADING_MS - elapsed);
+    if (remaining > 0) {
+      mapLoadingTimer.current = setTimeout(() => {
+        setMapLoading(false);
+        mapLoadingTimer.current = null;
+      }, remaining);
+    } else {
+      setMapLoading(false);
+    }
+  };
+
+  const [riskData, setRiskData] = useState<{
+    waikaneStream: number | null;
+    waiaholeStream: number | null;
+    punaluuStream: number | null;
+    tide: number | null;
+    makaiRain: number | null;
+    maukaRain: number | null;
+>>>>>>> test-anne-new
     lastUpdated: Date | null;
   }>({
     waikaneStream: null,
     waiaholeStream: null,
+<<<<<<< HEAD
     tide: null,
     rain: null,
+=======
+    punaluuStream: null,
+    tide: null,
+    makaiRain: null,
+    maukaRain: null,
+>>>>>>> test-anne-new
     lastUpdated: null,
   });
 
   // Fetch data from all sources
   useEffect(() => {
+<<<<<<< HEAD
     const fetchAllData = async () => {
       try {
         const [waikaneRes, waiaholeRes, tideRes, rainRes] = await Promise.all([
@@ -248,6 +289,23 @@ function FloodRiskIndicator() {
         const [waikaneData, waiaholeData, tideData, rainData] = await Promise.all([
           waikaneRes.json(),
           waiaholeRes.json(),
+=======
+
+    const fetchAllData = async () => {
+      try {
+        const [waikaneRes, waiaholeRes, punaluuRes, tideRes, rainRes] = await Promise.all([
+          fetch('http://149.165.159.226:5000/api/waikane_stream'),
+          fetch('http://149.165.159.226:5000/api/waiahole_stream'),
+          fetch('http://149.165.159.226:5000/api/punaluu_stream'),
+          fetch('http://149.165.159.226:5000/api/waikane_tide_curve'),
+          fetch('http://149.165.159.226:5000/api/rain_data')
+        ]);
+
+        const [waikaneData, waiaholeData, punaluuData, tideData, rainData] = await Promise.all([
+          waikaneRes.json(),
+          waiaholeRes.json(),
+          punaluuRes.json(),
+>>>>>>> test-anne-new
           tideRes.json(),
           rainRes.json()
         ]);
@@ -273,6 +331,19 @@ function FloodRiskIndicator() {
           .filter((d: any) => d.time <= now)
           .sort((a: any, b: any) => b.time - a.time)[0];
 
+<<<<<<< HEAD
+=======
+        // Process Punaluu Stream data
+        const punaluuLatest = punaluuData
+          .filter((d: any) => d.ft != null && d.DateTime)
+          .map((d: any) => ({
+            time: new Date(d.DateTime),
+            value: d.ft
+          }))
+          .filter((d: any) => d.time <= now)
+          .sort((a: any, b: any) => b.time - a.time)[0];
+
+>>>>>>> test-anne-new
         // Process Tide data using robust HST logic (match WaikaneTideLevel)
         function getNowHSTAsLocalDate() {
           const nowUTC = new Date();
@@ -297,20 +368,38 @@ function FloodRiskIndicator() {
           .sort((a: any, b: any) => b.time - a.time)[0];
 
         // Process Rain data
+<<<<<<< HEAD
         const totalRainfall = rainData.reduce((sum: number, item: any) => {
           return sum + (item["in"] || 0);
         }, 0);
+=======
+        const rainRows = Array.isArray(rainData) ? rainData : [];
+        const makaiRain = rainRows.find((d: any) => d.Name && d['1HrRainfall'] != null && d.Name.toLowerCase().includes('makai'));
+        const maukaRain = rainRows.find((d: any) => d.Name && d['1HrRainfall'] != null && d.Name.toLowerCase().includes('mauka'));
+>>>>>>> test-anne-new
 
         setRiskData({
           waikaneStream: waikaneLatest?.value || null,
           waiaholeStream: waiaholeLatest?.value || null,
+<<<<<<< HEAD
           tide: tideLatest?.height || null,
           rain: totalRainfall,
+=======
+          punaluuStream: punaluuLatest?.value || null,
+          tide: tideLatest?.height || null,
+          makaiRain: makaiRain?.['1HrRainfall'] ?? null,
+          maukaRain: maukaRain?.['1HrRainfall'] ?? null,
+>>>>>>> test-anne-new
           lastUpdated: new Date(),
         });
 
       } catch (error) {
+<<<<<<< HEAD
         console.error('Error fetching risk data:', error);
+=======
+        // Silently handle network errors to avoid flooding console
+        // The app will continue to use existing state values
+>>>>>>> test-anne-new
       }
     };
 
@@ -320,11 +409,32 @@ function FloodRiskIndicator() {
     return () => clearInterval(interval);
   }, []);
 
+<<<<<<< HEAD
   const currentRiskLevel = assessOverallRisk(
     riskData.waikaneStream,
     riskData.waiaholeStream, 
     riskData.tide,
     riskData.rain
+=======
+  // Cleanup any timers on unmount
+  useEffect(() => {
+    return () => {
+      if (mapLoadingTimer.current) {
+        clearTimeout(mapLoadingTimer.current as any);
+        mapLoadingTimer.current = null;
+      }
+    };
+  }, []);
+
+  // Use both Makai and Mauka rainfall for risk assessment
+  const currentRiskLevel = assessOverallRisk(
+    riskData.waikaneStream,
+    riskData.waiaholeStream, 
+    riskData.punaluuStream,
+    riskData.tide,
+    riskData.makaiRain,
+    riskData.maukaRain
+>>>>>>> test-anne-new
   ) as keyof typeof FLOOD_RISK_LEVELS;
   const risk = FLOOD_RISK_LEVELS[currentRiskLevel];
 
@@ -336,25 +446,20 @@ function FloodRiskIndicator() {
           onPress={() => setModalVisible(true)}
           activeOpacity={0.8}
         >
-          <Ionicons name={risk.icon as any} size={20} color={risk.color} />
+    <Ionicons name={risk.icon as any} size={16} color={risk.color} />
           <ThemedText style={[styles.riskText, { color: risk.color }]}>
             {risk.text}
           </ThemedText>
         </TouchableOpacity>
 
         <TouchableOpacity 
-          style={styles.contactsButton}
-          onPress={() => setContactsModalVisible(true)}
+          style={styles.mapButton}
+          onPress={openMap}
           activeOpacity={0.8}
         >
-          <Ionicons name="call" size={20} color="#FF3B30" />
+    <Ionicons name="map" size={16} color="#007AFF" />
         </TouchableOpacity>
       </View>
-
-      <ContactsModal 
-        visible={contactsModalVisible} 
-        onClose={() => setContactsModalVisible(false)} 
-      />
 
       <Modal
         animationType="fade"
@@ -387,11 +492,91 @@ function FloodRiskIndicator() {
             </ThemedText>
             
             <View style={styles.detailsList}>
+<<<<<<< HEAD
               {risk.details.map((detail: string, index: number) => (
                 <ThemedText key={index} style={styles.detailItem}>
                   {detail}
+=======
+              {Array.isArray(risk.details) && risk.details.map((detail: any, index: number) => {
+                if (typeof detail !== 'string') return null;
+                return (
+                  <ThemedText key={index} style={styles.detailItem}>
+                    {detail}
+                  </ThemedText>
+                );
+              })}
+            </View>
+
+            {/* Current Readings Section */}
+            <View style={styles.readingsSection}>
+              <ThemedText style={styles.readingsTitle}>Current Readings:</ThemedText>
+
+              <View style={styles.readingItem}>
+                <ThemedText style={styles.readingLabel}>Waikane Stream:</ThemedText>
+                <ThemedText style={[styles.readingValue, {
+                  color: riskData.waikaneStream && typeof riskData.waikaneStream === 'number' ?
+                    (assessWaikaneStreamRisk(riskData.waikaneStream) === 'HIGH' ? '#FF3B30' :
+                      assessWaikaneStreamRisk(riskData.waikaneStream) === 'MEDIUM' ? '#FF9500' : '#34C759') : '#8E8E93'
+                }]}> 
+                  {riskData.waikaneStream && typeof riskData.waikaneStream === 'number' ? `${riskData.waikaneStream.toFixed(2)} ft` : 'No data'}
+>>>>>>> test-anne-new
                 </ThemedText>
-              ))}
+              </View>
+
+              <View style={styles.readingItem}>
+                <ThemedText style={styles.readingLabel}>Waiahole Stream:</ThemedText>
+                <ThemedText style={[styles.readingValue, {
+                  color: riskData.waiaholeStream && typeof riskData.waiaholeStream === 'number' ?
+                    (assessWaiaholeStreamRisk(riskData.waiaholeStream) === 'HIGH' ? '#FF3B30' :
+                      assessWaiaholeStreamRisk(riskData.waiaholeStream) === 'MEDIUM' ? '#FF9500' : '#34C759') : '#8E8E93'
+                }]}> 
+                  {riskData.waiaholeStream && typeof riskData.waiaholeStream === 'number' ? `${riskData.waiaholeStream.toFixed(2)} ft` : 'No data'}
+                </ThemedText>
+              </View>
+
+              <View style={styles.readingItem}>
+                <ThemedText style={styles.readingLabel}>Punaluu Stream:</ThemedText>
+                <ThemedText style={[styles.readingValue, {
+                  color: riskData.punaluuStream && typeof riskData.punaluuStream === 'number' ?
+                    (assessPunaluuStreamRisk(riskData.punaluuStream) === 'HIGH' ? '#FF3B30' :
+                      assessPunaluuStreamRisk(riskData.punaluuStream) === 'MEDIUM' ? '#FF9500' : '#34C759') : '#8E8E93'
+                }]}> 
+                  {riskData.punaluuStream && typeof riskData.punaluuStream === 'number' ? `${riskData.punaluuStream.toFixed(2)} ft` : 'No data'}
+                </ThemedText>
+              </View>
+
+              <View style={styles.readingItem}>
+                <ThemedText style={styles.readingLabel}>Waikane Tide:</ThemedText>
+                <ThemedText style={[styles.readingValue, {
+                  color: riskData.tide && typeof riskData.tide === 'number' ?
+                    (assessTideRisk(riskData.tide) === 'HIGH' ? '#FF3B30' :
+                      assessTideRisk(riskData.tide) === 'MEDIUM' ? '#FF9500' : '#34C759') : '#8E8E93'
+                }]}> 
+                  {riskData.tide && typeof riskData.tide === 'number' ? `${riskData.tide.toFixed(2)} ft` : 'No data'}
+                </ThemedText>
+              </View>
+
+              <View style={styles.readingItem}>
+                <ThemedText style={styles.readingLabel}>Makai Rainfall (Last Hour):</ThemedText>
+                <ThemedText style={[styles.readingValue, {
+                  color: riskData.makaiRain !== null && typeof riskData.makaiRain === 'number' ?
+                    (assessMakaiRainRisk(riskData.makaiRain) === 'HIGH' ? '#FF3B30' :
+                      assessMakaiRainRisk(riskData.makaiRain) === 'MEDIUM' ? '#FF9500' : '#34C759') : '#8E8E93'
+                }]}> 
+                  {riskData.makaiRain !== null && typeof riskData.makaiRain === 'number' ? `${riskData.makaiRain.toFixed(2)} in` : 'No data'}
+                </ThemedText>
+              </View>
+
+              <View style={styles.readingItem}>
+                <ThemedText style={styles.readingLabel}>Mauka Rainfall (Last Hour):</ThemedText>
+                <ThemedText style={[styles.readingValue, {
+                  color: riskData.maukaRain !== null && typeof riskData.maukaRain === 'number' ?
+                    (assessMaukaRainRisk(riskData.maukaRain) === 'HIGH' ? '#FF3B30' :
+                      assessMaukaRainRisk(riskData.maukaRain) === 'MEDIUM' ? '#FF9500' : '#34C759') : '#8E8E93'
+                }]}> 
+                  {riskData.maukaRain !== null && typeof riskData.maukaRain === 'number' ? `${riskData.maukaRain.toFixed(2)} in` : 'No data'}
+                </ThemedText>
+              </View>
             </View>
 
             {/* Current Readings Section */}
@@ -449,30 +634,55 @@ function FloodRiskIndicator() {
           </ThemedView>
         </TouchableOpacity>
       </Modal>
+
+      {/* Map Modal (Map.js Component) */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={mapModalVisible}
+        onRequestClose={closeMap}
+      >
+        <View style={styles.mapModalBackdrop}>
+          <View style={styles.mapModalContent}>
+            <TouchableOpacity
+              style={styles.mapCloseButton}
+              onPress={closeMap}
+            >
+              <Ionicons name="close" size={20} color="#222" />
+            </TouchableOpacity>
+            <Map />
+            {mapLoading && (
+              <View style={styles.mapLoadingOverlay} pointerEvents="none">
+                <RNActivityIndicator size="large" color="#007AFF" />
+                <ThemedText style={styles.mapLoadingText}>Loading map…</ThemedText>
+              </View>
+            )}
+          </View>
+        </View>
+      </Modal>
     </>
   );
 }
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
 
   if (!loaded) {
-    //can return a loading indicator or null while fonts are loading
     return null;
   }
 
+  // Always use DarkTheme
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={DarkTheme}>
       <View style={styles.container}>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="+not-found" />
         </Stack>
         <FloodRiskIndicator />
-        <StatusBar style="auto" />
+        <StatusBar style="light" />
       </View>
     </ThemeProvider>
   );
@@ -484,20 +694,20 @@ const styles = StyleSheet.create({
   },
   indicatorContainer: {
     position: 'absolute',
-    top: 60, // Adjust based on status bar height
-    right: 16,
+    top: 60,
+    right: 14,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
     zIndex: 1000,
   },
   floodIndicator: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 16,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -508,94 +718,31 @@ const styles = StyleSheet.create({
     elevation: 5,
     gap: 4,
   },
-  contactsButton: {
+  riskText: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  mapButton: {
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    padding: 8,
-    borderRadius: 20,
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 18,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
   },
-  riskText: {
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  modalContent: {
-    backgroundColor: 'white',
-    borderRadius: 16,
-    padding: 24,
-    width: '90%',
-    maxWidth: 400,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 8,
-  },
-  contactsModalContent: {
-    backgroundColor: 'white',
-    borderRadius: 16,
-    padding: 24,
-    width: '95%',
-    maxWidth: 450,
-    maxHeight: '80%',
-    minHeight: 300,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 8,
-    flexDirection: 'column',
-  },
-  closeButton: {
-    position: 'absolute',
-    top: 16,
-    right: 16,
-    padding: 4,
-    zIndex: 1,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-    gap: 12,
-  },
-  contactsModalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-    gap: 12,
-    paddingTop: 8,
-  },
+  // Removed contacts styles (legacy cleanup)
+  // contactsModalHeader: {},
   modalTitle: {
     fontSize: 20,
     fontWeight: '700',
     flex: 1,
   },
-  contactsModalTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    flex: 1,
-    color: '#FF3B30',
-  },
+  // contactsModalTitle: {},
   modalDescription: {
     fontSize: 16,
     lineHeight: 22,
@@ -620,37 +767,117 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 8,
   },
-  contactsList: {
+  // Removed contacts list styles
+  modalOverlay: {
     flex: 1,
-    marginBottom: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
   },
-  contactsListContent: {
-    paddingBottom: 20,
-    flexGrow: 1,
+  modalContent: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 24,
+    width: '90%',
+    maxWidth: 400,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 8,
   },
-  contactItem: {
-    marginBottom: 20,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0, 0, 0, 0.1)',
+  closeButton: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    padding: 4,
+    zIndex: 1,
   },
-  contactName: {
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    gap: 12,
+  },
+  readingsSection: {
+    marginTop: 16,
+    marginBottom: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0, 0, 0, 0.1)',
+  },
+  readingsTitle: {
     fontSize: 16,
     fontWeight: '600',
-    marginBottom: 4,
+    marginBottom: 12,
     color: '#333333',
   },
-  contactNumber: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#007AFF',
-    textDecorationLine: 'underline',
-    marginBottom: 4,
+  readingItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
   },
-  contactDescription: {
+  readingLabel: {
     fontSize: 14,
+    fontWeight: '500',
     color: '#666666',
-    fontWeight: '400',
+    flex: 1,
+  },
+  readingValue: {
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'right',
+  },
+  mapModalContainer: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
+  mapCloseButton: {
+    position: 'absolute',
+    top: 40,
+    right: 16,
+    zIndex: 20,
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    borderRadius: 20,
+    padding: 6,
+  },
+  mapWebView: {
+    flex: 1,
+    marginTop: 0,
+  },
+  mapModalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  mapModalContent: {
+    width: '92%',
+    height: '72%',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    overflow: 'hidden',
+    alignSelf: 'center',
+    elevation: 10,
+  },
+  mapLoadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(255,255,255,0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 30,
+  },
+  mapLoadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#007AFF',
   },
   readingsSection: {
     marginTop: 16,

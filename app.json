@@ -1,16 +1,23 @@
 {
   "expo": {
-    "name": "chiaraduyn-app",
-    "slug": "waikane-app",
+  "name": "Windward Flood Check",
+  "slug": "windward-flood-check",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "chiaraduynapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "description": "Real-time flood monitoring app for Windward Oʻahu providing local water level data, maps, and safety alerts.",
+    "author": "WRRC Shuler Lab (University of Hawai‘i)",
+    "copyright": "© 2025 WRRC Shuler Lab. All rights reserved.",
+    "primaryLanguage": "en",
+    "categories": ["Weather", "Utilities"],
+    "ageRating": "4+",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.chiaraduyn.waikaneapp",
+      "bundleIdentifier": "edu.hawaii.wrrc",
+      "buildNumber": "1",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSAppTransportSecurity": {
@@ -24,7 +31,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.chiaraduyn.waikaneapp"
+      "package": "edu.hawaii.wrrc"
     },
     "web": {
       "bundler": "metro",
@@ -42,7 +49,8 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true
@@ -53,6 +61,7 @@
         "projectId": "67d81f10-69bc-490c-93c3-66cd09c99955"
       }
     },
-    "owner": "chiaraduyn"
+    "owner": "chiaraduyn",
+      "keywords": ["flood", "hawaii", "weather", "WRRC", "Oahu", "alerts"]
   }
 }
