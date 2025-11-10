@@ -6,8 +6,8 @@ const WaikaneTideLevel = () => {
   const [tideTime, setTideTime] = useState(null);
   const [tideDirection, setTideDirection] = useState(null);
 
-  const minLevel = -2;
-  const maxLevel = 4;
+  const _minLevel = -2;
+  const _maxLevel = 4;
 
   useEffect(() => {
     fetch('http://149.165.159.226:5000/api/waikane_tide_curve')
@@ -22,7 +22,7 @@ const WaikaneTideLevel = () => {
         const utcMinute = nowUTC.getUTCMinutes();
         const utcSecond = nowUTC.getUTCSeconds();
         // HST is UTC-10
-        const nowHST = new Date(Date.UTC(utcYear, utcMonth, utcDate, utcHour - 10, utcMinute, utcSecond));
+  const _nowHST = new Date(Date.UTC(utcYear, utcMonth, utcDate, utcHour - 10, utcMinute, utcSecond));
 
         // Helper to parse API timestamp as HST (treat as HST, not local/UTC)
         function parseHSTTimestamp(str) {

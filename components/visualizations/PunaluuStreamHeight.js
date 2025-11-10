@@ -69,7 +69,7 @@ const PunaluuStreamHeight = ({ streamData, trendData }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Punalu'u Stream Gauge</Text>
+      <Text style={styles.title}>Punalu&apos;u Stream Gauge</Text>
       <View style={styles.gaugeContainer}>
         <Svg width={700} height={300}>
           {/* Background arc */}

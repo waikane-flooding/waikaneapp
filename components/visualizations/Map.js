@@ -10,10 +10,10 @@ import Watersheds from './PlotlyData/Watersheds.json';
 
 // Conditionally import WebView only for mobile platforms
 let WebView;
-if (Platform.OS !== 'web') {
+  if (Platform.OS !== 'web') {
   try {
     WebView = require('react-native-webview').WebView;
-  } catch (e) {
+  } catch (_e) {
     console.warn('WebView not available');
   }
 }
@@ -301,213 +301,215 @@ const Map = () => {
     setHtmlContent(html);
   }, []);
 
+  // Web-only effect: load Plotly and render map into mapRef when running on web.
+  useEffect(() => {
+    if (Platform.OS !== 'web') return;
+    if (mapRef.current && coordinates.rain && coordinates.rain.length > 0) {
+      // Load Plotly dynamically
+      const script = document.createElement('script');
+      script.src = 'https://cdn.plot.ly/plotly-latest.min.js';
+      script.onload = () => {
+        if (window.Plotly && mapRef.current) {
+          // Create data array with multiple traces
+          const data = [];
+          
+          // Watersheds (rendered first - bottom layer)
+          if (coordinates.watersheds && coordinates.watersheds.length > 0) {
+            const watershedColors = [
+              { line: 'rgba(0, 0, 0, 0.8)', fill: 'rgba(0, 0, 0, 0.2)' },
+              { line: 'rgba(0, 0, 0, 0.8)', fill: 'rgba(0, 0, 0, 0.2)' },  
+              { line: 'rgba(0, 0, 0, 0.8)', fill: 'rgba(0, 0, 0, 0.2)' }
+            ];
+            
+            coordinates.watersheds.forEach((watershed, index) => {
+              const colorSet = watershedColors[index % watershedColors.length];
+              data.push({
+                type: 'scattermapbox',
+                mode: 'lines',
+                lon: watershed.path.map(point => point[0]),
+                lat: watershed.path.map(point => point[1]),
+                line: {
+                  width: 0.5,
+                  color: colorSet.line
+                },
+                fill: 'toself',
+                fillcolor: colorSet.fill,
+                name: 'Watersheds',
+                hovertemplate: '<b>' + watershed.name + '</b><extra></extra>',
+                showlegend: index === 0, // Only show in legend for the first watershed
+                legendgroup: 'watersheds'
+              });
+            });
+          }
+          
+          // Tides lines traces (rendered second layer)
+          if (coordinates.tides && coordinates.tides.length > 0) {
+            coordinates.tides.forEach((tide, index) => {
+              data.push({
+                type: 'scattermapbox',
+                mode: 'lines',
+                lon: tide.path.map(point => point[0]),
+                lat: tide.path.map(point => point[1]),
+                line: {
+                  width: 3,
+                  color: '#00008B'
+                },
+                name: 'Tides',
+                hovertemplate: '<b>Tides</b><extra></extra>',
+                showlegend: index === 0, // Only show in legend for the first tide
+                legendgroup: 'tides'
+              });
+            });
+          }
+
+          // Waikane Stream lines traces
+          if (coordinates.waikaneStreams && coordinates.waikaneStreams.length > 0) {
+            // Combine all Waikane stream segments into one trace
+            const allWaikaneCoords = coordinates.waikaneStreams.map(stream => stream.path);
+            allWaikaneCoords.forEach((streamPath, index) => {
+              data.push({
+                type: 'scattermapbox',
+                mode: 'lines',
+                lon: streamPath.map(point => point[0]),
+                lat: streamPath.map(point => point[1]),
+                line: {
+                  width: 2,
+                  color: '#0096FF'
+                },
+                name: 'Streams',
+                hovertemplate: '<b>Waikane Stream</b><extra></extra>',
+                showlegend: index === 0, // Only show in legend for the first segment
+                legendgroup: 'streams'
+              });
+            });
+          }
+
+          // Waiahole Stream lines traces
+          if (coordinates.waiaholeStreams && coordinates.waiaholeStreams.length > 0) {
+            // Combine all Waiahole stream segments into one trace
+            const allWaiaholeCoords = coordinates.waiaholeStreams.map(stream => stream.path);
+            allWaiaholeCoords.forEach((streamPath, index) => {
+              data.push({
+                type: 'scattermapbox',
+                mode: 'lines',
+                lon: streamPath.map(point => point[0]),
+                lat: streamPath.map(point => point[1]),
+                line: {
+                  width: 2,
+                  color: '#0096FF'
+                },
+                name: 'Streams',
+                hovertemplate: '<b>Waiahole Stream</b><extra></extra>',
+                showlegend: false, // Don't show in legend since Waikane already shows it
+                legendgroup: 'streams'
+              });
+            });
+          }
+
+          // Punaluu Stream lines traces
+          if (coordinates.punaluuStreams && coordinates.punaluuStreams.length > 0) {
+            // Combine all Punaluu stream segments into one trace
+            const allPunaluuCoords = coordinates.punaluuStreams.map(stream => stream.path);
+            allPunaluuCoords.forEach((streamPath, index) => {
+              data.push({
+                type: 'scattermapbox',
+                mode: 'lines',
+                lon: streamPath.map(point => point[0]),
+                lat: streamPath.map(point => point[1]),
+                line: {
+                  width: 2,
+                  color: '#0096FF'
+                },
+                name: 'Streams',
+                hovertemplate: '<b>Punaluu Stream</b><extra></extra>',
+                showlegend: false, // Don't show in legend since Waikane already shows it
+                legendgroup: 'streams'
+              });
+            });
+          }
+          
+          // Stream Gauges trace (rendered first - bottom layer)
+          if (coordinates.stream && coordinates.stream.length > 0) {
+            data.push({
+              type: 'scattermapbox',
+              mode: 'markers',
+              lon: coordinates.stream.map(x => x.lon),
+              lat: coordinates.stream.map(x => x.lat),
+              marker: {
+                size: 15,
+                color: 'green',
+                line: {
+                  color: 'black',
+                  width: 3
+                }
+              },
+              name: 'Stream Gauges',
+              text: coordinates.stream.map(x => x.name),
+              hovertemplate: '<b>%{text}</b><br><extra></extra>',
+              customdata: coordinates.stream.map(x => x.name)
+            });
+          }
+
+          // Rain Gauges trace (rendered on top)
+          if (coordinates.rain && coordinates.rain.length > 0) {
+            data.push({
+              type: 'scattermapbox',
+              mode: 'markers',
+              lon: coordinates.rain.map(x => x.lon),
+              lat: coordinates.rain.map(x => x.lat),
+              marker: {
+                size: 10,
+                color: 'red',
+              },
+              name: 'Rain Gauges',
+              text: coordinates.rain.map(x => x.name),
+              hovertemplate: '<b>%{text}</b><extra></extra>',
+              customdata: coordinates.rain.map(x => x.name)
+            });
+          }
+          
+          const layout = {
+            mapbox: {
+              style: "open-street-map",
+              center: { 
+                lat: 21.514,
+                lon: -157.887 
+              },
+              zoom: 11
+            },
+            margin: { r: 10, t: 10, l: 10, b: 10 },
+            autosize: true,
+            showlegend: true,
+            legend: {
+              x: 0,
+              y: 1,
+              bgcolor: 'rgba(255, 255, 255, 0.8)'
+            }
+          };
+          
+          const config = {
+            responsive: true,
+            displayModeBar: false,
+            scrollZoom: true,
+            doubleClick: 'reset'
+          };
+
+          window.Plotly.newPlot(mapRef.current, data, layout, config);
+        }
+      };
+      
+      // Only add script if it's not already loaded
+      if (!window.Plotly) {
+        document.head.appendChild(script);
+      } else {
+        script.onload();
+      }
+    }
+  }, [htmlContent, coordinates]);
+
   if (Platform.OS === 'web') {
     // For web platform, create Plotly map directly
-    useEffect(() => {
-      if (mapRef.current && coordinates.rain && coordinates.rain.length > 0) {
-        // Load Plotly dynamically
-        const script = document.createElement('script');
-        script.src = 'https://cdn.plot.ly/plotly-latest.min.js';
-        script.onload = () => {
-          if (window.Plotly && mapRef.current) {
-            // Create data array with multiple traces
-            const data = [];
-            
-            // Watersheds (rendered first - bottom layer)
-            if (coordinates.watersheds && coordinates.watersheds.length > 0) {
-              const watershedColors = [
-                { line: 'rgba(0, 0, 0, 0.8)', fill: 'rgba(0, 0, 0, 0.2)' },
-                { line: 'rgba(0, 0, 0, 0.8)', fill: 'rgba(0, 0, 0, 0.2)' },  
-                { line: 'rgba(0, 0, 0, 0.8)', fill: 'rgba(0, 0, 0, 0.2)' }
-              ];
-              
-              coordinates.watersheds.forEach((watershed, index) => {
-                const colorSet = watershedColors[index % watershedColors.length];
-                data.push({
-                  type: 'scattermapbox',
-                  mode: 'lines',
-                  lon: watershed.path.map(point => point[0]),
-                  lat: watershed.path.map(point => point[1]),
-                  line: {
-                    width: 0.5,
-                    color: colorSet.line
-                  },
-                  fill: 'toself',
-                  fillcolor: colorSet.fill,
-                  name: 'Watersheds',
-                  hovertemplate: '<b>' + watershed.name + '</b><extra></extra>',
-                  showlegend: index === 0, // Only show in legend for the first watershed
-                  legendgroup: 'watersheds'
-                });
-              });
-            }
-            
-            // Tides lines traces (rendered second layer)
-            if (coordinates.tides && coordinates.tides.length > 0) {
-              coordinates.tides.forEach((tide, index) => {
-                data.push({
-                  type: 'scattermapbox',
-                  mode: 'lines',
-                  lon: tide.path.map(point => point[0]),
-                  lat: tide.path.map(point => point[1]),
-                  line: {
-                    width: 3,
-                    color: '#00008B'
-                  },
-                  name: 'Tides',
-                  hovertemplate: '<b>Tides</b><extra></extra>',
-                  showlegend: index === 0, // Only show in legend for the first tide
-                  legendgroup: 'tides'
-                });
-              });
-            }
-
-            // Waikane Stream lines traces
-            if (coordinates.waikaneStreams && coordinates.waikaneStreams.length > 0) {
-              // Combine all Waikane stream segments into one trace
-              const allWaikaneCoords = coordinates.waikaneStreams.map(stream => stream.path);
-              allWaikaneCoords.forEach((streamPath, index) => {
-                data.push({
-                  type: 'scattermapbox',
-                  mode: 'lines',
-                  lon: streamPath.map(point => point[0]),
-                  lat: streamPath.map(point => point[1]),
-                  line: {
-                    width: 2,
-                    color: '#0096FF'
-                  },
-                  name: 'Streams',
-                  hovertemplate: '<b>Waikane Stream</b><extra></extra>',
-                  showlegend: index === 0, // Only show in legend for the first segment
-                  legendgroup: 'streams'
-                });
-              });
-            }
-
-            // Waiahole Stream lines traces
-            if (coordinates.waiaholeStreams && coordinates.waiaholeStreams.length > 0) {
-              // Combine all Waiahole stream segments into one trace
-              const allWaiaholeCoords = coordinates.waiaholeStreams.map(stream => stream.path);
-              allWaiaholeCoords.forEach((streamPath, index) => {
-                data.push({
-                  type: 'scattermapbox',
-                  mode: 'lines',
-                  lon: streamPath.map(point => point[0]),
-                  lat: streamPath.map(point => point[1]),
-                  line: {
-                    width: 2,
-                    color: '#0096FF'
-                  },
-                  name: 'Streams',
-                  hovertemplate: '<b>Waiahole Stream</b><extra></extra>',
-                  showlegend: false, // Don't show in legend since Waikane already shows it
-                  legendgroup: 'streams'
-                });
-              });
-            }
-
-            // Punaluu Stream lines traces
-            if (coordinates.punaluuStreams && coordinates.punaluuStreams.length > 0) {
-              // Combine all Punaluu stream segments into one trace
-              const allPunaluuCoords = coordinates.punaluuStreams.map(stream => stream.path);
-              allPunaluuCoords.forEach((streamPath, index) => {
-                data.push({
-                  type: 'scattermapbox',
-                  mode: 'lines',
-                  lon: streamPath.map(point => point[0]),
-                  lat: streamPath.map(point => point[1]),
-                  line: {
-                    width: 2,
-                    color: '#0096FF'
-                  },
-                  name: 'Streams',
-                  hovertemplate: '<b>Punaluu Stream</b><extra></extra>',
-                  showlegend: false, // Don't show in legend since Waikane already shows it
-                  legendgroup: 'streams'
-                });
-              });
-            }
-            
-            // Stream Gauges trace (rendered first - bottom layer)
-            if (coordinates.stream && coordinates.stream.length > 0) {
-              console.log('Web - Adding stream gauges:', coordinates.stream.length);
-              console.log('Web - Stream gauge coordinates:', coordinates.stream);
-              data.push({
-                type: 'scattermapbox',
-                mode: 'markers',
-                lon: coordinates.stream.map(x => x.lon),
-                lat: coordinates.stream.map(x => x.lat),
-                marker: {
-                  size: 15,
-                  color: 'green',
-                  line: {
-                    color: 'black',
-                    width: 3
-                  }
-                },
-                name: 'Stream Gauges',
-                text: coordinates.stream.map(x => x.name),
-                hovertemplate: '<b>%{text}</b><br><extra></extra>',
-                customdata: coordinates.stream.map(x => x.name)
-              });
-            }
-
-            // Rain Gauges trace (rendered on top)
-            if (coordinates.rain && coordinates.rain.length > 0) {
-              data.push({
-                type: 'scattermapbox',
-                mode: 'markers',
-                lon: coordinates.rain.map(x => x.lon),
-                lat: coordinates.rain.map(x => x.lat),
-                marker: {
-                  size: 10,
-                  color: 'red',
-                },
-                name: 'Rain Gauges',
-                text: coordinates.rain.map(x => x.name),
-                hovertemplate: '<b>%{text}</b><extra></extra>',
-                customdata: coordinates.rain.map(x => x.name)
-              });
-            }
-            
-            const layout = {
-              mapbox: {
-                style: "open-street-map",
-                center: { 
-                  lat: 21.514,
-                  lon: -157.887 
-                },
-                zoom: 11
-              },
-              margin: { r: 10, t: 10, l: 10, b: 10 },
-              autosize: true,
-              showlegend: true,
-              legend: {
-                x: 0,
-                y: 1,
-                bgcolor: 'rgba(255, 255, 255, 0.8)'
-              }
-            };
-            
-            const config = {
-              responsive: true,
-              displayModeBar: false,
-              scrollZoom: true,
-              doubleClick: 'reset'
-            };
-
-            window.Plotly.newPlot(mapRef.current, data, layout, config);
-          }
-        };
-        
-        // Only add script if it's not already loaded
-        if (!window.Plotly) {
-          document.head.appendChild(script);
-        } else {
-          script.onload();
-        }
-      }
-    }, [htmlContent]);
+    // Web rendering is handled by the top-level web-only effect. Render the DOM container below.
 
     return (
       <View style={styles.container}>

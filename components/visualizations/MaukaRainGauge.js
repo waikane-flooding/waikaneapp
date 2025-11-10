@@ -50,7 +50,7 @@ const MaukaRainGauge = () => {
     return '#F44336';
   };
 
-  const formattedDateTime = rainTime
+  const _formattedDateTime = rainTime
     ? 'Latest Reading: ' + new Date(rainTime).toLocaleString('en-US', {
         month: 'short',
         day: 'numeric',

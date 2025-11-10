@@ -1,6 +1,6 @@
 //home screen
 import { Ionicons } from '@expo/vector-icons';
-import { StyleSheet, Pressable, Platform, RefreshControl, ScrollView, View, Dimensions, ActivityIndicator } from 'react-native';
+import { StyleSheet, Pressable, RefreshControl, ScrollView, ActivityIndicator, View, Platform } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import { Image } from 'expo-image';
 import { useState, useCallback, useEffect, useMemo } from 'react';
@@ -8,7 +8,7 @@ import { useState, useCallback, useEffect, useMemo } from 'react';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
+// IconSymbol removed (unused)
 import WaikaneStreamHeight from '@/components/visualizations/WaikaneStreamHeight';
 import WaiaholeStreamHeight from '@/components/visualizations/WaiaholeStreamHeight';
 import WaikaneStreamGraph from '@/components/visualizations/WaikaneStreamGraph';
@@ -32,7 +32,7 @@ const KANEOHE_COORDS = { lat: 21.4181, lon: -157.8036 };
 
 export default function HomeScreen() {
     // Stream data caching
-    const { fetchStreamData, clearCache } = useStreamDataCache();
+    const { fetchStreamData } = useStreamDataCache();
     const [streamDataCache, setStreamDataCache] = useState<{
         waikane?: { data: any[]; trends: any[] };
         waiahole?: { data: any[]; trends: any[] };
@@ -96,7 +96,7 @@ export default function HomeScreen() {
                     }),
                 });
             }
-        } catch (e) {
+        } catch (_e) {
             setMakaiRain({ lastHour: 'No Data', lastSixHours: 'No Data', lastReading: 'Offline' });
             setMaukaRain({ lastHour: 'No Data', lastSixHours: 'No Data', lastReading: 'Offline' });
         }
@@ -133,8 +133,8 @@ export default function HomeScreen() {
                 return await fetch(proxied, { headers });
             }
             return resp;
-        } catch (err) {
-            console.warn('NWS direct fetch failed, retrying via proxy:', err);
+        } catch (_err) {
+            console.warn('NWS direct fetch failed, retrying via proxy:', _err);
             return fetch(proxied, { headers });
         }
     }, []);
@@ -318,7 +318,7 @@ export default function HomeScreen() {
             }
         }
         fetchForecast();
-    }, []);
+    }, [fetchNws]);
 
     // Fetch weather alerts - via NWS (uses proxy on web)
     useEffect(() => {
@@ -370,7 +370,7 @@ export default function HomeScreen() {
             }
         }
         fetchAlerts();
-    }, []);
+    }, [fetchNws]);
 
     // Load stream data for a specific stream type
     const loadStreamData = useCallback(async (streamType: 'waikane' | 'waiahole' | 'punaluu') => {

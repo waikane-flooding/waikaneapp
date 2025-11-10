@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Svg, Path, Line, Circle, Polygon, Defs, LinearGradient, Stop, Text as SvgText } from 'react-native-svg';
+import { Svg, Path, Line, Polygon, Defs, LinearGradient, Stop, Text as SvgText } from 'react-native-svg';
 
 const WaikaneTideGraph = () => {
   const [curveData, setCurveData] = useState([]);

@@ -33,7 +33,7 @@ const emergencyContacts = [
     website: "https://www.boardofwatersupply.com/"
   },
   {
-    name: "State of Hawai'i, DLNR",
+    name: "State of Hawai&apos;i, DLNR",
     number: "(808) 587-0230",
     description: "Engineering & flood control",
     website: "https://dlnreng.hawaii.gov"
@@ -85,7 +85,7 @@ export default function AboutScreen() {
           <ThemedView style={styles.row}>
             <Ionicons name="time" size={18} color="#007AFF" style={styles.icon} />
             <ThemedText>
-              Tide: Track the bay's tide heights to understand how ocean conditions may impact flooding risks.
+              Tide: Track the bay&apos;s tide heights to understand how ocean conditions may impact flooding risks.
             </ThemedText>
           </ThemedView>
           <ThemedView style={styles.row}>
