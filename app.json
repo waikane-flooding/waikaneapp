@@ -7,7 +7,7 @@
     "icon": "./assets/images/icon.png",
     "scheme": "chiaraduynapp",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+  "newArchEnabled": false,
     "description": "Real-time flood monitoring app for Windward Oʻahu providing local water level data, maps, and safety alerts.",
     "author": "WRRC Shuler Lab (University of Hawai‘i)",
     "copyright": "© 2025 WRRC Shuler Lab. All rights reserved.",
