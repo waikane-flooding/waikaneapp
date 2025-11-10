@@ -1,9 +1,9 @@
 //home screen
 import { Ionicons } from '@expo/vector-icons';
-import { StyleSheet, Pressable, RefreshControl, ScrollView, ActivityIndicator, View, Platform } from 'react-native';
-import * as WebBrowser from 'expo-web-browser';
+import { StyleSheet, Pressable, RefreshControl, ScrollView, ActivityIndicator, Platform } from 'react-native';
+// WebBrowser helper removed (not used in this file)
 import { Image } from 'expo-image';
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
@@ -96,7 +96,7 @@ export default function HomeScreen() {
                     }),
                 });
             }
-        } catch (_e) {
+        } catch {
             setMakaiRain({ lastHour: 'No Data', lastSixHours: 'No Data', lastReading: 'Offline' });
             setMaukaRain({ lastHour: 'No Data', lastSixHours: 'No Data', lastReading: 'Offline' });
         }
@@ -141,135 +141,30 @@ export default function HomeScreen() {
 
     
     const [refreshing, setRefreshing] = useState(false);
-    const [waikaneData, setWaikaneData] = useState<{ 
-        height: string | null; 
-        lastReading: string | null; 
-        direction: string | null;
-        status: string; 
-        statusColor?: string; 
-    }>({ height: null, lastReading: null, direction: null, status: 'Loading...' });
-    const [waiaholeData, setWaiaholeData] = useState<{ 
-        height: string | null; 
-        lastReading: string | null; 
-        direction: string | null;
-        status: string; 
-        statusColor?: string; 
-    }>({ height: null, lastReading: null, direction: null, status: 'Loading...' });
+    // Stream quick-status state removed; detailed visualizations fetch their own data
 
-    // Threshold values for different stream levels
-    const waikaneThresholds = useMemo(() => ({
-        greenEnd: 7,
-        yellowEnd: 10.8
-    }), []);
-
-    const waiaholeThresholds = useMemo(() => ({
-        greenEnd: 12,
-        yellowEnd: 16.4
-    }), []);
-
-    // Get status based on stream level
-    const getStreamStatus = useCallback((level: number, thresholds: { greenEnd: number; yellowEnd: number }) => {
-        if (level < thresholds.greenEnd) return { status: 'Normal', color: '#34C759' };
-        if (level < thresholds.yellowEnd) return { status: 'Warning', color: '#FFC107' };
-        return { status: 'Danger', color: '#F44336' };
-    }, []);
+    // Stream thresholds and status helpers removed (visualizations manage their own thresholds and status display)
 
     // Fetch Waikane and Waiahole stream data, including trend
     const fetchWaikaneData = useCallback(async () => {
         try {
-            const [streamRes, trendRes] = await Promise.all([
-                fetch('http://149.165.159.169:5000/api/waikane_stream'),
-                fetch('http://149.165.159.169:5000/api/stream_trend')
-            ]);
-            const data = await streamRes.json();
-            const trendData = await trendRes.json();
-
-            const now = new Date();
-            const latest = data
-                .filter((d: any) => d.ft != null && d.DateTime)
-                .map((d: any) => ({
-                    time: new Date(d.DateTime),
-                    value: d.ft
-                }))
-                .filter((d: any) => d.time <= now)
-                .sort((a: any, b: any) => b.time - a.time)[0]; // Most recent past point
-
-            // Find Waikane trend
-            let direction: string | null = null;
-            if (trendData && Array.isArray(trendData)) {
-                const waikaneTrend = trendData.find((t: any) => t.Name && t.Name.toLowerCase().includes('waikane'));
-                direction = waikaneTrend && waikaneTrend.Trend ? waikaneTrend.Trend : null;
-            }
-
-            if (latest) {
-                const statusInfo = getStreamStatus(latest.value, waikaneThresholds);
-                const formattedTime = latest.time.toLocaleString('en-US', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true
-                });
-
-                setWaikaneData({
-                    height: `${latest.value.toFixed(2)} ft`,
-                    lastReading: formattedTime,
-                    direction,
-                    status: statusInfo.status,
-                    statusColor: statusInfo.color
-                });
-            }
-        } catch (error) {
-            // Silently handle network errors to avoid flooding console
-            setWaikaneData({ height: 'No Data', lastReading: 'Offline', direction: null, status: 'Offline' });
+            const streamRes = await fetch('http://149.165.159.169:5000/api/waikane_stream');
+            // We intentionally do not process the response here; visualizations manage their own data/state.
+            await streamRes.json();
+        } catch {
+            // Silently handle network errors; visualization components will show offline/no-data states
         }
-    }, [getStreamStatus, waikaneThresholds]);
+    }, []);
 
     const fetchWaiaholeData = useCallback(async () => {
         try {
-            const [streamRes, trendRes] = await Promise.all([
-                fetch('http://149.165.159.169:5000/api/waiahole_stream'),
-                fetch('http://149.165.159.169:5000/api/stream_trend')
-            ]);
-            const data = await streamRes.json();
-            const trendData = await trendRes.json();
-
-            const now = new Date();
-            const latest = data
-                .filter((d: any) => d.ft != null && d.DateTime)
-                .map((d: any) => ({
-                    time: new Date(d.DateTime),
-                    value: d.ft
-                }))
-                .filter((d: any) => d.time <= now)
-                .sort((a: any, b: any) => b.time - a.time)[0]; // Most recent past point
-
-            // Find Waiahole trend
-            let direction: string | null = null;
-            if (trendData && Array.isArray(trendData)) {
-                const waiaholeTrend = trendData.find((t: any) => t.Name && t.Name.toLowerCase().includes('waiahole'));
-                direction = waiaholeTrend && waiaholeTrend.Trend ? waiaholeTrend.Trend : null;
-            }
-
-            if (latest) {
-                const statusInfo = getStreamStatus(latest.value, waiaholeThresholds);
-                const formattedTime = latest.time.toLocaleString('en-US', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true
-                });
-
-                setWaiaholeData({
-                    height: `${latest.value.toFixed(2)} ft`,
-                    lastReading: formattedTime,
-                    direction,
-                    status: statusInfo.status,
-                    statusColor: statusInfo.color
-                });
-            }
-        } catch (error) {
-            // Silently handle network errors to avoid flooding console
-            setWaiaholeData({ height: 'No Data', lastReading: 'Offline', direction: null, status: 'Offline' });
+            const streamRes = await fetch('http://149.165.159.169:5000/api/waiahole_stream');
+            // Visualizations handle their own parsing; keep call to refresh caches if needed
+            await streamRes.json();
+        } catch {
+            // Silently handle network errors; visualization components will show offline/no-data states
         }
-    }, [getStreamStatus, waiaholeThresholds]);
+    }, []);
 
     // Fetch weather forecast - via NWS (uses proxy on web)
     useEffect(() => {
@@ -414,9 +309,7 @@ export default function HomeScreen() {
         }, 500);
     }, [fetchWaikaneData, fetchWaiaholeData, fetchRainData, loadStreamData]);
 
-    const openMap = async () => {
-        await WebBrowser.openBrowserAsync('https://experience.arcgis.com/experience/60260cda4f744186bbd9c67163b747d3');
-    };
+    // map opening moved to inline usage when needed; helper removed to avoid unused variable warning
 
     // Stream chart navigation logic
     const streamCharts = [

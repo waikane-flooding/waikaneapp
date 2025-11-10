@@ -2,10 +2,10 @@ import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { View, StyleSheet, TouchableOpacity, Modal, Platform, ActivityIndicator as RNActivityIndicator } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Modal, ActivityIndicator as RNActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useState, useEffect, useRef } from 'react';
-import { WebView } from 'react-native-webview';
+// WebView not currently used in layout
 import 'react-native-reanimated';
 
 import { ThemedText } from '@/components/ThemedText';
@@ -294,10 +294,10 @@ function FloodRiskIndicator() {
           lastUpdated: new Date(),
         });
 
-      } catch (error) {
-        // Silently handle network errors to avoid flooding console
-        // The app will continue to use existing state values
-      }
+      } catch {
+            // Silently handle network errors to avoid flooding console
+            // The app will continue to use existing state values
+          }
     };
 
     fetchAllData();

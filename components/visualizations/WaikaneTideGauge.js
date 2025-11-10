@@ -15,16 +15,8 @@ const WaikaneTideGauge = () => {
     fetch('http://149.165.159.226:5000/api/waikane_tide_curve')
       .then(res => res.json())
       .then(data => {
-        // Get current time in HST (UTC-10, no DST)
-        const nowUTC = new Date();
-        const utcYear = nowUTC.getUTCFullYear();
-        const utcMonth = nowUTC.getUTCMonth();
-        const utcDate = nowUTC.getUTCDate();
-        const utcHour = nowUTC.getUTCHours();
-        const utcMinute = nowUTC.getUTCMinutes();
-        const utcSecond = nowUTC.getUTCSeconds();
-        // HST is UTC-10
-        const nowHST = new Date(Date.UTC(utcYear, utcMonth, utcDate, utcHour - 10, utcMinute, utcSecond));
+  // Get current time in UTC for comparisons
+  const nowUTC = new Date();
 
         // Helper to parse API timestamp as HST (treat as HST, not local/UTC)
         function parseHSTTimestamp(str) {
@@ -45,8 +37,8 @@ const WaikaneTideGauge = () => {
           .filter(d => !isNaN(d.time.getTime()) && d.height != null)
           .sort((a, b) => a.time - b.time);
 
-        // Find the latest reading at or before now
-        const pastTides = allTides.filter(d => d.time <= nowUTC);
+  // Find the latest reading at or before now (using UTC comparison)
+  const pastTides = allTides.filter(d => d.time <= nowUTC);
         if (pastTides.length > 0) {
           const latest = pastTides[pastTides.length - 1]; // Most recent PAST reading
           setTideLevel(latest.height);

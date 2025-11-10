@@ -4,7 +4,6 @@ import Svg, {
   Path, 
   Line, 
   Text as SvgText, 
-  Circle, 
   Defs, 
   LinearGradient, 
   Stop 

@@ -50,15 +50,7 @@ const MaukaRainGauge = () => {
     return '#F44336';
   };
 
-  const _formattedDateTime = rainTime
-    ? 'Latest Reading: ' + new Date(rainTime).toLocaleString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true
-      }) + ' HST'
-    : 'Loading...';
+  // Formatted datetime used inline in render; removed unused variable
 
   const customTicks = [0, 1, 2, 3, 4, 5, 6, 7];
 

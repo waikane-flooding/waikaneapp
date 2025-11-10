@@ -67,7 +67,7 @@ export const useStreamDataCache = () => {
       cacheRef.current[streamType] = result;
       
       return result;
-    } catch (error) {
+    } catch {
       return cached || null;
     } finally {
       setIsLoading(prev => ({ ...prev, [streamType]: false }));
