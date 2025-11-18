@@ -19,6 +19,15 @@
         "projectId": "a18f707f-f1bb-4745-87c7-b19e140d21c6"
       }
     },
-    "owner": "chiaraduyn"
+    "owner": "chiaraduyn",
+    "plugins": [
+      "expo-router"
+    ],
+    "android": {
+      "package": "com.chiaraduyn.windwardfloodcheck"
+    },
+    "ios": {
+      "bundleIdentifier": "com.chiaraduyn.windwardfloodcheck"
+    }
   }
 }
