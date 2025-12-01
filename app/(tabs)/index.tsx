@@ -356,7 +356,7 @@ export default function HomeScreen() {
                         source={require('@/assets/images/windward-header.jpg')}
                         style={styles.headerImage}
                     />
-                    <ThemedView style={styles.headerOverlay} pointerEvents="none">
+                    <ThemedView style={styles.headerOverlay}>
                         <ThemedText type="title" style={[styles.thinText, styles.appTitleOverlay]}>Windward Flood Check</ThemedText>
                     </ThemedView>
                 </ThemedView>
@@ -517,12 +517,12 @@ export default function HomeScreen() {
                             contentFit="cover"
                             accessibilityLabel="Map preview"
                         />
-                        <ThemedView style={styles.mapPreviewOverlay} pointerEvents="none">
+                        <ThemedView style={styles.mapPreviewOverlay}>
                             <ThemedView style={styles.mapPreviewTextBg}>
-                                <Ionicons name="map" size={28} color="#fff" style={{ marginBottom: 10, textShadowColor: '#222', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 6 }} />
+                                <Ionicons name="map" size={28} color="#fff" style={{ marginBottom: 10 }} />
                                 <ThemedText style={styles.mapButtonText}>Open Interactive Flood Risk Map</ThemedText>
                                 <ThemedText style={styles.mapButtonSubtext}>View flood-prone areas and monitoring stations</ThemedText>
-                                <Ionicons name="open-outline" size={18} color="#fff" style={{ marginTop: 10, textShadowColor: '#222', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 6 }} />
+                                <Ionicons name="open-outline" size={18} color="#fff" style={{ marginTop: 10 }} />
                             </ThemedView>
                         </ThemedView>
                     </Pressable>
@@ -714,14 +714,13 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: 'rgba(0,0,0,0.15)',
+        pointerEvents: 'none',
     },
     appTitleOverlay: {
         fontSize: 22,
         color: '#fff',
         textAlign: 'center',
-        textShadowColor: 'rgba(0,0,0,0.5)',
-        textShadowOffset: { width: 0, height: 1 },
-        textShadowRadius: 4,
+    // Removed text shadow to avoid deprecated props and type issues
         letterSpacing: 0.5,
         transform: [{ translateY: 68 }],
     },
@@ -930,9 +929,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginTop: 2,
         marginBottom: 6,
-        textShadowColor: '#222',
-        textShadowOffset: { width: 0, height: 2 },
-        textShadowRadius: 6,
+    // Removed text shadow to avoid deprecated props and type issues
         letterSpacing: 0.2,
     },
     mapButtonSubtext: {
@@ -942,9 +939,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         opacity: 0.92,
         marginBottom: 2,
-        textShadowColor: '#222',
-        textShadowOffset: { width: 0, height: 2 },
-        textShadowRadius: 6,
+    // Removed text shadow to avoid deprecated props and type issues
         letterSpacing: 0.1,
     },
     loadingContainer: {
@@ -986,6 +981,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         paddingHorizontal: 12,
+        pointerEvents: 'none',
     },
     mapPreviewTextBg: {
         backgroundColor: 'rgba(20, 30, 60, 0.55)',
@@ -995,10 +991,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         // Removed borderWidth and borderColor for cleaner look
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.18,
-        shadowRadius: 10,
+        boxShadow: '0px 3px 10px rgba(0,0,0,0.18)',
         elevation: 6,
         width: '100%', // expand overlay to match image width
         minHeight: 120,
@@ -1011,10 +1004,7 @@ const styles = StyleSheet.create({
         marginBottom: 12,
         width: '100%',
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.13,
-        shadowRadius: 8,
+        boxShadow: '0px 2px 8px rgba(0,0,0,0.13)',
         elevation: 4,
     },
     gaugeInnerBg: {
@@ -1134,11 +1124,15 @@ const styles = StyleSheet.create({
         marginVertical: Platform.OS === 'web' ? 8 : 4,
         borderRadius: 8,
         marginBottom: Platform.OS === 'web' ? 16 : 6,
-        shadowColor: '#1E90FF',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.08,
-        shadowRadius: 2,
-        elevation: 2,
+        // Use boxShadow on web; keep elevation for native
+        ...Platform.select({
+            web: {
+                boxShadow: '0px 1px 2px rgba(30, 144, 255, 0.08)',
+            },
+            default: {
+                elevation: 2,
+            },
+        }),
     },
     sectionHeaderText: {
         textAlign: 'center',

@@ -486,7 +486,7 @@ function FloodRiskIndicator() {
             </TouchableOpacity>
             <Map />
             {mapLoading && (
-              <View style={styles.mapLoadingOverlay} pointerEvents="none">
+              <View style={styles.mapLoadingOverlay}>
                 <RNActivityIndicator size="large" color="#007AFF" />
                 <ThemedText style={styles.mapLoadingText}>Loading map…</ThemedText>
               </View>
@@ -542,13 +542,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    // Use boxShadow for web; native shadows remain via elevation
+    boxShadow: '0px 2px 3.84px rgba(0,0,0,0.25)',
     elevation: 5,
     gap: 4,
   },
@@ -563,10 +558,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 18,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    boxShadow: '0px 2px 3.84px rgba(0,0,0,0.25)',
     elevation: 5,
   },
   // Removed contacts styles (legacy cleanup)
@@ -615,13 +607,7 @@ const styles = StyleSheet.create({
     padding: 24,
     width: '90%',
     maxWidth: 400,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
+    boxShadow: '0px 4px 6px rgba(0,0,0,0.3)',
     elevation: 8,
   },
   closeButton: {
@@ -706,6 +692,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 30,
+    pointerEvents: 'none',
   },
   mapLoadingText: {
     marginTop: 12,
