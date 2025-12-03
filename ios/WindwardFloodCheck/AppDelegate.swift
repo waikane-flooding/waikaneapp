@@ -62,13 +62,7 @@ class ReactNativeDelegate: ExpoReactNativeFactoryDelegate {
 
   override func bundleURL() -> URL? {
 #if DEBUG
-    // Try Metro bundler URL first (for local development). If Metro isn't
-    // running or the URL cannot be resolved, fall back to an embedded
-    // JS bundle so Xcode can open the app without the packager.
-    if let metroURL = RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: ".expo/.virtual-metro-entry") {
-      return metroURL
-    }
-    return Bundle.main.url(forResource: "main", withExtension: "jsbundle")
+    return RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: ".expo/.virtual-metro-entry")
 #else
     return Bundle.main.url(forResource: "main", withExtension: "jsbundle")
 #endif
