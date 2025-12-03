@@ -5,6 +5,7 @@
     "version": "1.0.0",
     "description": "Real-time flood monitoring app for Windward Oʻahu providing local water level data, maps, and safety alerts.",
     "icon": "./assets/images/icon.png",
+    "scheme": "windward-flood-check",
     "web": {
       "bundler": "metro",
       "output": "static",
@@ -21,7 +22,7 @@
     },
     "owner": "chiaraduyn",
     "ios": {
-      "bundleIdentifier": "com.chiaraduyn.windward-flood-check",
+      "bundleIdentifier": "edu.hawaii.wrrc",
       "icon": "./assets/images/icon.png"
     }
   }
