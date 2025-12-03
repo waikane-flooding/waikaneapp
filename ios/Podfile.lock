@@ -3,7 +3,7 @@ PODS:
   - DoubleConversion (1.1.6)
   - EXConstants (18.0.10):
     - ExpoModulesCore
-  - Expo (54.0.24):
+  - Expo (54.0.25):
     - boost
     - DoubleConversion
     - ExpoModulesCore
@@ -38,7 +38,7 @@ PODS:
     - ExpoModulesCore
   - ExpoBlur (15.0.7):
     - ExpoModulesCore
-  - ExpoFileSystem (19.0.18):
+  - ExpoFileSystem (19.0.19):
     - ExpoModulesCore
   - ExpoFont (14.0.9):
     - ExpoModulesCore
@@ -3117,10 +3117,10 @@ SPEC CHECKSUMS:
   boost: 7e761d76ca2ce687f7cc98e698152abd03a18f90
   DoubleConversion: cb417026b2400c8f53ae97020b2be961b59470cb
   EXConstants: fd688cef4e401dcf798a021cfb5d87c890c30ba3
-  Expo: f382ff0ec47d54f608bb3305145549d61269e58f
+  Expo: 22c06b7185706d92688f6e943576198540836bc1
   ExpoAsset: d839c8eae8124470332408427327e8f88beb2dfd
   ExpoBlur: 2dd8f64aa31f5d405652c21d3deb2d2588b1852f
-  ExpoFileSystem: a67324b609244372efac5abb599f7f555b6584f0
+  ExpoFileSystem: 77157a101e03150a4ea4f854b4dd44883c93ae0a
   ExpoFont: cf9d90ec1d3b97c4f513211905724c8171f82961
   ExpoHaptics: 807476b0c39e9d82b7270349d6487928ce32df84
   ExpoHead: 95a6ee0be1142320bccf07961d6a1502ded5d6ac
@@ -3216,6 +3216,6 @@ SPEC CHECKSUMS:
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: 728df40394d49f3f471688747cf558158b3a3bd1
 
-PODFILE CHECKSUM: 55aefc991ffd9755b492f2684f22e66b4876ed7e
+PODFILE CHECKSUM: 1e66cff9463f7e0961db0e080b7a1dce7a2a4d91
 
 COCOAPODS: 1.16.2
