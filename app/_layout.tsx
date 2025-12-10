@@ -210,11 +210,11 @@ function FloodRiskIndicator() {
     const fetchAllData = async () => {
       try {
         const [waikaneRes, waiaholeRes, punaluuRes, tideRes, rainRes] = await Promise.all([
-          fetch('http://149.165.159.226:5000/api/waikane_stream'),
-          fetch('http://149.165.159.226:5000/api/waiahole_stream'),
-          fetch('http://149.165.159.226:5000/api/punaluu_stream'),
-          fetch('http://149.165.159.226:5000/api/waikane_tide_curve'),
-          fetch('http://149.165.159.226:5000/api/rain_data')
+          fetch('https://waikaneappbackend.ees250103.projects.jetstream-cloud.org/api/waikane_stream'),
+          fetch('https://waikaneappbackend.ees250103.projects.jetstream-cloud.org/api/waiahole_stream'),
+          fetch('https://waikaneappbackend.ees250103.projects.jetstream-cloud.org/api/punaluu_stream'),
+          fetch('https://waikaneappbackend.ees250103.projects.jetstream-cloud.org/api/waikane_tide_curve'),
+          fetch('https://waikaneappbackend.ees250103.projects.jetstream-cloud.org/api/rain_data')
         ]);
 
         const [waikaneData, waiaholeData, punaluuData, tideData, rainData] = await Promise.all([

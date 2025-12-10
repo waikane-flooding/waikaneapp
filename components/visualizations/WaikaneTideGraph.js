@@ -7,7 +7,7 @@ const WaikaneTideGraph = () => {
   const [tideData, setTideData] = useState([]);
 
   useEffect(() => {
-    fetch('http://149.165.159.226:5000/api/waikane_tide_curve')
+    fetch('https://waikaneappbackend.ees250103.projects.jetstream-cloud.org/api/waikane_tide_curve')
       .then(res => res.json())
       .then(curve => {
         setCurveData(curve);
@@ -18,7 +18,7 @@ const WaikaneTideGraph = () => {
   }, []);
 
   useEffect(() => {
-    fetch('http://149.165.159.226:5000/api/waikane_tides')
+    fetch('https://waikaneappbackend.ees250103.projects.jetstream-cloud.org/api/waikane_tides')
       .then(res => res.json())
       .then(data => {
         setTideData(data);

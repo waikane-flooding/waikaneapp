@@ -9,7 +9,7 @@ const WaikaneTideLevel = () => {
   // min/max levels handled inline in UI; no standalone variables required here
 
   useEffect(() => {
-    fetch('http://149.165.159.226:5000/api/waikane_tide_curve')
+    fetch('https://waikaneappbackend.ees250103.projects.jetstream-cloud.org/api/waikane_tide_curve')
       .then(res => res.json())
       .then(data => {
   // Get current time in HST (UTC-10, no DST)
