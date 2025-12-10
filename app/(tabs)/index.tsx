@@ -70,7 +70,7 @@ export default function HomeScreen() {
     // Fetch Makai and Mauka rain data
     const fetchRainData = useCallback(async () => {
         try {
-            const res = await fetch('http://149.165.159.226:5000/api/rain_data');
+            const res = await fetch('https://waikaneappbackend.ees250103.projects.jetstream-cloud.org/api/rain_data');
             const data: RainData[] = await res.json();
             // Find latest Makai and Mauka
             const makai = data.filter(d => d.Name && d.Name.toLowerCase().includes('makai'))

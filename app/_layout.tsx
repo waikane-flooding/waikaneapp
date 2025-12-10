@@ -418,7 +418,7 @@ function FloodRiskIndicator() {
               </View>
 
               <View style={styles.readingItem}>
-                <ThemedText style={styles.readingLabel}>Punaluu Stream:</ThemedText>
+                <ThemedText style={styles.readingLabel}>Punalu'u Stream:</ThemedText>
                 <ThemedText style={[styles.readingValue, {
                   color: riskData.punaluuStream && typeof riskData.punaluuStream === 'number' ?
                     (assessPunaluuStreamRisk(riskData.punaluuStream) === 'HIGH' ? '#FF3B30' :
@@ -429,7 +429,7 @@ function FloodRiskIndicator() {
               </View>
 
               <View style={styles.readingItem}>
-                <ThemedText style={styles.readingLabel}>Waikane Tide:</ThemedText>
+                <ThemedText style={styles.readingLabel}>Waikane Tides:</ThemedText>
                 <ThemedText style={[styles.readingValue, {
                   color: riskData.tide && typeof riskData.tide === 'number' ?
                     (assessTideRisk(riskData.tide) === 'HIGH' ? '#FF3B30' :
