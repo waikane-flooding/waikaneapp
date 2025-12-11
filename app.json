@@ -23,7 +23,13 @@
     "owner": "chiaraduyn",
     "ios": {
       "bundleIdentifier": "edu.hawaii.wrrc",
+      "appleTeamId": "B8Y298FMLQ",
       "icon": "./assets/images/icon.png"
-    }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-web-browser",
+      "expo-font"
+    ]
   }
 }
