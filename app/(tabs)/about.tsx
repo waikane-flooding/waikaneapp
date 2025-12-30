@@ -33,14 +33,14 @@ const emergencyContacts = [
 		website: 'https://www.boardofwatersupply.com/',
 	},
 	{
-		name: 'State of Hawai&apos;i, DLNR',
+		name: "State of Hawai'i, DLNR",
 		number: '(808) 587-0230',
 		description: 'Engineering & flood control',
 		website: 'https://dlnreng.hawaii.gov',
 	},
 	{
 		name: 'Hawaiian Electric',
-		number: '855-304-1212',
+		number: '(855) 304-1212',
 		description: 'Power outages & emergencies',
 		website: 'https://www.hawaiianelectric.com/',
 	},
