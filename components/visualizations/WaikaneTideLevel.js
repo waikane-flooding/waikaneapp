@@ -5,13 +5,10 @@ const WaikaneTideLevel = () => {
   const [tideLevel, setTideLevel] = useState(null);
   const [tideTime, setTideTime] = useState(null);
   const [tideDirection, setTideDirection] = useState(null);
-  const [nextTideType, setNextTideType] = useState(null);
-  const [nextTideTime, setNextTideTime] = useState(null);
 
   // min/max levels handled inline in UI; no standalone variables required here
 
   useEffect(() => {
-    // Fetch tide curve data
     fetch('https://waikaneappbackend.ees250103.projects.jetstream-cloud.org/api/waikane_tide_curve')
       .then(res => res.json())
       .then(data => {
@@ -65,43 +62,6 @@ const WaikaneTideLevel = () => {
         setTideLevel(null);
         setTideTime(null);
       });
-
-    // Fetch high/low tide data
-    fetch('https://waikaneappbackend.ees250103.projects.jetstream-cloud.org/api/waikane_tides')
-      .then(res => res.json())
-      .then(data => {
-        const nowUTC = new Date();
-
-        // Helper to parse API timestamp as HST (treat as HST, not local/UTC)
-        function parseHSTTimestamp(str) {
-          // str: 'YYYY-MM-DDTHH:mm:ss.sss'
-          const [datePart, timePart] = str.split('T');
-          const [year, month, day] = datePart.split('-').map(Number);
-          const [hour, minute, second] = timePart.split(':');
-          // Construct a UTC date that represents the same wall time as HST
-          return new Date(Date.UTC(year, month - 1, day, Number(hour) + 10, Number(minute), Number(second)));
-        }
-
-        // Parse and sort tide events
-        const tideEvents = data
-          .map(item => ({
-            time: parseHSTTimestamp(item["Date Time"]),
-            type: item["Type"] // "H" or "L"
-          }))
-          .filter(d => !isNaN(d.time.getTime()))
-          .sort((a, b) => a.time - b.time);
-
-        // Find the next high or low tide after now
-        const nextTide = tideEvents.find(d => d.time > nowUTC);
-        if (nextTide) {
-          setNextTideType(nextTide.type === 'H' ? 'High' : 'Low');
-          setNextTideTime(nextTide.time);
-        }
-      })
-      .catch(err => {
-        setNextTideType(null);
-        setNextTideTime(null);
-      });
   }, []);
 
   const greenEnd = 2.92;
@@ -125,15 +85,6 @@ const WaikaneTideLevel = () => {
       })
     : 'Loading...';
 
-  const formattedNextTideTime = nextTideTime
-    ? new Date(nextTideTime).toLocaleString('en-US', {
-        timeZone: 'Pacific/Honolulu',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true
-      })
-    : 'Loading...';
-
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Waikāne Tide Level</Text>
@@ -147,10 +98,6 @@ const WaikaneTideLevel = () => {
         
         <Text style={styles.direction}>
           Tide is {tideDirection ? tideDirection : 'Loading...'}
-        </Text>
-        
-        <Text style={styles.nextTide}>
-          Next Tide is {nextTideType ? nextTideType : 'Loading...'} at {formattedNextTideTime}
         </Text>
       </View>
 
@@ -207,12 +154,6 @@ const styles = StyleSheet.create({
     color: '#007AFF',
     fontSize: 16,
     textAlign: 'center',
-  },
-  nextTide: {
-    color: '#007AFF',
-    fontSize: 16,
-    textAlign: 'center',
-    marginTop: 5,
   },
   legendContainer: {
     flexDirection: 'row',
