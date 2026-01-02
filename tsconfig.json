@@ -3,11 +3,14 @@
   "compilerOptions": {
     "strict": true,
     "allowJs": true,
+    "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./*"
-      ]
-    }
+      "@/*": ["./*"]
+    },
+    "moduleResolution": "bundler", // Fix: align with Expo's customConditions
+    "jsx": "react-jsx",
+    "types": ["expo", "react", "react-native"],
+    "skipLibCheck": true
   },
   "include": [
     "**/*.ts",
@@ -16,5 +19,6 @@
     "**/*.jsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-  ]
+  ],
+  "exclude": ["node_modules"]
 }
