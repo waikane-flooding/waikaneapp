@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Windward Flood Check",
-    "slug": "windward-flood-check",
+    "name": "Flood Check",
+    "slug": "flood-check",
     "version": "1.0.0",
     "description": "Real-time flood monitoring app for Windward Oʻahu providing local water level data, maps, and safety alerts.",
     "icon": "./assets/images/icon.png",
-    "scheme": "windward-flood-check",
+  "scheme": "flood-check",
     "web": {
       "bundler": "metro",
       "output": "static",
