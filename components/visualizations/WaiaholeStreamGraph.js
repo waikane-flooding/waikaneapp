@@ -4,46 +4,11 @@ import Svg, {
   Path, 
   Line, 
   Text as SvgText, 
-  Circle, 
   Defs, 
   LinearGradient, 
   Stop 
 } from 'react-native-svg';
 
-<<<<<<< HEAD
-const WaiaholeStreamGraph = () => {
-  const [streamData, setStreamData] = useState([]);
-
-  useEffect(() => {
-    fetch('http://149.165.172.129:5000/api/waiahole_stream')
-      .then(res => res.json())
-      .then(data => {
-        setStreamData(data);
-      })
-      .catch(error => {
-        console.error('Error fetching stream data:', error);
-      });
-  }, []);
-
-  // Chart dimensions - same as WaikaneTideGraph
-  const chartWidth = 650;
-  const chartHeight = 300;
-  const padding = 40;
-  const graphWidth = chartWidth - 2 * padding;
-  const graphHeight = chartHeight - 2 * padding;
-
-  // Y-axis range - specific to Waiahole Stream (same as WaiaholeStreamHeight thresholds)
-  const yMin = 0;
-  const yMax = 22;
-  const yRange = yMax - yMin;
-
-  // Process data
-  const sortedStreamData = [...streamData]
-    .filter(d => d.ft != null && d.DateTime)
-    .sort((a, b) => new Date(a.DateTime) - new Date(b.DateTime));
-  
-  if (sortedStreamData.length === 0) {
-=======
 const WaiaholeStreamGraph = ({ streamData: propStreamData }) => {
   const [streamData, setStreamData] = useState([]);
 
@@ -56,7 +21,6 @@ const WaiaholeStreamGraph = ({ streamData: propStreamData }) => {
 
   // Show loading state if no prop data is available yet
   if (!propStreamData || propStreamData.length === 0) {
->>>>>>> test-anne-new
     return (
       <View style={styles.container}>
         <View style={styles.loadingContainer}>
@@ -66,8 +30,6 @@ const WaiaholeStreamGraph = ({ streamData: propStreamData }) => {
     );
   }
 
-<<<<<<< HEAD
-=======
   // Chart dimensions - same as WaikaneTideGraph
   const chartWidth = 650;
   const chartHeight = 300;
@@ -85,7 +47,6 @@ const WaiaholeStreamGraph = ({ streamData: propStreamData }) => {
     .filter(d => d.ft != null && d.DateTime)
     .sort((a, b) => new Date(a.DateTime) - new Date(b.DateTime));
 
->>>>>>> test-anne-new
   // Robust cross-platform date handling for time window
   let latestDate = null;
   if (sortedStreamData.length > 0) {
@@ -164,11 +125,7 @@ const WaiaholeStreamGraph = ({ streamData: propStreamData }) => {
   }
 
   // Y-axis labels - specific to Waiahole stream heights
-<<<<<<< HEAD
-  const yTicks = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22];
-=======
   const yTicks = [6, 8, 10, 12, 14, 16, 18];
->>>>>>> test-anne-new
   
   // X-axis labels (every 6 hours, aligned to 12 AM, 6 AM, 12 PM, 6 PM)
   const xTicks = [];
@@ -231,8 +188,6 @@ const WaiaholeStreamGraph = ({ streamData: propStreamData }) => {
     <View style={styles.container}>
       <View style={styles.chartContainer}>
         <Svg width={chartWidth} height={chartHeight}>
-<<<<<<< HEAD
-=======
           {/* Chart title */}
                     <SvgText
                       x={chartWidth / 2}
@@ -267,7 +222,6 @@ const WaiaholeStreamGraph = ({ streamData: propStreamData }) => {
           >
             Date and Time
           </SvgText>
->>>>>>> test-anne-new
           <Defs>
             <LinearGradient id="waiaholeStreamGradient" x1="0%" y1="0%" x2="0%" y2="100%">
               <Stop offset="0%" stopColor="rgba(0, 122, 255, 0.3)" />
@@ -382,11 +336,7 @@ const WaiaholeStreamGraph = ({ streamData: propStreamData }) => {
                 fill="#666"
                 textAnchor="end"
               >
-<<<<<<< HEAD
-                {tick + " ft"}
-=======
                 {tick}
->>>>>>> test-anne-new
               </SvgText>
             );
           })}
@@ -439,11 +389,7 @@ const WaiaholeStreamGraph = ({ streamData: propStreamData }) => {
             fontSize="12"
             fill="#FFC107"
           >
-<<<<<<< HEAD
-            12 ft
-=======
             Elevated: 12.00 ft
->>>>>>> test-anne-new
           </SvgText>
           <SvgText
             x={padding + 8}
@@ -451,11 +397,7 @@ const WaiaholeStreamGraph = ({ streamData: propStreamData }) => {
             fontSize="12"
             fill="#F44336"
           >
-<<<<<<< HEAD
-            16.4 ft
-=======
             Extreme: 16.40 ft
->>>>>>> test-anne-new
           </SvgText>
         </Svg>
         
@@ -484,13 +426,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 10,
     margin: 2,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    boxShadow: '0px 2px 4px rgba(0,0,0,0.1)',
     elevation: 3,
   },
   chartContainer: {

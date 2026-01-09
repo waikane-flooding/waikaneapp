@@ -50,8 +50,8 @@ export const useStreamDataCache = () => {
       };
 
       const [streamRes, trendRes] = await Promise.all([
-        fetch(`http://149.165.159.226:5000/api/${apiEndpoints[streamType]}`),
-        fetch('http://149.165.159.226:5000/api/stream_trend')
+        fetch(`https://waikaneappbackend.ees250103.projects.jetstream-cloud.org/api/${apiEndpoints[streamType]}`),
+        fetch('https://waikaneappbackend.ees250103.projects.jetstream-cloud.org/api/stream_trend')
       ]);
 
       const streamData = await streamRes.json();
@@ -67,7 +67,7 @@ export const useStreamDataCache = () => {
       cacheRef.current[streamType] = result;
       
       return result;
-    } catch (error) {
+    } catch {
       return cached || null;
     } finally {
       setIsLoading(prev => ({ ...prev, [streamType]: false }));

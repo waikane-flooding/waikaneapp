@@ -2,14 +2,10 @@ import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { View, StyleSheet, TouchableOpacity, Modal, Platform, ActivityIndicator as RNActivityIndicator } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Modal, ActivityIndicator as RNActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-<<<<<<< HEAD
-import { useState, useEffect } from 'react';
-=======
 import { useState, useEffect, useRef } from 'react';
-import { WebView } from 'react-native-webview';
->>>>>>> test-anne-new
+// WebView not currently used in layout
 import 'react-native-reanimated';
 
 import { ThemedText } from '@/components/ThemedText';
@@ -96,58 +92,6 @@ const assessOverallRisk = (
   return 'LOW';
 };
 
-// Risk assessment functions for each data source
-const assessWaikaneStreamRisk = (level: number | null): string => {
-  if (!level) return 'UNKNOWN';
-  const greenEnd = 7;
-  const yellowEnd = 10.8;
-  if (level < greenEnd) return 'LOW';
-  if (level < yellowEnd) return 'MEDIUM';
-  return 'HIGH';
-};
-
-const assessWaiaholeStreamRisk = (level: number | null): string => {
-  if (!level) return 'UNKNOWN';
-  const greenEnd = 12;
-  const yellowEnd = 16.4;
-  if (level < greenEnd) return 'LOW';
-  if (level < yellowEnd) return 'MEDIUM';
-  return 'HIGH';
-};
-
-const assessTideRisk = (level: number | null): string => {
-  if (!level) return 'UNKNOWN';
-  const greenEnd = 2.12;
-  const yellowEnd = 2.92;
-  if (level < greenEnd) return 'LOW';
-  if (level < yellowEnd) return 'MEDIUM';
-  return 'HIGH';
-};
-
-const assessRainRisk = (level: number | null): string => {
-  if (!level) return 'UNKNOWN';
-  const greenEnd = 2.8;
-  const yellowEnd = 4.1;
-  if (level <= greenEnd) return 'LOW';
-  if (level <= yellowEnd) return 'MEDIUM';
-  return 'HIGH';
-};
-
-// Overall risk assessment
-const assessOverallRisk = (waikaneStream: number | null, waiaholeStream: number | null, tide: number | null, rain: number | null): string => {
-  const risks = [
-    assessWaikaneStreamRisk(waikaneStream),
-    assessWaiaholeStreamRisk(waiaholeStream),
-    assessTideRisk(tide),
-    assessRainRisk(rain)
-  ].filter(risk => risk !== 'UNKNOWN');
-
-  if (risks.length === 0) return 'UNKNOWN';
-  if (risks.includes('HIGH')) return 'HIGH';
-  if (risks.includes('MEDIUM')) return 'MEDIUM';
-  return 'LOW';
-};
-
 // Flood risk levels with detailed information
 const FLOOD_RISK_LEVELS = {
   LOW: { 
@@ -207,14 +151,6 @@ const FLOOD_RISK_LEVELS = {
 
 function FloodRiskIndicator() {
   const [modalVisible, setModalVisible] = useState(false);
-<<<<<<< HEAD
-  const [contactsModalVisible, setContactsModalVisible] = useState(false);
-  const [riskData, setRiskData] = useState<{
-    waikaneStream: number | null;
-    waiaholeStream: number | null;
-    tide: number | null;
-    rain: number | null;
-=======
   
   const [mapModalVisible, setMapModalVisible] = useState(false);
   const closeMap = () => {
@@ -257,55 +193,34 @@ function FloodRiskIndicator() {
     tide: number | null;
     makaiRain: number | null;
     maukaRain: number | null;
->>>>>>> test-anne-new
     lastUpdated: Date | null;
   }>({
     waikaneStream: null,
     waiaholeStream: null,
-<<<<<<< HEAD
-    tide: null,
-    rain: null,
-=======
     punaluuStream: null,
     tide: null,
     makaiRain: null,
     maukaRain: null,
->>>>>>> test-anne-new
     lastUpdated: null,
   });
 
   // Fetch data from all sources
   useEffect(() => {
-<<<<<<< HEAD
-    const fetchAllData = async () => {
-      try {
-        const [waikaneRes, waiaholeRes, tideRes, rainRes] = await Promise.all([
-          fetch('http://149.165.172.129:5000/api/waikane_stream'),
-          fetch('http://149.165.172.129:5000/api/waiahole_stream'),
-          fetch('http://149.165.172.129:5000/api/waikane_tide_curve'),
-          fetch('http://149.165.172.129:5000/api/rain_data')
-        ]);
-
-        const [waikaneData, waiaholeData, tideData, rainData] = await Promise.all([
-          waikaneRes.json(),
-          waiaholeRes.json(),
-=======
 
     const fetchAllData = async () => {
       try {
         const [waikaneRes, waiaholeRes, punaluuRes, tideRes, rainRes] = await Promise.all([
-          fetch('http://149.165.159.226:5000/api/waikane_stream'),
-          fetch('http://149.165.159.226:5000/api/waiahole_stream'),
-          fetch('http://149.165.159.226:5000/api/punaluu_stream'),
-          fetch('http://149.165.159.226:5000/api/waikane_tide_curve'),
-          fetch('http://149.165.159.226:5000/api/rain_data')
+          fetch('https://waikaneappbackend.ees250103.projects.jetstream-cloud.org/api/waikane_stream'),
+          fetch('https://waikaneappbackend.ees250103.projects.jetstream-cloud.org/api/waiahole_stream'),
+          fetch('https://waikaneappbackend.ees250103.projects.jetstream-cloud.org/api/punaluu_stream'),
+          fetch('https://waikaneappbackend.ees250103.projects.jetstream-cloud.org/api/waikane_tide_curve'),
+          fetch('https://waikaneappbackend.ees250103.projects.jetstream-cloud.org/api/rain_data')
         ]);
 
         const [waikaneData, waiaholeData, punaluuData, tideData, rainData] = await Promise.all([
           waikaneRes.json(),
           waiaholeRes.json(),
           punaluuRes.json(),
->>>>>>> test-anne-new
           tideRes.json(),
           rainRes.json()
         ]);
@@ -331,8 +246,6 @@ function FloodRiskIndicator() {
           .filter((d: any) => d.time <= now)
           .sort((a: any, b: any) => b.time - a.time)[0];
 
-<<<<<<< HEAD
-=======
         // Process Punaluu Stream data
         const punaluuLatest = punaluuData
           .filter((d: any) => d.ft != null && d.DateTime)
@@ -343,7 +256,6 @@ function FloodRiskIndicator() {
           .filter((d: any) => d.time <= now)
           .sort((a: any, b: any) => b.time - a.time)[0];
 
->>>>>>> test-anne-new
         // Process Tide data using robust HST logic (match WaikaneTideLevel)
         function getNowHSTAsLocalDate() {
           const nowUTC = new Date();
@@ -368,39 +280,24 @@ function FloodRiskIndicator() {
           .sort((a: any, b: any) => b.time - a.time)[0];
 
         // Process Rain data
-<<<<<<< HEAD
-        const totalRainfall = rainData.reduce((sum: number, item: any) => {
-          return sum + (item["in"] || 0);
-        }, 0);
-=======
         const rainRows = Array.isArray(rainData) ? rainData : [];
         const makaiRain = rainRows.find((d: any) => d.Name && d['1HrRainfall'] != null && d.Name.toLowerCase().includes('makai'));
         const maukaRain = rainRows.find((d: any) => d.Name && d['1HrRainfall'] != null && d.Name.toLowerCase().includes('mauka'));
->>>>>>> test-anne-new
 
         setRiskData({
           waikaneStream: waikaneLatest?.value || null,
           waiaholeStream: waiaholeLatest?.value || null,
-<<<<<<< HEAD
-          tide: tideLatest?.height || null,
-          rain: totalRainfall,
-=======
           punaluuStream: punaluuLatest?.value || null,
           tide: tideLatest?.height || null,
           makaiRain: makaiRain?.['1HrRainfall'] ?? null,
           maukaRain: maukaRain?.['1HrRainfall'] ?? null,
->>>>>>> test-anne-new
           lastUpdated: new Date(),
         });
 
-      } catch (error) {
-<<<<<<< HEAD
-        console.error('Error fetching risk data:', error);
-=======
-        // Silently handle network errors to avoid flooding console
-        // The app will continue to use existing state values
->>>>>>> test-anne-new
-      }
+      } catch {
+            // Silently handle network errors to avoid flooding console
+            // The app will continue to use existing state values
+          }
     };
 
     fetchAllData();
@@ -409,13 +306,6 @@ function FloodRiskIndicator() {
     return () => clearInterval(interval);
   }, []);
 
-<<<<<<< HEAD
-  const currentRiskLevel = assessOverallRisk(
-    riskData.waikaneStream,
-    riskData.waiaholeStream, 
-    riskData.tide,
-    riskData.rain
-=======
   // Cleanup any timers on unmount
   useEffect(() => {
     return () => {
@@ -434,7 +324,6 @@ function FloodRiskIndicator() {
     riskData.tide,
     riskData.makaiRain,
     riskData.maukaRain
->>>>>>> test-anne-new
   ) as keyof typeof FLOOD_RISK_LEVELS;
   const risk = FLOOD_RISK_LEVELS[currentRiskLevel];
 
@@ -492,11 +381,6 @@ function FloodRiskIndicator() {
             </ThemedText>
             
             <View style={styles.detailsList}>
-<<<<<<< HEAD
-              {risk.details.map((detail: string, index: number) => (
-                <ThemedText key={index} style={styles.detailItem}>
-                  {detail}
-=======
               {Array.isArray(risk.details) && risk.details.map((detail: any, index: number) => {
                 if (typeof detail !== 'string') return null;
                 return (
@@ -519,7 +403,6 @@ function FloodRiskIndicator() {
                       assessWaikaneStreamRisk(riskData.waikaneStream) === 'MEDIUM' ? '#FF9500' : '#34C759') : '#8E8E93'
                 }]}> 
                   {riskData.waikaneStream && typeof riskData.waikaneStream === 'number' ? `${riskData.waikaneStream.toFixed(2)} ft` : 'No data'}
->>>>>>> test-anne-new
                 </ThemedText>
               </View>
 
@@ -535,7 +418,7 @@ function FloodRiskIndicator() {
               </View>
 
               <View style={styles.readingItem}>
-                <ThemedText style={styles.readingLabel}>Punaluu Stream:</ThemedText>
+                <ThemedText style={styles.readingLabel}>Punalu'u Stream:</ThemedText>
                 <ThemedText style={[styles.readingValue, {
                   color: riskData.punaluuStream && typeof riskData.punaluuStream === 'number' ?
                     (assessPunaluuStreamRisk(riskData.punaluuStream) === 'HIGH' ? '#FF3B30' :
@@ -546,7 +429,7 @@ function FloodRiskIndicator() {
               </View>
 
               <View style={styles.readingItem}>
-                <ThemedText style={styles.readingLabel}>Waikane Tide:</ThemedText>
+                <ThemedText style={styles.readingLabel}>Waikane Tides:</ThemedText>
                 <ThemedText style={[styles.readingValue, {
                   color: riskData.tide && typeof riskData.tide === 'number' ?
                     (assessTideRisk(riskData.tide) === 'HIGH' ? '#FF3B30' :
@@ -578,55 +461,6 @@ function FloodRiskIndicator() {
                 </ThemedText>
               </View>
             </View>
-
-            {/* Current Readings Section */}
-            <View style={styles.readingsSection}>
-              <ThemedText style={styles.readingsTitle}>Current Readings:</ThemedText>
-              
-              <View style={styles.readingItem}>
-                <ThemedText style={styles.readingLabel}>Waikane Stream:</ThemedText>
-                <ThemedText style={[styles.readingValue, { 
-                  color: riskData.waikaneStream ? 
-                    (assessWaikaneStreamRisk(riskData.waikaneStream) === 'HIGH' ? '#FF3B30' : 
-                     assessWaikaneStreamRisk(riskData.waikaneStream) === 'MEDIUM' ? '#FF9500' : '#34C759') : '#8E8E93' 
-                }]}>
-                  {riskData.waikaneStream ? `${riskData.waikaneStream.toFixed(2)} ft` : 'No data'}
-                </ThemedText>
-              </View>
-
-              <View style={styles.readingItem}>
-                <ThemedText style={styles.readingLabel}>Waiahole Stream:</ThemedText>
-                <ThemedText style={[styles.readingValue, { 
-                  color: riskData.waiaholeStream ? 
-                    (assessWaiaholeStreamRisk(riskData.waiaholeStream) === 'HIGH' ? '#FF3B30' : 
-                     assessWaiaholeStreamRisk(riskData.waiaholeStream) === 'MEDIUM' ? '#FF9500' : '#34C759') : '#8E8E93' 
-                }]}>
-                  {riskData.waiaholeStream ? `${riskData.waiaholeStream.toFixed(2)} ft` : 'No data'}
-                </ThemedText>
-              </View>
-
-              <View style={styles.readingItem}>
-                <ThemedText style={styles.readingLabel}>Waikane Tide:</ThemedText>
-                <ThemedText style={[styles.readingValue, { 
-                  color: riskData.tide ? 
-                    (assessTideRisk(riskData.tide) === 'HIGH' ? '#FF3B30' : 
-                     assessTideRisk(riskData.tide) === 'MEDIUM' ? '#FF9500' : '#34C759') : '#8E8E93' 
-                }]}>
-                  {riskData.tide ? `${riskData.tide.toFixed(2)} ft` : 'No data'}
-                </ThemedText>
-              </View>
-
-              <View style={styles.readingItem}>
-                <ThemedText style={styles.readingLabel}>Rainfall:</ThemedText>
-                <ThemedText style={[styles.readingValue, { 
-                  color: riskData.rain !== null ? 
-                    (assessRainRisk(riskData.rain) === 'HIGH' ? '#FF3B30' : 
-                     assessRainRisk(riskData.rain) === 'MEDIUM' ? '#FF9500' : '#34C759') : '#8E8E93' 
-                }]}>
-                  {riskData.rain !== null ? `${riskData.rain.toFixed(2)} in` : 'No data'}
-                </ThemedText>
-              </View>
-            </View>
             
             <ThemedText style={styles.lastUpdated}>
               Last updated: {riskData.lastUpdated ? riskData.lastUpdated.toLocaleTimeString() : 'Never'}
@@ -652,7 +486,7 @@ function FloodRiskIndicator() {
             </TouchableOpacity>
             <Map />
             {mapLoading && (
-              <View style={styles.mapLoadingOverlay} pointerEvents="none">
+              <View style={styles.mapLoadingOverlay}>
                 <RNActivityIndicator size="large" color="#007AFF" />
                 <ThemedText style={styles.mapLoadingText}>Loading map…</ThemedText>
               </View>
@@ -708,13 +542,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    // Use boxShadow for web; native shadows remain via elevation
+    boxShadow: '0px 2px 3.84px rgba(0,0,0,0.25)',
     elevation: 5,
     gap: 4,
   },
@@ -729,10 +558,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 18,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    boxShadow: '0px 2px 3.84px rgba(0,0,0,0.25)',
     elevation: 5,
   },
   // Removed contacts styles (legacy cleanup)
@@ -781,13 +607,7 @@ const styles = StyleSheet.create({
     padding: 24,
     width: '90%',
     maxWidth: 400,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
+    boxShadow: '0px 4px 6px rgba(0,0,0,0.3)',
     elevation: 8,
   },
   closeButton: {
@@ -872,41 +692,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 30,
+    pointerEvents: 'none',
   },
   mapLoadingText: {
     marginTop: 12,
     fontSize: 14,
     fontWeight: '600',
     color: '#007AFF',
-  },
-  readingsSection: {
-    marginTop: 16,
-    marginBottom: 16,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(0, 0, 0, 0.1)',
-  },
-  readingsTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 12,
-    color: '#333333',
-  },
-  readingItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  readingLabel: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#666666',
-    flex: 1,
-  },
-  readingValue: {
-    fontSize: 14,
-    fontWeight: '600',
-    textAlign: 'right',
   },
 });

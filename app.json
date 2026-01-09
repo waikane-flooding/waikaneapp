@@ -1,67 +1,50 @@
 {
   "expo": {
-  "name": "Windward Flood Check",
-  "slug": "windward-flood-check",
+    "name": "Flood Check",
+    "slug": "flood-check",
     "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "chiaraduynapp",
-    "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "description": "Real-time flood monitoring app for Windward Oʻahu providing local water level data, maps, and safety alerts.",
-    "author": "WRRC Shuler Lab (University of Hawai‘i)",
-    "copyright": "© 2025 WRRC Shuler Lab. All rights reserved.",
-    "primaryLanguage": "en",
-    "categories": ["Weather", "Utilities"],
-    "ageRating": "4+",
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "edu.hawaii.wrrc",
-      "buildNumber": "1",
-      "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false,
-        "NSAppTransportSecurity": {
-          "NSAllowsArbitraryLoads": true
-        }
-      }
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
-      "edgeToEdgeEnabled": true,
-      "package": "edu.hawaii.wrrc"
-    },
+    "icon": "./assets/images/icon.png",
+    "scheme": "flood-check",
     "web": {
       "bundler": "metro",
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
-    "plugins": [
-      "expo-router",
-      [
-        "expo-splash-screen",
-        {
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
-        }
-      ],
-      "expo-web-browser",
-      "expo-font"
-    ],
     "experiments": {
       "typedRoutes": true
     },
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "67d81f10-69bc-490c-93c3-66cd09c99955"
+        "projectId": "b3aa46d1-9493-4256-be23-aa67df85c6d1"
       }
     },
     "owner": "chiaraduyn",
-      "keywords": ["flood", "hawaii", "weather", "WRRC", "Oahu", "alerts"]
+    "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "bundleIdentifier": "edu.hawaii.wrrc",
+      "appleTeamId": "B8Y298FMLQ",
+      "icon": "./assets/images/icon.png",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-web-browser",
+      "expo-font"
+    ],
+    "android": {
+      "package": "edu.hawaii.wrrc",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      }
+    }
   }
 }

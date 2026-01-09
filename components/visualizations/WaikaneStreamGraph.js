@@ -1,22 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Svg, Path, Line, Circle, Defs, LinearGradient, Stop, Text as SvgText } from 'react-native-svg';
+import { Svg, Path, Line, Defs, LinearGradient, Stop, Text as SvgText } from 'react-native-svg';
 
-<<<<<<< HEAD
-const WaikaneStreamGraph = () => {
-  const [streamData, setStreamData] = useState([]);
-
-  useEffect(() => {
-    fetch('http://149.165.172.129:5000/api/waikane_stream')
-      .then(res => res.json())
-      .then(data => {
-        setStreamData(data);
-      })
-      .catch(error => {
-        console.error('Error fetching stream data:', error);
-      });
-  }, []);
-=======
 const WaikaneStreamGraph = ({ streamData: propStreamData }) => {
   const [streamData, setStreamData] = useState([]);
 
@@ -37,16 +22,11 @@ const WaikaneStreamGraph = ({ streamData: propStreamData }) => {
       </View>
     );
   }
->>>>>>> test-anne-new
 
   // Chart dimensions - responsive but maintain aspect ratio
   const chartWidth = 650;
   const chartHeight = 300;
-<<<<<<< HEAD
-  const padding = 40;
-=======
   const padding = 50;
->>>>>>> test-anne-new
   const graphWidth = chartWidth - 2 * padding;
   const graphHeight = chartHeight - 2 * padding;
 
@@ -59,19 +39,6 @@ const WaikaneStreamGraph = ({ streamData: propStreamData }) => {
   const sortedStreamData = [...streamData]
     .filter(d => d.ft != null && d.DateTime)
     .sort((a, b) => new Date(a.DateTime) - new Date(b.DateTime));
-<<<<<<< HEAD
-  
-  if (sortedStreamData.length === 0) {
-    return (
-      <View style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading...</Text>
-        </View>
-      </View>
-    );
-  }
-=======
->>>>>>> test-anne-new
 
   // Find the latest reading's date
   let latestDate = null;
@@ -213,8 +180,6 @@ const WaikaneStreamGraph = ({ streamData: propStreamData }) => {
     <View style={styles.container}>
       <View style={styles.chartContainer}>
         <Svg width={chartWidth} height={chartHeight}>
-<<<<<<< HEAD
-=======
           {/* Chart title */}
                     <SvgText
                       x={chartWidth / 2}
@@ -249,7 +214,6 @@ const WaikaneStreamGraph = ({ streamData: propStreamData }) => {
                     >
                       Date and Time
                     </SvgText>
->>>>>>> test-anne-new
           <Defs>
             <LinearGradient id="streamGradient" x1="0%" y1="0%" x2="0%" y2="100%">
               <Stop offset="0%" stopColor="rgba(0, 122, 255, 0.3)" />
@@ -364,11 +328,7 @@ const WaikaneStreamGraph = ({ streamData: propStreamData }) => {
                 fill="#666"
                 textAnchor="end"
               >
-<<<<<<< HEAD
-                {tick + " ft"}
-=======
                 {tick}
->>>>>>> test-anne-new
               </SvgText>
             );
           })}
@@ -418,32 +378,18 @@ const WaikaneStreamGraph = ({ streamData: propStreamData }) => {
           <SvgText
             x={padding + 5}
             y={threshold1Y - 5}
-<<<<<<< HEAD
-            fontSize="10"
-            fill="#FFC107"
-          >
-            7 ft
-=======
             fontSize="12"
             fill="#FFC107"
           >
             Elevated: 7.00 ft
->>>>>>> test-anne-new
           </SvgText>
           <SvgText
             x={padding + 5}
             y={threshold2Y - 5}
-<<<<<<< HEAD
-            fontSize="10"
-            fill="#F44336"
-          >
-            10.8 ft
-=======
             fontSize="12"
             fill="#F44336"
           >
             Extreme: 10.80 ft
->>>>>>> test-anne-new
           </SvgText>
         </Svg>
         
@@ -472,13 +418,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 10,
     margin: 2,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    boxShadow: '0px 2px 4px rgba(0,0,0,0.1)',
     elevation: 3,
   },
   chartContainer: {

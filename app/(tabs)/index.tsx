@@ -1,14 +1,14 @@
 //home screen
 import { Ionicons } from '@expo/vector-icons';
-import { StyleSheet, Pressable, Platform, RefreshControl, ScrollView, View, Dimensions, ActivityIndicator } from 'react-native';
-import * as WebBrowser from 'expo-web-browser';
+import { StyleSheet, Pressable, RefreshControl, ScrollView, ActivityIndicator, Platform } from 'react-native';
+// WebBrowser helper removed (not used in this file)
 import { Image } from 'expo-image';
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
+// IconSymbol removed (unused)
 import WaikaneStreamHeight from '@/components/visualizations/WaikaneStreamHeight';
 import WaiaholeStreamHeight from '@/components/visualizations/WaiaholeStreamHeight';
 import WaikaneStreamGraph from '@/components/visualizations/WaikaneStreamGraph';
@@ -32,23 +32,13 @@ const KANEOHE_COORDS = { lat: 21.4181, lon: -157.8036 };
 
 export default function HomeScreen() {
     // Stream data caching
-    const { fetchStreamData, clearCache } = useStreamDataCache();
+    const { fetchStreamData } = useStreamDataCache();
     const [streamDataCache, setStreamDataCache] = useState<{
         waikane?: { data: any[]; trends: any[] };
         waiahole?: { data: any[]; trends: any[] };
         punaluu?: { data: any[]; trends: any[] };
     }>({});
 
-<<<<<<< HEAD
-      {/* <ThemedView style={styles.welcomeSection}>
-        <ThemedText style={styles.welcomeText}>
-          Stay informed about flood conditions in Waikāne and Waiahole areas of windward Oʻahu.
-        </ThemedText>
-        <ThemedText style={styles.descriptionText}>
-          Monitor real-time data and get alerts to make informed decisions during heavy rainfall.
-        </ThemedText>
-      </ThemedView> */}
-=======
     // Helper to get color for rainfall value
     function getMakaiRainColor(val: string) {
         const num = parseFloat(val);
@@ -80,14 +70,13 @@ export default function HomeScreen() {
     // Fetch Makai and Mauka rain data
     const fetchRainData = useCallback(async () => {
         try {
-            const res = await fetch('http://149.165.159.226:5000/api/rain_data');
+            const res = await fetch('https://waikaneappbackend.ees250103.projects.jetstream-cloud.org/api/rain_data');
             const data: RainData[] = await res.json();
             // Find latest Makai and Mauka
             const makai = data.filter(d => d.Name && d.Name.toLowerCase().includes('makai'))
                 .sort((a, b) => new Date(b.DateTime).getTime() - new Date(a.DateTime).getTime())[0];
             const mauka = data.filter(d => d.Name && d.Name.toLowerCase().includes('mauka'))
                 .sort((a, b) => new Date(b.DateTime).getTime() - new Date(a.DateTime).getTime())[0];
->>>>>>> test-anne-new
 
             if (makai) {
                 setMakaiRain({
@@ -107,7 +96,7 @@ export default function HomeScreen() {
                     }),
                 });
             }
-        } catch (e) {
+        } catch {
             setMakaiRain({ lastHour: 'No Data', lastSixHours: 'No Data', lastReading: 'Offline' });
             setMaukaRain({ lastHour: 'No Data', lastSixHours: 'No Data', lastReading: 'Offline' });
         }
@@ -144,143 +133,38 @@ export default function HomeScreen() {
                 return await fetch(proxied, { headers });
             }
             return resp;
-        } catch (err) {
-            console.warn('NWS direct fetch failed, retrying via proxy:', err);
+        } catch (_err) {
+            console.warn('NWS direct fetch failed, retrying via proxy:', _err);
             return fetch(proxied, { headers });
         }
     }, []);
 
     
     const [refreshing, setRefreshing] = useState(false);
-    const [waikaneData, setWaikaneData] = useState<{ 
-        height: string | null; 
-        lastReading: string | null; 
-        direction: string | null;
-        status: string; 
-        statusColor?: string; 
-    }>({ height: null, lastReading: null, direction: null, status: 'Loading...' });
-    const [waiaholeData, setWaiaholeData] = useState<{ 
-        height: string | null; 
-        lastReading: string | null; 
-        direction: string | null;
-        status: string; 
-        statusColor?: string; 
-    }>({ height: null, lastReading: null, direction: null, status: 'Loading...' });
+    // Stream quick-status state removed; detailed visualizations fetch their own data
 
-    // Threshold values for different stream levels
-    const waikaneThresholds = useMemo(() => ({
-        greenEnd: 7,
-        yellowEnd: 10.8
-    }), []);
-
-    const waiaholeThresholds = useMemo(() => ({
-        greenEnd: 12,
-        yellowEnd: 16.4
-    }), []);
-
-    // Get status based on stream level
-    const getStreamStatus = useCallback((level: number, thresholds: { greenEnd: number; yellowEnd: number }) => {
-        if (level < thresholds.greenEnd) return { status: 'Normal', color: '#34C759' };
-        if (level < thresholds.yellowEnd) return { status: 'Warning', color: '#FFC107' };
-        return { status: 'Danger', color: '#F44336' };
-    }, []);
+    // Stream thresholds and status helpers removed (visualizations manage their own thresholds and status display)
 
     // Fetch Waikane and Waiahole stream data, including trend
     const fetchWaikaneData = useCallback(async () => {
         try {
-            const [streamRes, trendRes] = await Promise.all([
-                fetch('http://149.165.159.169:5000/api/waikane_stream'),
-                fetch('http://149.165.159.169:5000/api/stream_trend')
-            ]);
-            const data = await streamRes.json();
-            const trendData = await trendRes.json();
-
-            const now = new Date();
-            const latest = data
-                .filter((d: any) => d.ft != null && d.DateTime)
-                .map((d: any) => ({
-                    time: new Date(d.DateTime),
-                    value: d.ft
-                }))
-                .filter((d: any) => d.time <= now)
-                .sort((a: any, b: any) => b.time - a.time)[0]; // Most recent past point
-
-            // Find Waikane trend
-            let direction: string | null = null;
-            if (trendData && Array.isArray(trendData)) {
-                const waikaneTrend = trendData.find((t: any) => t.Name && t.Name.toLowerCase().includes('waikane'));
-                direction = waikaneTrend && waikaneTrend.Trend ? waikaneTrend.Trend : null;
-            }
-
-            if (latest) {
-                const statusInfo = getStreamStatus(latest.value, waikaneThresholds);
-                const formattedTime = latest.time.toLocaleString('en-US', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true
-                });
-
-                setWaikaneData({
-                    height: `${latest.value.toFixed(2)} ft`,
-                    lastReading: formattedTime,
-                    direction,
-                    status: statusInfo.status,
-                    statusColor: statusInfo.color
-                });
-            }
-        } catch (error) {
-            // Silently handle network errors to avoid flooding console
-            setWaikaneData({ height: 'No Data', lastReading: 'Offline', direction: null, status: 'Offline' });
+            const streamRes = await fetch('http://149.165.159.169:5000/api/waikane_stream');
+            // We intentionally do not process the response here; visualizations manage their own data/state.
+            await streamRes.json();
+        } catch {
+            // Silently handle network errors; visualization components will show offline/no-data states
         }
-    }, [getStreamStatus, waikaneThresholds]);
+    }, []);
 
     const fetchWaiaholeData = useCallback(async () => {
         try {
-            const [streamRes, trendRes] = await Promise.all([
-                fetch('http://149.165.159.169:5000/api/waiahole_stream'),
-                fetch('http://149.165.159.169:5000/api/stream_trend')
-            ]);
-            const data = await streamRes.json();
-            const trendData = await trendRes.json();
-
-            const now = new Date();
-            const latest = data
-                .filter((d: any) => d.ft != null && d.DateTime)
-                .map((d: any) => ({
-                    time: new Date(d.DateTime),
-                    value: d.ft
-                }))
-                .filter((d: any) => d.time <= now)
-                .sort((a: any, b: any) => b.time - a.time)[0]; // Most recent past point
-
-            // Find Waiahole trend
-            let direction: string | null = null;
-            if (trendData && Array.isArray(trendData)) {
-                const waiaholeTrend = trendData.find((t: any) => t.Name && t.Name.toLowerCase().includes('waiahole'));
-                direction = waiaholeTrend && waiaholeTrend.Trend ? waiaholeTrend.Trend : null;
-            }
-
-            if (latest) {
-                const statusInfo = getStreamStatus(latest.value, waiaholeThresholds);
-                const formattedTime = latest.time.toLocaleString('en-US', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true
-                });
-
-                setWaiaholeData({
-                    height: `${latest.value.toFixed(2)} ft`,
-                    lastReading: formattedTime,
-                    direction,
-                    status: statusInfo.status,
-                    statusColor: statusInfo.color
-                });
-            }
-        } catch (error) {
-            // Silently handle network errors to avoid flooding console
-            setWaiaholeData({ height: 'No Data', lastReading: 'Offline', direction: null, status: 'Offline' });
+            const streamRes = await fetch('http://149.165.159.169:5000/api/waiahole_stream');
+            // Visualizations handle their own parsing; keep call to refresh caches if needed
+            await streamRes.json();
+        } catch {
+            // Silently handle network errors; visualization components will show offline/no-data states
         }
-    }, [getStreamStatus, waiaholeThresholds]);
+    }, []);
 
     // Fetch weather forecast - via NWS (uses proxy on web)
     useEffect(() => {
@@ -329,7 +213,7 @@ export default function HomeScreen() {
             }
         }
         fetchForecast();
-    }, []);
+    }, [fetchNws]);
 
     // Fetch weather alerts - via NWS (uses proxy on web)
     useEffect(() => {
@@ -381,7 +265,7 @@ export default function HomeScreen() {
             }
         }
         fetchAlerts();
-    }, []);
+    }, [fetchNws]);
 
     // Load stream data for a specific stream type
     const loadStreamData = useCallback(async (streamType: 'waikane' | 'waiahole' | 'punaluu') => {
@@ -425,9 +309,7 @@ export default function HomeScreen() {
         }, 500);
     }, [fetchWaikaneData, fetchWaiaholeData, fetchRainData, loadStreamData]);
 
-    const openMap = async () => {
-        await WebBrowser.openBrowserAsync('https://experience.arcgis.com/experience/60260cda4f744186bbd9c67163b747d3');
-    };
+    // map opening moved to inline usage when needed; helper removed to avoid unused variable warning
 
     // Stream chart navigation logic
     const streamCharts = [
@@ -474,7 +356,7 @@ export default function HomeScreen() {
                         source={require('@/assets/images/windward-header.jpg')}
                         style={styles.headerImage}
                     />
-                    <ThemedView style={styles.headerOverlay} pointerEvents="none">
+                    <ThemedView style={styles.headerOverlay}>
                         <ThemedText type="title" style={[styles.thinText, styles.appTitleOverlay]}>Windward Flood Check</ThemedText>
                     </ThemedView>
                 </ThemedView>
@@ -635,12 +517,12 @@ export default function HomeScreen() {
                             contentFit="cover"
                             accessibilityLabel="Map preview"
                         />
-                        <ThemedView style={styles.mapPreviewOverlay} pointerEvents="none">
+                        <ThemedView style={styles.mapPreviewOverlay}>
                             <ThemedView style={styles.mapPreviewTextBg}>
-                                <Ionicons name="map" size={28} color="#fff" style={{ marginBottom: 10, textShadowColor: '#222', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 6 }} />
+                                <Ionicons name="map" size={28} color="#fff" style={{ marginBottom: 10 }} />
                                 <ThemedText style={styles.mapButtonText}>Open Interactive Flood Risk Map</ThemedText>
                                 <ThemedText style={styles.mapButtonSubtext}>View flood-prone areas and monitoring stations</ThemedText>
-                                <Ionicons name="open-outline" size={18} color="#fff" style={{ marginTop: 10, textShadowColor: '#222', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 6 }} />
+                                <Ionicons name="open-outline" size={18} color="#fff" style={{ marginTop: 10 }} />
                             </ThemedView>
                         </ThemedView>
                     </Pressable>
@@ -832,14 +714,13 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: 'rgba(0,0,0,0.15)',
+        pointerEvents: 'none',
     },
     appTitleOverlay: {
         fontSize: 22,
         color: '#fff',
         textAlign: 'center',
-        textShadowColor: 'rgba(0,0,0,0.5)',
-        textShadowOffset: { width: 0, height: 1 },
-        textShadowRadius: 4,
+    // Removed text shadow to avoid deprecated props and type issues
         letterSpacing: 0.5,
         transform: [{ translateY: 68 }],
     },
@@ -1048,9 +929,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginTop: 2,
         marginBottom: 6,
-        textShadowColor: '#222',
-        textShadowOffset: { width: 0, height: 2 },
-        textShadowRadius: 6,
+    // Removed text shadow to avoid deprecated props and type issues
         letterSpacing: 0.2,
     },
     mapButtonSubtext: {
@@ -1060,9 +939,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         opacity: 0.92,
         marginBottom: 2,
-        textShadowColor: '#222',
-        textShadowOffset: { width: 0, height: 2 },
-        textShadowRadius: 6,
+    // Removed text shadow to avoid deprecated props and type issues
         letterSpacing: 0.1,
     },
     loadingContainer: {
@@ -1104,6 +981,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         paddingHorizontal: 12,
+        pointerEvents: 'none',
     },
     mapPreviewTextBg: {
         backgroundColor: 'rgba(20, 30, 60, 0.55)',
@@ -1113,10 +991,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         // Removed borderWidth and borderColor for cleaner look
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.18,
-        shadowRadius: 10,
+        boxShadow: '0px 3px 10px rgba(0,0,0,0.18)',
         elevation: 6,
         width: '100%', // expand overlay to match image width
         minHeight: 120,
@@ -1129,10 +1004,7 @@ const styles = StyleSheet.create({
         marginBottom: 12,
         width: '100%',
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.13,
-        shadowRadius: 8,
+        boxShadow: '0px 2px 8px rgba(0,0,0,0.13)',
         elevation: 4,
     },
     gaugeInnerBg: {
@@ -1252,11 +1124,15 @@ const styles = StyleSheet.create({
         marginVertical: Platform.OS === 'web' ? 8 : 4,
         borderRadius: 8,
         marginBottom: Platform.OS === 'web' ? 16 : 6,
-        shadowColor: '#1E90FF',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.08,
-        shadowRadius: 2,
-        elevation: 2,
+        // Use boxShadow on web; keep elevation for native
+        ...Platform.select({
+            web: {
+                boxShadow: '0px 1px 2px rgba(30, 144, 255, 0.08)',
+            },
+            default: {
+                elevation: 2,
+            },
+        }),
     },
     sectionHeaderText: {
         textAlign: 'center',

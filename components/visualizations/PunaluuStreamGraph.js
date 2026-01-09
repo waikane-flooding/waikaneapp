@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Svg, Path, Line, Circle, Defs, LinearGradient, Stop, Text as SvgText } from 'react-native-svg';
+import { Svg, Path, Line, Defs, LinearGradient, Stop, Text as SvgText } from 'react-native-svg';
 
 const PunaluuStreamGraph = ({ streamData: propStreamData }) => {
   const [streamData, setStreamData] = useState([]);
@@ -189,7 +189,7 @@ const PunaluuStreamGraph = ({ streamData: propStreamData }) => {
             textAnchor="middle"
             fontWeight="bold"
           >
-            Punaluu Stream Graph
+            Punalu&apos;u Stream Graph
           </SvgText>
           {/* Y-axis title */}
                     <SvgText
@@ -418,13 +418,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 10,
     margin: 2,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    boxShadow: '0px 2px 4px rgba(0,0,0,0.1)',
     elevation: 3,
   },
   chartContainer: {

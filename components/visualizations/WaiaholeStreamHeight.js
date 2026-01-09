@@ -2,15 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import Svg, { Path, Text as SvgText } from 'react-native-svg';
 
-<<<<<<< HEAD
-const WaiaholeStreamHeight = () => {
-  const [streamLevel, setStreamLevel] = useState(null);
-  const [streamTime, setStreamTime] = useState(null);
-  const [animatedValue] = useState(new Animated.Value(0));
-
-  const minLevel = 0;
-  const maxLevel = 22;
-=======
 const WaiaholeStreamHeight = ({ streamData, trendData }) => {
   const [streamLevel, setStreamLevel] = useState(null);
   const [streamTime, setStreamTime] = useState(null);
@@ -19,7 +10,6 @@ const WaiaholeStreamHeight = ({ streamData, trendData }) => {
 
   const minLevel = 6;
   const maxLevel = 18;
->>>>>>> test-anne-new
   const greenEnd = 12;
   const yellowEnd = 16.4;
 
@@ -30,49 +20,6 @@ const WaiaholeStreamHeight = ({ streamData, trendData }) => {
     return '#F44336';
   };
 
-<<<<<<< HEAD
-  const customTicks = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22];
-
-  useEffect(() => {
-    fetch('http://149.165.172.129:5000/api/waiahole_stream')
-      .then(res => res.json())
-      .then(data => {
-        const now = new Date();
-        const latest = data
-          .filter(d => d.ft != null && d.DateTime)
-          .map(d => ({
-            time: new Date(d.DateTime),
-            value: d.ft
-          }))
-          .filter(d => d.time <= now)
-          .sort((a, b) => b.time - a.time)[0];
-
-        if (latest) {
-          setStreamLevel(latest.value);
-          setStreamTime(latest.time);
-          
-          // Animate to new stream level
-          const targetPercent = (latest.value - minLevel) / (maxLevel - minLevel);
-          Animated.timing(animatedValue, {
-            toValue: targetPercent,
-            duration: 2000,
-            useNativeDriver: false,
-          }).start();
-        }
-      })
-      .catch(err => console.error("Failed to load stream data", err));
-  }, [animatedValue, maxLevel, minLevel]);
-
-  const formattedDateTime = streamTime
-    ? 'Latest Reading: ' + new Date(streamTime).toLocaleString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true
-      }) + ' HST'
-=======
   const customTicks = [6, 8, 10, 12, 14, 16, 18];
 
   useEffect(() => {
@@ -118,15 +65,11 @@ const WaiaholeStreamHeight = ({ streamData, trendData }) => {
         minute: '2-digit',
         hour12: true
       })
->>>>>>> test-anne-new
     : 'Loading...';
 
   return (
     <View style={styles.container}>
-<<<<<<< HEAD
-=======
       <Text style={styles.title}>Waiāhole Stream Gauge</Text>
->>>>>>> test-anne-new
       <View style={styles.gaugeContainer}>
         <Svg width={700} height={300}>
           {/* Background arc */}
@@ -170,11 +113,7 @@ const WaiaholeStreamHeight = ({ streamData, trendData }) => {
                 x={lx}
                 y={ly}
                 fontSize="18"
-<<<<<<< HEAD
-                fill="#fff"
-=======
                 fill="#007AFF"
->>>>>>> test-anne-new
                 textAnchor="middle"
                 alignmentBaseline="middle"
               >
@@ -182,15 +121,6 @@ const WaiaholeStreamHeight = ({ streamData, trendData }) => {
               </SvgText>
             );
           })}
-<<<<<<< HEAD
-        </Svg>
-      </View>
-      <View style={styles.valueContainer}>
-        <Text style={[styles.value, { color: streamLevel !== null ? getColorForLevel(streamLevel) : 'white' }]}>
-          {streamLevel !== null ? `${streamLevel.toFixed(2)} ft` : 'Loading...'}
-        </Text>
-        <Text style={styles.datetime}>{formattedDateTime}</Text>
-=======
           {/* Threshold tick marks and labels */}
           {[{ value: greenEnd, color: '#FFC107', label: '12.00 ft' }, { value: yellowEnd, color: '#F44336', label: '16.40 ft' }].map((threshold, idx) => {
             const percent = (threshold.value - minLevel) / (maxLevel - minLevel);
@@ -242,22 +172,10 @@ const WaiaholeStreamHeight = ({ streamData, trendData }) => {
         <Text style={{ color: '#007AFF', fontSize: 16, marginTop: 8, textAlign: 'center' }}>
           Stream is {streamDirection ? streamDirection : 'Loading...'}
         </Text>
->>>>>>> test-anne-new
       </View>
       <View style={styles.legendContainer}>
         <View style={styles.legendItem}>
           <View style={[styles.legendColor, { backgroundColor: '#4CAF50' }]} />
-<<<<<<< HEAD
-          <Text style={styles.legendText}>No Flooding</Text>
-        </View>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendColor, { backgroundColor: '#FFC107' }]} />
-          <Text style={styles.legendText}>Minor Flooding</Text>
-        </View>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendColor, { backgroundColor: '#F44336' }]} />
-          <Text style={styles.legendText}>Major Flooding</Text>
-=======
           <Text style={styles.legendText}>Normal</Text>
         </View>
         <View style={styles.legendItem}>
@@ -267,7 +185,6 @@ const WaiaholeStreamHeight = ({ streamData, trendData }) => {
         <View style={styles.legendItem}>
           <View style={[styles.legendColor, { backgroundColor: '#F44336' }]} />
           <Text style={styles.legendText}>Extreme</Text>
->>>>>>> test-anne-new
         </View>
       </View>
     </View>
@@ -282,8 +199,6 @@ const styles = StyleSheet.create({
     marginBottom: 2,
     position: 'relative',
   },
-<<<<<<< HEAD
-=======
   title: {
     fontSize: 18,
     fontWeight: '400',
@@ -291,7 +206,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 8,
   },
->>>>>>> test-anne-new
   gaugeContainer: {
     marginBottom: 0,
     position: 'relative',
@@ -310,22 +224,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   datetime: {
-<<<<<<< HEAD
-    color: 'white',
-=======
     color: '#007AFF',
->>>>>>> test-anne-new
     fontSize: 16,
     marginTop: 4,
     textAlign: 'center',
   },
   legendContainer: {
     position: 'absolute',
-<<<<<<< HEAD
-    bottom: 10,
-=======
     bottom: 40,
->>>>>>> test-anne-new
     left: 0,
     right: 0,
     flexDirection: 'row',
@@ -345,11 +251,7 @@ const styles = StyleSheet.create({
     marginRight: 5,
   },
   legendText: {
-<<<<<<< HEAD
-    color: 'white',
-=======
     color: '#007AFF',
->>>>>>> test-anne-new
     fontSize: 14,
   },
 });

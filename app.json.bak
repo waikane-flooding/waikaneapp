@@ -1,0 +1,41 @@
+{
+  "expo": {
+    "name": "Flood Check",
+    "slug": "flood-check",
+    "version": "1.0.0",
+    "description": "Real-time flood monitoring app for Windward Oʻahu providing local water level data, maps, and safety alerts.",
+    "icon": "./assets/images/icon.png",
+  "scheme": "flood-check",
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "a18f707f-f1bb-4745-87c7-b19e140d21c6"
+      }
+    },
+    "owner": "chiaraduyn",
+    "ios": {
+      "bundleIdentifier": "edu.hawaii.wrrc",
+      "appleTeamId": "B8Y298FMLQ",
+      "icon": "./assets/images/icon.png",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-web-browser",
+      "expo-font"
+    ],
+    "android": {
+      "package": "edu.hawaii.wrrc"
+    }
+  }
+}

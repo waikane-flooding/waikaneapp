@@ -11,7 +11,7 @@ const MaukaRainGauge = () => {
   const maxLevel = 7;
 
   useEffect(() => {
-    fetch('http://149.165.159.226:5000/api/rain_data')
+    fetch('https://waikaneappbackend.ees250103.projects.jetstream-cloud.org/api/rain_data')
       .then(res => res.json())
       .then(data => {
         // Find the first entry where Name === "Mauka"
@@ -50,15 +50,7 @@ const MaukaRainGauge = () => {
     return '#F44336';
   };
 
-  const formattedDateTime = rainTime
-    ? 'Latest Reading: ' + new Date(rainTime).toLocaleString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true
-      }) + ' HST'
-    : 'Loading...';
+  // Formatted datetime used inline in render; removed unused variable
 
   const customTicks = [0, 1, 2, 3, 4, 5, 6, 7];
 

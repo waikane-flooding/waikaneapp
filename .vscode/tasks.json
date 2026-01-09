@@ -1,0 +1,36 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Start Expo dev server",
+			"type": "shell",
+			"command": "npx expo start --clear",
+			"isBackground": false,
+			"problemMatcher": [
+				"$eslint - stylish"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Start Expo dev server",
+			"type": "shell",
+			"command": "npx expo start --clear",
+			"isBackground": false,
+			"group": "build"
+		},
+		{
+			"label": "Start Expo dev server",
+			"type": "shell",
+			"command": "npx expo start --clear",
+			"isBackground": false,
+			"group": "build"
+		},
+		{
+			"label": "Start Expo dev server",
+			"type": "shell",
+			"command": "npx expo start --clear",
+			"isBackground": false,
+			"group": "build"
+		}
+	]
+}
