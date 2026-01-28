@@ -640,6 +640,14 @@ export default function HomeScreen() {
                 <ThemedView style={styles.sectionDivider} />
             </ThemedView>
 
+            {/* Refresh Data Notice */}
+            <ThemedView style={styles.footerNotice}>
+                <Ionicons name="refresh-circle" size={18} color="#0A84FF" style={{ marginRight: 8 }} />
+                <ThemedText style={styles.footerNoticeText}>
+                    To refresh data, please fully close the app and reopen it.
+                </ThemedText>
+            </ThemedView>
+
         </ParallaxScrollView>
     );
 }
@@ -1199,5 +1207,26 @@ const styles = StyleSheet.create({
         fontSize: 12,
         marginTop: 6,
         marginBottom: 4,
+    },
+    footerNotice: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(10, 132, 255, 0.08)',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: 'rgba(10, 132, 255, 0.2)',
+        paddingVertical: 10,
+        paddingHorizontal: 12,
+        marginHorizontal: 12,
+        marginTop: 8,
+        marginBottom: Platform.OS === 'web' ? 12 : 4,
+    },
+    footerNoticeText: {
+        color: '#0A84FF',
+        fontSize: 13,
+        textAlign: 'center',
+        fontWeight: '400',
+        flexShrink: 1,
     },
 });
