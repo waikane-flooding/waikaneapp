@@ -64,7 +64,8 @@ export default function AboutScreen() {
 		>
 			<ThemedView>
 				<ThemedText style={styles.thinText}>
-					Aloha! Monitor real time stream levels, rainfall data, tide conditions, and weather forecasts to stay informed about flood risks and environmental conditions on the windward side.
+					Aloha! Monitor real time stream levels, rainfall data, tide conditions, and weather forecasts to stay informed about flood risks and environmental conditions on the windward side.{"\n\n"}
+					This app is for exploratory purposes only. Read the disclaimer below for more important information about the app.
 				</ThemedText>
 			</ThemedView>
 
