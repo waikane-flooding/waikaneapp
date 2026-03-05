@@ -96,7 +96,6 @@ function PinchPanView({ children }) {
 
       onPanResponderRelease: () => {
         st.pinchDist = null;
-        if (st.scale <= MIN_SCALE) springReset();
       },
     })
   ).current;
@@ -153,9 +152,7 @@ export default function ZoomableChart({
             {/* Header */}
             <View style={styles.modalHeader}>
               <Text style={styles.modalHint}>
-                {Platform.OS === 'web'
-                  ? 'Scroll to pan  ·  Tap outside to close'
-                  : 'Pinch to zoom  ·  Drag to pan  ·  Double-tap to reset'}
+                Drag to pan
               </Text>
               <Pressable
                 onPress={() => setOpen(false)}
