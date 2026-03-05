@@ -3,7 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Pressable, RefreshControl, ScrollView, ActivityIndicator, Platform } from 'react-native';
 // WebBrowser helper removed (not used in this file)
 import { Image } from 'expo-image';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, cloneElement } from 'react';
 
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
@@ -17,6 +17,7 @@ import WaikaneTideLevel from '@/components/visualizations/WaikaneTideLevel';
 import WaikaneTideGraph from '@/components/visualizations/WaikaneTideGraph';
 import PunaluuStreamHeight from '@/components/visualizations/PunaluuStreamHeight';
 import PunaluuStreamGraph from '@/components/visualizations/PunaluuStreamGraph';
+import ZoomableChart from '@/components/visualizations/ZoomableChart';
 import { useStreamDataCache } from '@/hooks/useStreamDataCache';
 
 // Types for rain data
@@ -56,6 +57,23 @@ export default function HomeScreen() {
         if (num <= 7) return '#F44336'; // red
         return '#007AFF';
     }
+    // Tide data state — fetched once here so the zoom modal reuses it instantly
+    const [tideCurveData, setTideCurveData] = useState<any[]>([]);
+    const [tideMarkersData, setTideMarkersData] = useState<any[]>([]);
+    const fetchTideData = useCallback(async () => {
+        try {
+            const [curveRes, markersRes] = await Promise.all([
+                fetch('https://waikaneappbackend.ees250103.projects.jetstream-cloud.org/api/waikane_tide_curve'),
+                fetch('https://waikaneappbackend.ees250103.projects.jetstream-cloud.org/api/waikane_tides'),
+            ]);
+            const [curve, markers] = await Promise.all([curveRes.json(), markersRes.json()]);
+            setTideCurveData(curve);
+            setTideMarkersData(markers);
+        } catch {
+            // leave as empty — graph will show loading/no-data
+        }
+    }, []);
+
     // Rain data state
     const [makaiRain, setMakaiRain] = useState<{
         lastHour: string;
@@ -283,19 +301,21 @@ export default function HomeScreen() {
         fetchWaikaneData();
         fetchWaiaholeData();
         fetchRainData();
+        fetchTideData();
         // Load stream data for caching
         loadStreamData('waikane');
         loadStreamData('waiahole');
         loadStreamData('punaluu');
         // Note: forecast and alerts are fetched by their own useEffect hooks above
-    }, [fetchWaikaneData, fetchWaiaholeData, fetchRainData, loadStreamData]);
+    }, [fetchWaikaneData, fetchWaiaholeData, fetchRainData, fetchTideData, loadStreamData]);
 
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
         await Promise.all([
             fetchWaikaneData(), 
             fetchWaiaholeData(), 
-            fetchRainData(), 
+            fetchRainData(),
+            fetchTideData(),
             loadStreamData('waikane'),
             loadStreamData('waiahole'),
             loadStreamData('punaluu')
@@ -307,7 +327,7 @@ export default function HomeScreen() {
         setTimeout(() => {
             setRefreshing(false);
         }, 500);
-    }, [fetchWaikaneData, fetchWaiaholeData, fetchRainData, loadStreamData]);
+    }, [fetchWaikaneData, fetchWaiaholeData, fetchRainData, fetchTideData, loadStreamData]);
 
     // map opening moved to inline usage when needed; helper removed to avoid unused variable warning
 
@@ -402,7 +422,17 @@ export default function HomeScreen() {
                     </ThemedView>
                     <ThemedText style={styles.streamNavHint}>Tap arrows to switch</ThemedText>
                     <ThemedView style={styles.gaugeWrapper}>{currentStream.gauge}</ThemedView>
-                    <ThemedView style={styles.chartWrapper}>{currentStream.graph}</ThemedView>
+                    <ThemedView style={styles.chartWrapper}>
+                        <ZoomableChart
+                            compactWidth={650}
+                            compactHeight={300}
+                            renderZoomContent={({ width, height }: { width: number; height: number }) =>
+                                cloneElement(currentStream.graph as React.ReactElement<any>, { width, height })
+                            }
+                        >
+                            {currentStream.graph}
+                        </ZoomableChart>
+                    </ThemedView>
                 </ThemedView>
             </ThemedView>
             <ThemedView style={styles.sectionDividerWrap}>
@@ -426,8 +456,21 @@ export default function HomeScreen() {
                     <WaikaneTideLevel />
                 </ThemedView>
                 <ThemedView style={styles.chartWrapper}>
-                    <WaikaneTideGraph />
-                </ThemedView>
+                        <ZoomableChart
+                            compactWidth={650}
+                            compactHeight={300}
+                            renderZoomContent={({ width, height }: { width: number; height: number }) => (
+                                <WaikaneTideGraph
+                                    width={width}
+                                    height={height}
+                                    curveData={tideCurveData}
+                                    tideData={tideMarkersData}
+                                />
+                            )}
+                        >
+                            <WaikaneTideGraph curveData={tideCurveData} tideData={tideMarkersData} />
+                        </ZoomableChart>
+                    </ThemedView>
             </ThemedView>
             <ThemedView style={styles.sectionDividerWrap}>
                 <ThemedView style={styles.sectionDivider} />
