@@ -2,35 +2,34 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Svg, Path, Line, Polygon, Defs, LinearGradient, Stop, Text as SvgText } from 'react-native-svg';
 
-const WaikaneTideGraph = () => {
-  const [curveData, setCurveData] = useState([]);
-  const [tideData, setTideData] = useState([]);
+const WaikaneTideGraph = ({ width = 650, height = 300, curveData: propCurveData, tideData: propTideData }) => {
+  const [fetchedCurveData, setFetchedCurveData] = useState([]);
+  const [fetchedTideData, setFetchedTideData]   = useState([]);
 
+  // Only fetch if data was not passed in as props (avoids re-fetching in the zoom modal)
   useEffect(() => {
+    if (propCurveData) return;
     fetch('https://waikaneappbackend.ees250103.projects.jetstream-cloud.org/api/waikane_tide_curve')
       .then(res => res.json())
-      .then(curve => {
-        setCurveData(curve);
-      })
-      .catch(error => {
-        setCurveData([]);
-      });
-  }, []);
+      .then(curve => setFetchedCurveData(curve))
+      .catch(() => setFetchedCurveData([]));
+  }, [propCurveData]);
 
   useEffect(() => {
+    if (propTideData) return;
     fetch('https://waikaneappbackend.ees250103.projects.jetstream-cloud.org/api/waikane_tides')
       .then(res => res.json())
-      .then(data => {
-        setTideData(data);
-      })
-      .catch(error => {
-        setTideData([]);
-      });
-  }, []);
+      .then(data => setFetchedTideData(data))
+      .catch(() => setFetchedTideData([]));
+  }, [propTideData]);
 
-  // Chart dimensions - fill the container
-  const chartWidth = 650;
-  const chartHeight = 300;
+  // Use prop data if provided, otherwise fall back to locally fetched data
+  const curveData = propCurveData ?? fetchedCurveData;
+  const tideData  = propTideData  ?? fetchedTideData;
+
+  // Chart dimensions - allow override via props for the zoom modal
+  const chartWidth = width;
+  const chartHeight = height;
   const padding = 50;
   const graphWidth = chartWidth - 2 * padding;
   const graphHeight = chartHeight - 2 * padding;

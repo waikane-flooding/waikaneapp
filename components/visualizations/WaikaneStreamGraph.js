@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Svg, Path, Line, Defs, LinearGradient, Stop, Text as SvgText } from 'react-native-svg';
 
-const WaikaneStreamGraph = ({ streamData: propStreamData }) => {
+const WaikaneStreamGraph = ({ streamData: propStreamData, width = 650, height = 300 }) => {
   const [streamData, setStreamData] = useState([]);
 
   useEffect(() => {
@@ -23,9 +23,9 @@ const WaikaneStreamGraph = ({ streamData: propStreamData }) => {
     );
   }
 
-  // Chart dimensions - responsive but maintain aspect ratio
-  const chartWidth = 650;
-  const chartHeight = 300;
+  // Chart dimensions - allow override via props for the zoom modal
+  const chartWidth = width;
+  const chartHeight = height;
   const padding = 50;
   const graphWidth = chartWidth - 2 * padding;
   const graphHeight = chartHeight - 2 * padding;
