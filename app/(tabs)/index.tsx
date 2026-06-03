@@ -63,8 +63,8 @@ export default function HomeScreen() {
     const fetchTideData = useCallback(async () => {
         try {
             const [curveRes, markersRes] = await Promise.all([
-                fetch('https://waikaneappbackend.ees250103.projects.jetstream-cloud.org/api/waikane_tide_curve'),
-                fetch('https://waikaneappbackend.ees250103.projects.jetstream-cloud.org/api/waikane_tides'),
+                fetch('http://159.223.179.149:5000/api/waikane_tide_curve'),
+                fetch('http://159.223.179.149:5000/api/waikane_tides'),
             ]);
             const [curve, markers] = await Promise.all([curveRes.json(), markersRes.json()]);
             setTideCurveData(curve);
@@ -88,7 +88,7 @@ export default function HomeScreen() {
     // Fetch Makai and Mauka rain data
     const fetchRainData = useCallback(async () => {
         try {
-            const res = await fetch('https://waikaneappbackend.ees250103.projects.jetstream-cloud.org/api/rain_data');
+            const res = await fetch('http://159.223.179.149:5000/api/rain_data');
             const data: RainData[] = await res.json();
             // Find latest Makai and Mauka
             const makai = data.filter(d => d.Name && d.Name.toLowerCase().includes('makai'))

@@ -9,7 +9,7 @@ const WaikaneTideGraph = ({ width = 650, height = 300, curveData: propCurveData,
   // Only fetch if data was not passed in as props (avoids re-fetching in the zoom modal)
   useEffect(() => {
     if (propCurveData) return;
-    fetch('https://waikaneappbackend.ees250103.projects.jetstream-cloud.org/api/waikane_tide_curve')
+    fetch('http://159.223.179.149:5000/api/waikane_tide_curve')
       .then(res => res.json())
       .then(curve => setFetchedCurveData(curve))
       .catch(() => setFetchedCurveData([]));
@@ -17,7 +17,7 @@ const WaikaneTideGraph = ({ width = 650, height = 300, curveData: propCurveData,
 
   useEffect(() => {
     if (propTideData) return;
-    fetch('https://waikaneappbackend.ees250103.projects.jetstream-cloud.org/api/waikane_tides')
+    fetch('http://159.223.179.149:5000/api/waikane_tides')
       .then(res => res.json())
       .then(data => setFetchedTideData(data))
       .catch(() => setFetchedTideData([]));

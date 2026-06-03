@@ -11,7 +11,7 @@ const MaukaRainGauge = () => {
   const maxLevel = 7;
 
   useEffect(() => {
-    fetch('https://waikaneappbackend.ees250103.projects.jetstream-cloud.org/api/rain_data')
+    fetch('http://159.223.179.149:5000/api/rain_data')
       .then(res => res.json())
       .then(data => {
         // Find the first entry where Name === "Mauka"

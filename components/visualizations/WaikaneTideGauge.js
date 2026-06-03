@@ -12,7 +12,7 @@ const WaikaneTideGauge = () => {
   const maxLevel = 4;
 
   useEffect(() => {
-    fetch('https://waikaneappbackend.ees250103.projects.jetstream-cloud.org/api/waikane_tide_curve')
+    fetch('http://159.223.179.149:5000/api/waikane_tide_curve')
       .then(res => res.json())
       .then(data => {
   // Get current time in UTC for comparisons

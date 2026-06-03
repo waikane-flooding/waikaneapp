@@ -12,7 +12,7 @@ const WaikaneTideLevel = () => {
 
   useEffect(() => {
     // Fetch tide curve data
-    fetch('https://waikaneappbackend.ees250103.projects.jetstream-cloud.org/api/waikane_tide_curve')
+    fetch('http://159.223.179.149:5000/api/waikane_tide_curve')
       .then(res => res.json())
       .then(data => {
   // Get current time in HST (UTC-10, no DST)
@@ -67,7 +67,7 @@ const WaikaneTideLevel = () => {
       });
 
     // Fetch high/low tide data
-    fetch('https://waikaneappbackend.ees250103.projects.jetstream-cloud.org/api/waikane_tides')
+    fetch('http://159.223.179.149:5000/api/waikane_tides')
       .then(res => res.json())
       .then(data => {
         const nowUTC = new Date();
