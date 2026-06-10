@@ -46,6 +46,15 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="redesign"
+        options={{
+          title: 'Redesign',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="color-palette" color={color} size={size} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

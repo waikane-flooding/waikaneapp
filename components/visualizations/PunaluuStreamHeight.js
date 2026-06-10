@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import Svg, { Path, Text as SvgText } from 'react-native-svg';
+import ZoomableChart from './ZoomableChart';
+import PunaluuStreamGraph from './PunaluuStreamGraph';
 
 const PunaluuStreamHeight = ({ streamData, trendData }) => {
   const [streamLevel, setStreamLevel] = useState(null);
@@ -68,126 +70,134 @@ const PunaluuStreamHeight = ({ streamData, trendData }) => {
     : 'Loading...';
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Punalu&apos;u Stream Gauge</Text>
-      <View style={styles.gaugeContainer}>
-        <Svg width={700} height={300}>
-          {/* Background arc */}
-          <Path
-            d="M100,280 A250,250 0 0,1 600,280"
-            stroke="#333"
-            strokeWidth={20}
-            fill="none"
-            strokeLinecap="round"
-          />
-          
-          {/* Animated colored arc based on stream level */}
-          {streamLevel !== null && (() => {
-            const percent = Math.min((streamLevel - minLevel) / (maxLevel - minLevel), 0.98); // Cap at 98%
-            const angle = percent * Math.PI;
-            const endX = 350 + 250 * Math.cos(Math.PI - angle);
-            const endY = 280 - 250 * Math.sin(Math.PI - angle);
+    <ZoomableChart
+      compactWidth={700}
+      compactHeight={300}
+      renderZoomContent={({ width, height }) => (
+        <PunaluuStreamGraph streamData={streamData} width={width} height={height} />
+      )}
+    >
+      <View style={styles.container}>
+        <Text style={styles.title}>Punalu&apos;u Stream Gauge</Text>
+        <View style={styles.gaugeContainer}>
+          <Svg width={700} height={300}>
+            {/* Background arc */}
+            <Path
+              d="M100,280 A250,250 0 0,1 600,280"
+              stroke="#333"
+              strokeWidth={20}
+              fill="none"
+              strokeLinecap="round"
+            />
             
-            // Always use small arc flag to prevent wrapping
-            return (
-              <Path
-                d={`M100,280 A250,250 0 0,1 ${endX},${endY}`}
-                stroke={getColorForLevel(streamLevel)}
-                strokeWidth={20}
-                fill="none"
-                strokeLinecap="round"
-              />
-            );
-          })()}
-          
-          {/* Tick labels */}
-          {customTicks.map((tick) => {
-            const tickPercent = (tick - minLevel) / (maxLevel - minLevel);
-            const angle = Math.PI - tickPercent * Math.PI;
-            const labelRadius = 270;
-            const lx = 350 + labelRadius * Math.cos(angle);
-            const ly = 280 - labelRadius * Math.sin(angle);
-            return (
-              <SvgText
-                key={tick}
-                x={lx}
-                y={ly}
-                fontSize="18"
-                fill="#007AFF"
-                textAnchor="middle"
-                alignmentBaseline="middle"
-              >
-                {`${tick} ft`}
-              </SvgText>
-            );
-          })}
-          {/* Threshold tick marks and labels */}
-          {[{ value: greenEnd, color: '#FFC107', label: '10.00 ft' }, { value: yellowEnd, color: '#F44336', label: '14.70 ft' }].map((threshold, idx) => {
-            const percent = (threshold.value - minLevel) / (maxLevel - minLevel);
-            const angle = Math.PI - percent * Math.PI;
-            const tickRadius = 250;
-            const tickLength = 20;
-            const tickCenter = tickRadius;
-            const halfLength = tickLength / 2;
-            const x1 = 350 + (tickCenter - halfLength) * Math.cos(angle);
-            const y1 = 280 - (tickCenter - halfLength) * Math.sin(angle);
-            const x2 = 350 + (tickCenter + halfLength) * Math.cos(angle);
-            const y2 = 280 - (tickCenter + halfLength) * Math.sin(angle);
-            
-            const labelRadius = 200;
-            const lx = 350 + labelRadius * Math.cos(angle);
-            const ly = 280 - labelRadius * Math.sin(angle);
-            return (
-              <React.Fragment key={threshold.value}>
-                {/* Tick mark */}
+            {/* Animated colored arc based on stream level */}
+            {streamLevel !== null && (() => {
+              const percent = Math.min((streamLevel - minLevel) / (maxLevel - minLevel), 0.98); // Cap at 98%
+              const angle = percent * Math.PI;
+              const endX = 350 + 250 * Math.cos(Math.PI - angle);
+              const endY = 280 - 250 * Math.sin(Math.PI - angle);
+              
+              // Always use small arc flag to prevent wrapping
+              return (
                 <Path
-                  d={`M${x1},${y1} L${x2},${y2}`}
-                  stroke={threshold.color}
-                  strokeWidth={5}
+                  d={`M100,280 A250,250 0 0,1 ${endX},${endY}`}
+                  stroke={getColorForLevel(streamLevel)}
+                  strokeWidth={20}
+                  fill="none"
                   strokeLinecap="round"
                 />
-                {/* Label */}
+              );
+            })()}
+            
+            {/* Tick labels */}
+            {customTicks.map((tick) => {
+              const tickPercent = (tick - minLevel) / (maxLevel - minLevel);
+              const angle = Math.PI - tickPercent * Math.PI;
+              const labelRadius = 270;
+              const lx = 350 + labelRadius * Math.cos(angle);
+              const ly = 280 - labelRadius * Math.sin(angle);
+              return (
                 <SvgText
+                  key={tick}
                   x={lx}
                   y={ly}
-                  fontSize="20"
-                  fill={threshold.color}
+                  fontSize="18"
+                  fill="#007AFF"
                   textAnchor="middle"
                   alignmentBaseline="middle"
-                  fontWeight="bold"
                 >
-                  {threshold.label}
+                  {`${tick} ft`}
                 </SvgText>
-              </React.Fragment>
-            );
-          })}
-        </Svg>
-      </View>
-      <View style={styles.valueContainer}>
-        <Text style={[styles.value, { color: streamLevel !== null ? getColorForLevel(streamLevel) : '#007AFF' }]}>
-          {streamLevel !== null ? `${streamLevel.toFixed(2)} ft` : 'Loading...'}
-        </Text>
-        <Text style={styles.datetime}>{formattedDateTime}</Text>
-        {/* Stream Direction */}
-        <Text style={{ color: '#007AFF', fontSize: 16, marginTop: 8, textAlign: 'center' }}>
-          Stream is {streamDirection ? streamDirection : 'Loading...'}
-        </Text>
-      </View>
-      <View style={styles.legendContainer}>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendColor, { backgroundColor: '#4CAF50' }]} />
-          <Text style={styles.legendText}>Normal</Text>
+              );
+            })}
+            {/* Threshold tick marks and labels */}
+            {[{ value: greenEnd, color: '#FFC107', label: '10.00 ft' }, { value: yellowEnd, color: '#F44336', label: '14.70 ft' }].map((threshold, idx) => {
+              const percent = (threshold.value - minLevel) / (maxLevel - minLevel);
+              const angle = Math.PI - percent * Math.PI;
+              const tickRadius = 250;
+              const tickLength = 20;
+              const tickCenter = tickRadius;
+              const halfLength = tickLength / 2;
+              const x1 = 350 + (tickCenter - halfLength) * Math.cos(angle);
+              const y1 = 280 - (tickCenter - halfLength) * Math.sin(angle);
+              const x2 = 350 + (tickCenter + halfLength) * Math.cos(angle);
+              const y2 = 280 - (tickCenter + halfLength) * Math.sin(angle);
+              
+              const labelRadius = 200;
+              const lx = 350 + labelRadius * Math.cos(angle);
+              const ly = 280 - labelRadius * Math.sin(angle);
+              return (
+                <React.Fragment key={threshold.value}>
+                  {/* Tick mark */}
+                  <Path
+                    d={`M${x1},${y1} L${x2},${y2}`}
+                    stroke={threshold.color}
+                    strokeWidth={5}
+                    strokeLinecap="round"
+                  />
+                  {/* Label */}
+                  <SvgText
+                    x={lx}
+                    y={ly}
+                    fontSize="20"
+                    fill={threshold.color}
+                    textAnchor="middle"
+                    alignmentBaseline="middle"
+                    fontWeight="bold"
+                  >
+                    {threshold.label}
+                  </SvgText>
+                </React.Fragment>
+              );
+            })}
+          </Svg>
         </View>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendColor, { backgroundColor: '#FFC107' }]} />
-          <Text style={styles.legendText}>Elevated</Text>
+        <View style={styles.valueContainer}>
+          <Text style={[styles.value, { color: streamLevel !== null ? getColorForLevel(streamLevel) : '#007AFF' }]}> 
+            {streamLevel !== null ? `${streamLevel.toFixed(2)} ft` : 'Loading...'}
+          </Text>
+          <Text style={styles.datetime}>{formattedDateTime}</Text>
+          {/* Stream Direction */}
+          <Text style={{ color: '#007AFF', fontSize: 16, marginTop: 8, textAlign: 'center' }}>
+            Stream is {streamDirection ? streamDirection : 'Loading...'}
+          </Text>
         </View>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendColor, { backgroundColor: '#F44336' }]} />
-          <Text style={styles.legendText}>Extreme</Text>
+        <View style={styles.legendContainer}>
+          <View style={styles.legendItem}>
+            <View style={[styles.legendColor, { backgroundColor: '#4CAF50' }]} />
+            <Text style={styles.legendText}>Normal</Text>
+          </View>
+          <View style={styles.legendItem}>
+            <View style={[styles.legendColor, { backgroundColor: '#FFC107' }]} />
+            <Text style={styles.legendText}>Elevated</Text>
+          </View>
+          <View style={styles.legendItem}>
+            <View style={[styles.legendColor, { backgroundColor: '#F44336' }]} />
+            <Text style={styles.legendText}>Extreme</Text>
+          </View>
         </View>
       </View>
-    </View>
+    </ZoomableChart>
   );
 };
 
