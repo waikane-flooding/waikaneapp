@@ -166,7 +166,7 @@ export default function HomeScreen() {
     // Fetch Waikane and Waiahole stream data, including trend
     const fetchWaikaneData = useCallback(async () => {
         try {
-            const streamRes = await fetch('http://149.165.159.169:5000/api/waikane_stream');
+            const streamRes = await fetch('http://159.223.179.149:5000/api/waikane_stream');
             // We intentionally do not process the response here; visualizations manage their own data/state.
             await streamRes.json();
         } catch {
@@ -176,7 +176,7 @@ export default function HomeScreen() {
 
     const fetchWaiaholeData = useCallback(async () => {
         try {
-            const streamRes = await fetch('http://149.165.159.169:5000/api/waiahole_stream');
+            const streamRes = await fetch('http://159.223.179.149:5000/api/waiahole_stream');
             // Visualizations handle their own parsing; keep call to refresh caches if needed
             await streamRes.json();
         } catch {
